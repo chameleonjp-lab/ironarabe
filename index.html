@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#161822">
+<title>イロナラベ</title>
+<style>
+  :root {
+    --bg: #12131c;
+    --panel: #1c1e2b;
+    --panel-2: #242739;
+    --text: #e7e9f2;
+    --muted: #9aa0b8;
+    --accent: #7fd7c4;
+    --accent-2: #f0b96a;
+    --border: #2f3350;
+    --gap: 3px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+  }
+  .app {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+  }
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; }
+
+  h1.logo {
+    font-size: 30px;
+    letter-spacing: 0.18em;
+    margin: 18px 0 6px;
+    text-align: center;
+    font-weight: 700;
+    background: linear-gradient(90deg, #f36b6b, #f0c46a 33%, #5fd0b5 66%, #7b6ff0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .logo-chips {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .logo-chips span {
+    width: 20px; height: 20px; border-radius: 5px;
+  }
+  .lead {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+    text-align: center;
+    margin: 0 auto 22px;
+    max-width: 340px;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 13px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+  }
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    background: var(--accent);
+    color: #10221d;
+    transition: transform .06s ease, opacity .2s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn.secondary {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    padding: 12px;
+    font-size: 15px;
+  }
+  .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+  .btn-row .btn { margin: 0; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+  }
+  .card p, .card li { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 0; }
+  .card ol { margin: 0; padding-left: 18px; }
+  .best-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .best-line .val { font-size: 22px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* Game screen */
+  .hud {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .hud .stat {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    text-align: center;
+  }
+  .hud .stat .k { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+  .hud .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .board-wrap { display: flex; justify-content: center; flex: 1; align-items: center; }
+  .board {
+    width: min(94vw, calc((100dvh - 260px) * 7 / 9), 460px);
+    aspect-ratio: 7 / 9;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    gap: var(--gap);
+    background: var(--panel);
+    padding: var(--gap);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .tile {
+    border-radius: 7px;
+    position: relative;
+    transition: transform .08s ease, box-shadow .12s ease, outline-color .12s ease;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+  }
+  .tile.movable { cursor: pointer; }
+  .tile.selected {
+    outline-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 0 14px 2px rgba(255,255,255,0.5);
+    transform: scale(1.08);
+    z-index: 3;
+  }
+  .tile.fixed::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 26%; height: 26%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: rgba(20,22,32,0.55);
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.85);
+  }
+  .board.cleared .tile { outline-color: transparent; box-shadow: none; }
+  .board.cleared { animation: clearPulse .6s ease; }
+  @keyframes clearPulse {
+    0% { box-shadow: 0 0 0 0 rgba(127,215,196,0.0); }
+    40% { box-shadow: 0 0 0 6px rgba(127,215,196,0.35); }
+    100% { box-shadow: 0 0 0 0 rgba(127,215,196,0.0); }
+  }
+
+  .game-hint {
+    font-size: 12px; color: var(--muted); text-align: center;
+    margin: 10px 0; line-height: 1.6;
+  }
+  .game-footer { margin-top: auto; }
+
+  /* Result */
+  .result-head { text-align: center; margin: 20px 0 18px; }
+  .result-head .big-time {
+    font-size: 46px; font-weight: 800; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  .result-head .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .badge {
+    display: inline-block; margin-top: 10px;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    color: #201a10; font-weight: 700; font-size: 13px;
+    padding: 5px 14px; border-radius: 999px; letter-spacing: 0.04em;
+  }
+  .rank-note { text-align: center; font-size: 12px; color: var(--muted); margin: 12px 0 4px; min-height: 16px; }
+  .rank-note.err { color: #e08a8a; }
+
+  .spacer { flex: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen active">
+    <h1 class="logo">イロナラベ</h1>
+    <div class="logo-chips" id="logoChips"></div>
+    <p class="lead">色の流れを見ながら、タイルを正しい場所に並べ直す7×9のタイムアタックです。</p>
+
+    <div class="field">
+      <label for="playerName">プレイヤー名</label>
+      <input type="text" id="playerName" maxlength="16" placeholder="なまえを入力" autocomplete="off">
+    </div>
+
+    <button class="btn" id="startBtn">スタート</button>
+
+    <div class="card" style="margin-top:18px;">
+      <h3>遊び方</h3>
+      <ol>
+        <li>2つのタイルを順番にタップすると入れ替わります。</li>
+        <li>印のあるタイルは動かせません（手がかりです）。</li>
+        <li>すべてを正しいグラデーション位置に戻すとクリア。</li>
+        <li>クリアまでのタイムが短いほど好成績です。</li>
+      </ol>
+    </div>
+
+    <div class="card best-line">
+      <div>
+        <h3 style="margin-bottom:2px;">ベストタイム</h3>
+        <p style="font-size:11px;">この端末に保存された記録</p>
+      </div>
+      <div class="val" id="homeBest">--.---</div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="screen-game" class="screen">
+    <div class="hud">
+      <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.000</div></div>
+      <div class="stat"><div class="k">MOVES</div><div class="v" id="moveDisplay">0</div></div>
+    </div>
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+    <p class="game-hint">2つのタイルを順番にタップすると入れ替わります。印のあるタイルは動かせません。</p>
+    <div class="game-footer">
+      <button class="btn ghost" id="retireBtn">リタイア</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="screen-result" class="screen">
+    <div class="result-head">
+      <div style="font-size:14px;color:var(--muted);letter-spacing:0.1em;">CLEAR!</div>
+      <div class="big-time" id="resultTime">0.000<span style="font-size:22px;">秒</span></div>
+      <div class="sub">移動回数 <b id="resultMoves">0</b> 回</div>
+      <div id="bestBadge" class="badge" style="display:none;">ベスト更新！</div>
+    </div>
+    <div class="rank-note" id="rankNote"></div>
+    <div class="spacer"></div>
+    <button class="btn" id="againBtn">もう一度遊ぶ</button>
+    <div class="btn-row">
+      <button class="btn secondary" id="shareBtn">シェア</button>
+      <button class="btn secondary" id="homeBtn">ホームへ</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+(function () {
+  // ---------- Config ----------
+  const COLS = 7;
+  const ROWS = 9;
+  const TOTAL = COLS * ROWS; // 63
+
+  const OFFICIAL_CHALLENGE = {
+    id: 'ironarabe-official-001',
+    topLeft:     '#f36b6b',
+    topRight:    '#f0c46a',
+    bottomLeft:  '#7b6ff0',
+    bottomRight: '#5fd0b5'
+  };
+  const SHUFFLE_SEED = 'ironarabe-official-001-v1';
+
+  // Fixed tile positions as [col,row]
+  const FIXED_COORDS = [
+    [0,0],[3,0],[6,0],
+    [0,4],      [6,4],
+    [0,8],[3,8],[6,8]
+  ];
+
+  // Ranking backend config. Left unset by default: when unconfigured the
+  // submission is skipped safely and the game keeps working. Fill in a
+  // public (anon) key + REST endpoint to enable. NEVER put a secret key here.
+  const RANKING_CONFIG = {
+    enabled: false,
+    endpoint: '',      // e.g. https://<proj>.supabase.co/rest/v1/scores
+    anonKey: '',       // public anon key ONLY
+    gameSlug: 'ironarabe'
+  };
+
+  const LS = {
+    playerName: 'ironarabe.playerName',
+    bestTimeMs: 'ironarabe.bestTimeMs',
+    lastResult: 'ironarabe.lastResult'
+  };
+
+  // ---------- Color helpers ----------
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function lerpRgb(c1, c2, t) {
+    return [Math.round(lerp(c1[0],c2[0],t)), Math.round(lerp(c1[1],c2[1],t)), Math.round(lerp(c1[2],c2[2],t))];
+  }
+  function rgbToCss(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+
+  function buildTiles(challenge) {
+    const tl = hexToRgb(challenge.topLeft);
+    const tr = hexToRgb(challenge.topRight);
+    const bl = hexToRgb(challenge.bottomLeft);
+    const br = hexToRgb(challenge.bottomRight);
+    const tiles = [];
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const x = col / (COLS - 1);
+        const y = row / (ROWS - 1);
+        const top = lerpRgb(tl, tr, x);
+        const bottom = lerpRgb(bl, br, x);
+        const color = lerpRgb(top, bottom, y);
+        const id = row * COLS + col;
+        tiles.push({ id: id, targetRow: row, targetCol: col, color: rgbToCss(color) });
+      }
+    }
+    return tiles;
+  }
+
+  // ---------- Seeded PRNG ----------
+  function xfnv1a(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // ---------- State ----------
+  const state = {
+    tiles: [],
+    solution: [],       // position index -> correct tile id (equals index)
+    board: [],          // position index -> current tile id
+    fixedSet: new Set(),
+    selectedIndex: null,
+    moves: 0,
+    startTime: null,
+    elapsedMs: 0,
+    cleared: false,
+    submitted: false,
+    rafId: null
+  };
+
+  // ---------- DOM ----------
+  const el = {
+    screens: {
+      home: document.getElementById('screen-home'),
+      game: document.getElementById('screen-game'),
+      result: document.getElementById('screen-result')
+    },
+    playerName: document.getElementById('playerName'),
+    startBtn: document.getElementById('startBtn'),
+    homeBest: document.getElementById('homeBest'),
+    logoChips: document.getElementById('logoChips'),
+    board: document.getElementById('board'),
+    timeDisplay: document.getElementById('timeDisplay'),
+    moveDisplay: document.getElementById('moveDisplay'),
+    retireBtn: document.getElementById('retireBtn'),
+    resultTime: document.getElementById('resultTime'),
+    resultMoves: document.getElementById('resultMoves'),
+    bestBadge: document.getElementById('bestBadge'),
+    rankNote: document.getElementById('rankNote'),
+    againBtn: document.getElementById('againBtn'),
+    shareBtn: document.getElementById('shareBtn'),
+    homeBtn: document.getElementById('homeBtn')
+  };
+
+  function showScreen(name) {
+    Object.keys(el.screens).forEach(function (k) {
+      el.screens[k].classList.toggle('active', k === name);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Formatting ----------
+  function formatMs(ms) {
+    // e.g. 12345 -> "12.345"
+    return (ms / 1000).toFixed(3);
+  }
+
+  // ---------- Local storage ----------
+  function loadBest() {
+    const raw = localStorage.getItem(LS.bestTimeMs);
+    if (raw === null) return null;
+    const n = parseInt(raw, 10);
+    return isNaN(n) ? null : n;
+  }
+  function refreshHomeBest() {
+    const best = loadBest();
+    el.homeBest.textContent = best === null ? '--.---' : formatMs(best);
+    const savedName = localStorage.getItem(LS.playerName);
+    if (savedName) el.playerName.value = savedName;
+  }
+
+  // ---------- Board building ----------
+  function coordIndex(col, row) { return row * COLS + col; }
+
+  function initFixedSet() {
+    state.fixedSet = new Set(FIXED_COORDS.map(function (c) { return coordIndex(c[0], c[1]); }));
+  }
+
+  function shuffledBoard() {
+    // solution[i] = i (each position's correct tile id equals its index)
+    const solution = [];
+    for (let i = 0; i < TOTAL; i++) solution.push(i);
+
+    const board = solution.slice();
+    // Collect non-fixed positions
+    const movable = [];
+    for (let i = 0; i < TOTAL; i++) {
+      if (!state.fixedSet.has(i)) movable.push(i);
+    }
+    // Fisher-Yates on the tile ids sitting in movable positions, seeded
+    const rand = mulberry32(xfnv1a(SHUFFLE_SEED));
+    const ids = movable.map(function (i) { return board[i]; });
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      const tmp = ids[i]; ids[i] = ids[j]; ids[j] = tmp;
+    }
+    // Guard: ensure not already fully solved (extremely unlikely, but required)
+    let allSame = true;
+    for (let i = 0; i < ids.length; i++) {
+      if (ids[i] !== movable[i]) { allSame = false; break; }
+    }
+    if (allSame && ids.length >= 2) {
+      const t = ids[0]; ids[0] = ids[1]; ids[1] = t;
+    }
+    for (let i = 0; i < movable.length; i++) board[movable[i]] = ids[i];
+
+    return { solution: solution, board: board };
+  }
+
+  function renderBoard() {
+    el.board.innerHTML = '';
+    el.board.classList.remove('cleared');
+    for (let i = 0; i < TOTAL; i++) {
+      const tileId = state.board[i];
+      const tile = state.tiles[tileId];
+      const div = document.createElement('div');
+      div.className = 'tile';
+      div.style.background = tile.color;
+      div.dataset.pos = i;
+      if (state.fixedSet.has(i)) {
+        div.classList.add('fixed');
+      } else {
+        div.classList.add('movable');
+      }
+      el.board.appendChild(div);
+    }
+  }
+
+  function updateTileVisual(pos) {
+    const div = el.board.children[pos];
+    if (!div) return;
+    const tileId = state.board[pos];
+    div.style.background = state.tiles[tileId].color;
+  }
+
+  // ---------- Timer ----------
+  function tick() {
+    if (state.cleared || state.startTime === null) return;
+    state.elapsedMs = Math.round(performance.now() - state.startTime);
+    el.timeDisplay.textContent = formatMs(state.elapsedMs);
+    state.rafId = requestAnimationFrame(tick);
+  }
+  function startTimer() {
+    state.startTime = performance.now();
+    state.elapsedMs = 0;
+    el.timeDisplay.textContent = '0.000';
+    state.rafId = requestAnimationFrame(tick);
+  }
+  function stopTimer() {
+    if (state.rafId !== null) { cancelAnimationFrame(state.rafId); state.rafId = null; }
+  }
+
+  // ---------- Gameplay ----------
+  function selectTile(pos) {
+    if (state.cleared) return;
+    if (state.fixedSet.has(pos)) return; // fixed tiles are not selectable
+
+    if (state.selectedIndex === null) {
+      state.selectedIndex = pos;
+      el.board.children[pos].classList.add('selected');
+      return;
+    }
+    if (state.selectedIndex === pos) {
+      // tapping the same tile again -> deselect
+      el.board.children[pos].classList.remove('selected');
+      state.selectedIndex = null;
+      return;
+    }
+    // second distinct movable tile -> swap
+    const a = state.selectedIndex;
+    const b = pos;
+    const tmp = state.board[a];
+    state.board[a] = state.board[b];
+    state.board[b] = tmp;
+
+    el.board.children[a].classList.remove('selected');
+    state.selectedIndex = null;
+
+    updateTileVisual(a);
+    updateTileVisual(b);
+
+    state.moves += 1;
+    el.moveDisplay.textContent = String(state.moves);
+
+    if (checkCleared()) onClear();
+  }
+
+  function checkCleared() {
+    for (let i = 0; i < TOTAL; i++) {
+      if (state.board[i] !== state.solution[i]) return false;
+    }
+    return true;
+  }
+
+  function onClear() {
+    state.cleared = true;
+    stopTimer();
+    // finalize elapsed time
+    state.elapsedMs = Math.round(performance.now() - state.startTime);
+    el.timeDisplay.textContent = formatMs(state.elapsedMs);
+    el.board.classList.add('cleared');
+    setTimeout(showResult, 650);
+  }
+
+  function onBoardTap(e) {
+    const target = e.target.closest('.tile');
+    if (!target) return;
+    const pos = parseInt(target.dataset.pos, 10);
+    if (isNaN(pos)) return;
+    selectTile(pos);
+  }
+
+  // ---------- Result ----------
+  function showResult() {
+    const timeMs = state.elapsedMs;
+    el.resultTime.innerHTML = formatMs(timeMs) + '<span style="font-size:22px;">秒</span>';
+    el.resultMoves.textContent = String(state.moves);
+
+    // Best time update
+    const prevBest = loadBest();
+    let isBest = false;
+    if (prevBest === null || timeMs < prevBest) {
+      isBest = true;
+      try { localStorage.setItem(LS.bestTimeMs, String(timeMs)); } catch (e) {}
+    }
+    el.bestBadge.style.display = isBest ? 'inline-block' : 'none';
+
+    // Save last result
+    const playerName = (el.playerName.value || '').trim() || 'ゲスト';
+    try {
+      localStorage.setItem(LS.lastResult, JSON.stringify({
+        playerName: playerName,
+        timeMs: timeMs,
+        moves: state.moves,
+        challengeId: OFFICIAL_CHALLENGE.id,
+        at: Date.now()
+      }));
+    } catch (e) {}
+
+    // Ranking submission (isolated, safe on failure, once per play)
+    el.rankNote.textContent = '';
+    el.rankNote.classList.remove('err');
+    if (!state.submitted) {
+      state.submitted = true;
+      submitScore(playerName, timeMs).then(function (ok) {
+        if (!ok) {
+          el.rankNote.textContent = 'ランキング送信に失敗しました';
+          el.rankNote.classList.add('err');
+        }
+      }).catch(function () {
+        el.rankNote.textContent = 'ランキング送信に失敗しました';
+        el.rankNote.classList.add('err');
+      });
+    }
+
+    showScreen('result');
+  }
+
+  // ---------- Ranking submission (isolated) ----------
+  function submitScore(playerName, scoreMs) {
+    // Returns a Promise<boolean>; never throws in a way that breaks the game.
+    return new Promise(function (resolve) {
+      try {
+        if (!RANKING_CONFIG.enabled || !RANKING_CONFIG.endpoint || !RANKING_CONFIG.anonKey) {
+          // Backend not configured yet -> treat as a benign failure.
+          resolve(false);
+          return;
+        }
+        const payload = {
+          game_slug: RANKING_CONFIG.gameSlug,
+          player_name: playerName,
+          score: Math.round(scoreMs), // milliseconds integer
+          challenge_id: OFFICIAL_CHALLENGE.id
+        };
+        fetch(RANKING_CONFIG.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': RANKING_CONFIG.anonKey,
+            'Authorization': 'Bearer ' + RANKING_CONFIG.anonKey
+          },
+          body: JSON.stringify(payload)
+        }).then(function (res) {
+          resolve(res.ok);
+        }).catch(function () {
+          resolve(false);
+        });
+      } catch (e) {
+        resolve(false);
+      }
+    });
+  }
+
+  // ---------- Flow ----------
+  function startGame() {
+    const name = (el.playerName.value || '').trim();
+    try { localStorage.setItem(LS.playerName, name); } catch (e) {}
+
+    initFixedSet();
+    state.tiles = buildTiles(OFFICIAL_CHALLENGE);
+    const s = shuffledBoard();
+    state.solution = s.solution;
+    state.board = s.board;
+    state.selectedIndex = null;
+    state.moves = 0;
+    state.cleared = false;
+    state.submitted = false;
+    el.moveDisplay.textContent = '0';
+
+    renderBoard();
+    showScreen('game');
+    startTimer();
+  }
+
+  function retire() {
+    // No ranking submission on retire.
+    stopTimer();
+    state.cleared = true;
+    state.selectedIndex = null;
+    showScreen('home');
+    refreshHomeBest();
+  }
+
+  function shareResult() {
+    const timeStr = formatMs(state.elapsedMs);
+    const url = location.href.split('#')[0];
+    const text = 'イロナラベ 公式チャレンジをクリア！ タイム ' + timeStr + '秒 / 移動 ' + state.moves + '回\n' + url;
+    if (navigator.share) {
+      navigator.share({ title: 'イロナラベ', text: text, url: url }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        el.shareBtn.textContent = 'コピーしました';
+        setTimeout(function () { el.shareBtn.textContent = 'シェア'; }, 1500);
+      }).catch(function () {
+        window.prompt('シェア文をコピーしてください', text);
+      });
+    } else {
+      window.prompt('シェア文をコピーしてください', text);
+    }
+  }
+
+  // ---------- Logo chips (decorative, from challenge colors) ----------
+  function buildLogoChips() {
+    const c = OFFICIAL_CHALLENGE;
+    [c.topLeft, c.topRight, c.bottomRight, c.bottomLeft].forEach(function (hex) {
+      const s = document.createElement('span');
+      s.style.background = hex;
+      el.logoChips.appendChild(s);
+    });
+  }
+
+  // ---------- Wire up ----------
+  el.startBtn.addEventListener('click', startGame);
+  el.retireBtn.addEventListener('click', retire);
+  el.board.addEventListener('click', onBoardTap);
+  el.againBtn.addEventListener('click', startGame);
+  el.shareBtn.addEventListener('click', shareResult);
+  el.homeBtn.addEventListener('click', function () { showScreen('home'); refreshHomeBest(); });
+
+  // Suppress long-press context menu on the board.
+  el.board.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  buildLogoChips();
+  refreshHomeBest();
+})();
+</script>
+</body>
+</html>
