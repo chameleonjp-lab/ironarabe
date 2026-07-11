@@ -21,13 +21,14 @@
 - ベストタイム・プレイヤー名・最終結果を localStorage に保存。
 
 ## ランキング連携について
-`index.html` 内の `RANKING_CONFIG` にランキング送信設定を分離しています。
-初期状態は `enabled: false` で、バックエンド（Supabase 等）の公開 anon key と REST エンドポイントを
-設定すると有効化されます。**secret key は絶対に使わないでください。**
-未設定・送信失敗時もゲーム本体は動作し、結果画面に控えめな失敗表示を出すだけです。
+`index.html` 内の `RANKING_CONFIG` に Supabase URL と Publishable key を設定し、共通 `submit_score` RPC へランキングを送信します。**secret key は使いません。**
+通信失敗時もゲーム本体は動作し、結果画面に控えめな失敗表示を出すだけです。
 
-- game_slug: `ironarabe` / 内部計測はミリ秒、ランキング送信値は1秒=100の整数 / クリア時のみ・1プレイ1回。
+- game_slug: `ironarabe`
+- 内部計測はミリ秒、ランキング送信値は1秒=100の整数、表示は小数2桁です。
+- 送信はクリア時のみ・1プレイ1回です。
 
 ## ドキュメント
-- 仕様: [SPEC.md](./SPEC.md)
-- 実装計画: [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md)
+- 現在の仕様: [SPEC_v2.md](./SPEC_v2.md)
+- 現在のレビュー観点: [REVIEW_CHECKLIST_v2.md](./REVIEW_CHECKLIST_v2.md)
+- 初回実装時の旧文書: [SPEC.md](./SPEC.md)、[IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md)

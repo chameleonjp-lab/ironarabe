@@ -80,7 +80,9 @@ Publishable key以外の秘密鍵、service role key、Bearer認証、`public.ga
 
 ## 実Supabase疎通の確認状況
 
-この作業時点では `SUPABASE_PUBLISHABLE_KEY` は指定されたが、`SUPABASE_URL` はリポジトリ内や作業環境で確認できなかったため未設定。実Supabaseへの送信、RPC登録、`ironarabe` のDB側登録、保存済み本番スコアの有無は未確認。
+`index.html` のクライアント設定には Supabase URL と Publishable key を反映済み。キー実値はこの文書へ書かない。
+
+共通RPC契約は維持しているが、本番ランキングを汚す検証スコアは送信していない。そのため、実Supabaseへの疎通、RPC正常応答、スコア保存成功、`public.games` への `ironarabe` 登録状況、実験場ランキングへの反映は未確認。設定済みであることと、サーバー疎通済みであることを混同しない。
 
 公開準備の回で、DB側の `public.games` と実験場側も `score_scale=100`、`score_decimals=2` に揃える前提。
 
