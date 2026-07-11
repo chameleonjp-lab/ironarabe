@@ -337,11 +337,11 @@
     [0,8],[3,8],[6,8]
   ];
 
-  // Ranking backend config. Left unset by default: when unconfigured the
-  // submission is skipped safely and the game keeps working. Fill in a
-  // public (anon) key + REST endpoint to enable. NEVER put a secret key here.
+  // Ranking backend config. Supabase URL and publishable key are safe for
+  // browser exposure. Never put a secret key or service_role key here.
+  // Ranking submission uses only the shared submit_score RPC.
   const RANKING_CONFIG = {
-    supabaseUrl: '',
+    supabaseUrl: 'https://mlpnjgezrnhdxsxolyzj.supabase.co',
     publishableKey: 'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM'
   };
 

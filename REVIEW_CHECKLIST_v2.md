@@ -2,14 +2,22 @@
 
 ## 静的確認
 
+- [済] `index.html` 内の `RANKING_CONFIG.supabaseUrl` が空ではない。
+- [済] 指定Supabase URLは `RANKING_CONFIG.supabaseUrl` の設定値として1か所だけ存在する。
 - [済] `index.html` 内に `Authorization: Bearer` が残っていない。
 - [済] `index.html` 内に secret key、service_role key の実値がない。
 - [済] `public.game_scores` への直接INSERT先がない。
 - [済] URL生成の末尾が `/rest/v1/rpc/submit_score` である。
+- [済] 生成URLが指定の `/rest/v1/rpc/submit_score` になる。
+- [済] Publishable keyが既存設定から消えていない。
+- [済] `apikey` ヘッダーが存在する。
 - [済] 送信本文のキーが `p_display_name`、`p_game_slug`、`p_score`、`p_client_version` の4つである。
 - [済] `p_score` へミリ秒をそのまま送っていない。
 - [済] `CLIENT_VERSION` が定数化されている。
 - [済] `index.html` だけで起動でき、外部のローカルCSS/JavaScriptを必要としない。
+- [済] READMEが `enabled: false` と説明していない。
+- [済] READMEが現在仕様として `SPEC_v2.md` へ案内している。
+- [済] `isRankingConfigured()` が現在の設定値では真になることを静的確認した。
 
 ## スコア変換確認
 
@@ -26,7 +34,6 @@
 - [未確認] 2タップ交換が動くことのブラウザ操作確認。
 - [未確認] 固定タイルが動かないことのブラウザ操作確認。
 - [未確認] リタイアしてもPOSTしないことのブラウザ通信確認。
-- [未確認] 未設定時にfetchせず「ランキングは未設定です」と表示することのブラウザ通信確認。
 - [未確認] クリア1回につきPOSTが1回だけ発生することの実通信確認。
 - [未確認] 成功時に「ランキングへ登録しました」と表示することの実通信確認。
 - [未確認] オフライン、HTTPエラー、タイムアウトで「ランキング送信に失敗しました」と表示することのブラウザ実通信確認。
@@ -36,11 +43,13 @@
 
 ## 実Supabase確認
 
-- [未確認] 正常な名前とスコアでRPCが成功する。
+- [未確認] 正常な名前とスコアでSupabase RPCが正常応答する。
+- [未確認] `ironarabe` が `public.games` へ登録済みである。
+- [未確認] スコアが本番DBへ保存される。
+- [未確認] 実験場ランキングへ反映される。
 - [未確認] `p_score` が整数で保存される。
 - [未確認] `CLIENT_VERSION` が渡る。
 - [未確認] 同じクリアで二重送信されない。
-- [未確認] `ironarabe` の登録状況と保存済み本番スコアの有無。
 
 ## 回帰確認
 
@@ -51,6 +60,7 @@
 - [済] クリア判定はID比較のまま。
 - [済] レイアウト、色、文字、ボタン配置を意図せず変えていない。
 - [未確認] 横スクロールが新たに発生していないことの実機確認。
+- [未確認] iPhone実機での通信確認。
 - [未確認] iPhone 17 Pro実機確認。
 - [未確認] iPhone 11 Pro実機確認。
 - [未確認] iPad Pro 2018実機確認。
