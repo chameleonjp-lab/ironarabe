@@ -267,14 +267,14 @@
         <h3 style="margin-bottom:2px;">ベストタイム</h3>
         <p style="font-size:11px;">この端末に保存された記録</p>
       </div>
-      <div class="val" id="homeBest">--.---</div>
+      <div class="val" id="homeBest">--.--</div>
     </div>
   </section>
 
   <!-- GAME -->
   <section id="screen-game" class="screen">
     <div class="hud">
-      <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.000</div></div>
+      <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.00</div></div>
       <div class="stat"><div class="k">MOVES</div><div class="v" id="moveDisplay">0</div></div>
     </div>
     <div class="board-wrap">
@@ -290,7 +290,7 @@
   <section id="screen-result" class="screen">
     <div class="result-head">
       <div style="font-size:14px;color:var(--muted);letter-spacing:0.1em;">CLEAR!</div>
-      <div class="big-time" id="resultTime">0.000<span style="font-size:22px;">秒</span></div>
+      <div class="big-time" id="resultTime">0.00<span style="font-size:22px;">秒</span></div>
       <div class="sub">移動回数 <b id="resultMoves">0</b> 回</div>
       <div id="bestBadge" class="badge" style="display:none;">ベスト更新！</div>
     </div>
@@ -313,8 +313,16 @@
   const ROWS = 9;
   const TOTAL = COLS * ROWS; // 63
 
+  const GAME_SLUG = 'ironarabe';
+  const CHALLENGE_ID = 'ironarabe-official-001';
+  const BOARD_VERSION = 2;
+  const CLIENT_VERSION = 'ironarabe-web-1.0.0-official001-v2';
+  const SCORE_SCALE = 100;
+  const SCORE_DECIMALS = 2;
+  const SCORE_SUBMIT_TIMEOUT_MS = 10000;
+
   const OFFICIAL_CHALLENGE = {
-    id: 'ironarabe-official-001',
+    id: CHALLENGE_ID,
     topLeft:     '#f36b6b',
     topRight:    '#f0c46a',
     bottomLeft:  '#7b6ff0',
@@ -333,10 +341,8 @@
   // submission is skipped safely and the game keeps working. Fill in a
   // public (anon) key + REST endpoint to enable. NEVER put a secret key here.
   const RANKING_CONFIG = {
-    enabled: false,
-    endpoint: '',      // e.g. https://<proj>.supabase.co/rest/v1/scores
-    anonKey: '',       // public anon key ONLY
-    gameSlug: 'ironarabe'
+    supabaseUrl: '',
+    publishableKey: 'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM'
   };
 
   const LS = {
@@ -407,6 +413,8 @@
     elapsedMs: 0,
     cleared: false,
     submitted: false,
+    playId: 0,
+    clearPlayId: null,
     rafId: null
   };
 
@@ -442,9 +450,17 @@
   }
 
   // ---------- Formatting ----------
-  function formatMs(ms) {
-    // e.g. 12345 -> "12.345"
-    return (ms / 1000).toFixed(3);
+  function elapsedMsToScore(ms) {
+    return Math.round(ms / 10);
+  }
+
+  function isValidScore(score) {
+    return Number.isFinite(score) && Number.isInteger(score) && score > 0;
+  }
+
+  function formatElapsedMs(ms) {
+    const score = elapsedMsToScore(ms);
+    return isValidScore(score) ? (score / SCORE_SCALE).toFixed(SCORE_DECIMALS) : (0).toFixed(SCORE_DECIMALS);
   }
 
   // ---------- Local storage ----------
@@ -456,7 +472,7 @@
   }
   function refreshHomeBest() {
     const best = loadBest();
-    el.homeBest.textContent = best === null ? '--.---' : formatMs(best);
+    el.homeBest.textContent = best === null ? '--.--' : formatElapsedMs(best);
     const savedName = localStorage.getItem(LS.playerName);
     if (savedName) el.playerName.value = savedName;
   }
@@ -529,13 +545,13 @@
   function tick() {
     if (state.cleared || state.startTime === null) return;
     state.elapsedMs = Math.round(performance.now() - state.startTime);
-    el.timeDisplay.textContent = formatMs(state.elapsedMs);
+    el.timeDisplay.textContent = formatElapsedMs(state.elapsedMs);
     state.rafId = requestAnimationFrame(tick);
   }
   function startTimer() {
     state.startTime = performance.now();
     state.elapsedMs = 0;
-    el.timeDisplay.textContent = '0.000';
+    el.timeDisplay.textContent = '0.00';
     state.rafId = requestAnimationFrame(tick);
   }
   function stopTimer() {
@@ -589,9 +605,10 @@
     stopTimer();
     // finalize elapsed time
     state.elapsedMs = Math.round(performance.now() - state.startTime);
-    el.timeDisplay.textContent = formatMs(state.elapsedMs);
+    el.timeDisplay.textContent = formatElapsedMs(state.elapsedMs);
     el.board.classList.add('cleared');
-    setTimeout(showResult, 650);
+    state.clearPlayId = state.playId;
+    setTimeout(function () { showResult(state.clearPlayId); }, 650);
   }
 
   function onBoardTap(e) {
@@ -603,9 +620,10 @@
   }
 
   // ---------- Result ----------
-  function showResult() {
+  function showResult(playId) {
+    if (playId !== state.playId) return;
     const timeMs = state.elapsedMs;
-    el.resultTime.innerHTML = formatMs(timeMs) + '<span style="font-size:22px;">秒</span>';
+    el.resultTime.innerHTML = formatElapsedMs(timeMs) + '<span style="font-size:22px;">秒</span>';
     el.resultMoves.textContent = String(state.moves);
 
     // Best time update
@@ -630,56 +648,79 @@
     } catch (e) {}
 
     // Ranking submission (isolated, safe on failure, once per play)
-    el.rankNote.textContent = '';
-    el.rankNote.classList.remove('err');
-    if (!state.submitted) {
-      state.submitted = true;
-      submitScore(playerName, timeMs).then(function (ok) {
-        if (!ok) {
-          el.rankNote.textContent = 'ランキング送信に失敗しました';
-          el.rankNote.classList.add('err');
-        }
-      }).catch(function () {
-        el.rankNote.textContent = 'ランキング送信に失敗しました';
-        el.rankNote.classList.add('err');
-      });
-    }
-
     showScreen('result');
+    updateRankingStatus('idle');
+    submitScoreForCurrentPlay(playId, playerName, timeMs);
   }
 
   // ---------- Ranking submission (isolated) ----------
-  function submitScore(playerName, scoreMs) {
-    // Returns a Promise<boolean>; never throws in a way that breaks the game.
+  function getSubmitScoreUrl() {
+    const base = (RANKING_CONFIG.supabaseUrl || '').trim().replace(/\/+$/, '');
+    return base ? base + '/rest/v1/rpc/submit_score' : '';
+  }
+
+  function isRankingConfigured() {
+    return Boolean(getSubmitScoreUrl() && (RANKING_CONFIG.publishableKey || '').trim());
+  }
+
+  function updateRankingStatus(status) {
+    el.rankNote.classList.toggle('err', status === 'failed');
+    if (status === 'submitting') el.rankNote.textContent = 'ランキング送信中…';
+    else if (status === 'success') el.rankNote.textContent = 'ランキングへ登録しました';
+    else if (status === 'failed') el.rankNote.textContent = 'ランキング送信に失敗しました';
+    else if (status === 'unconfigured') el.rankNote.textContent = 'ランキングは未設定です';
+    else el.rankNote.textContent = '';
+  }
+
+  function submitScoreForCurrentPlay(playId, playerName, elapsedMs) {
+    if (state.submitted) return;
+    state.submitted = true;
+    updateRankingStatus(isRankingConfigured() ? 'submitting' : 'unconfigured');
+    submitScore(playerName, elapsedMs).then(function (result) {
+      if (playId !== state.playId) return;
+      updateRankingStatus(result.status);
+    }).catch(function () {
+      if (playId !== state.playId) return;
+      updateRankingStatus('failed');
+    });
+  }
+
+  function submitScore(playerName, elapsedMs) {
     return new Promise(function (resolve) {
-      try {
-        if (!RANKING_CONFIG.enabled || !RANKING_CONFIG.endpoint || !RANKING_CONFIG.anonKey) {
-          // Backend not configured yet -> treat as a benign failure.
-          resolve(false);
-          return;
-        }
-        const payload = {
-          game_slug: RANKING_CONFIG.gameSlug,
-          player_name: playerName,
-          score: Math.round(scoreMs), // milliseconds integer
-          challenge_id: OFFICIAL_CHALLENGE.id
-        };
-        fetch(RANKING_CONFIG.endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': RANKING_CONFIG.anonKey,
-            'Authorization': 'Bearer ' + RANKING_CONFIG.anonKey
-          },
-          body: JSON.stringify(payload)
-        }).then(function (res) {
-          resolve(res.ok);
-        }).catch(function () {
-          resolve(false);
-        });
-      } catch (e) {
-        resolve(false);
+      const score = elapsedMsToScore(elapsedMs);
+      if (!isRankingConfigured()) {
+        resolve({ status: 'unconfigured', httpStatus: null });
+        return;
       }
+      if (!isValidScore(score)) {
+        resolve({ status: 'failed', httpStatus: null });
+        return;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(function () { controller.abort(); }, SCORE_SUBMIT_TIMEOUT_MS);
+      const payload = {
+        p_display_name: playerName,
+        p_game_slug: GAME_SLUG,
+        p_score: score,
+        p_client_version: CLIENT_VERSION
+      };
+
+      fetch(getSubmitScoreUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': RANKING_CONFIG.publishableKey
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      }).then(function (res) {
+        clearTimeout(timeoutId);
+        resolve({ status: res.ok ? 'success' : 'failed', httpStatus: res.status });
+      }).catch(function () {
+        clearTimeout(timeoutId);
+        resolve({ status: 'failed', httpStatus: null });
+      });
     });
   }
 
@@ -697,6 +738,9 @@
     state.moves = 0;
     state.cleared = false;
     state.submitted = false;
+    state.playId += 1;
+    state.clearPlayId = null;
+    updateRankingStatus('idle');
     el.moveDisplay.textContent = '0';
 
     renderBoard();
@@ -714,7 +758,7 @@
   }
 
   function shareResult() {
-    const timeStr = formatMs(state.elapsedMs);
+    const timeStr = formatElapsedMs(state.elapsedMs);
     const url = location.href.split('#')[0];
     const text = 'イロナラベ 公式チャレンジをクリア！ タイム ' + timeStr + '秒 / 移動 ' + state.moves + '回\n' + url;
     if (navigator.share) {
