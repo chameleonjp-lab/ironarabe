@@ -37,7 +37,7 @@
 - `result → nameConfirm`（もう一度遊ぶ）
 - `result → home`
 
-盤面操作は `state.phase === 'playing' && state.inputLocked === false && state.cleared === false` の時だけ受け付ける。
+盤面操作は `state.phase === 'playing' && state.inputLocked === false && state.cleared === false` の時だけ受け付ける。クリア確定後は演出待機中で `state.phase` が一時的に `playing` でも、リタイア処理を受け付けない。ホームへ戻る共通処理はカウントダウン、クリア待機、通知など画面をまたぐ待機処理を解除する。
 
 ## ホームと名前確認
 
@@ -79,7 +79,7 @@ localStorage の読み書きはすべて `safeStorageGet(key)`、`safeStorageSet
 
 結果画面には、今回の記録、この端末の初回記録、この端末のベスト記録、この端末のプレイ回数、移動回数、初回記録またはベスト更新表示、ランキング送信状態、結果をシェア、もう一度遊ぶ、ホームへ戻る、カメレオンJPの実験場へのリンクを表示する。ローカル記録には「この端末の記録」と明記し、サーバーランキングと誤解させない。
 
-クリア時は `state.cleared = true`、`state.inputLocked = true`、タイマー停止、最終時間確定、既存クリア演出、対象 `playId` 保存、結果画面の1回表示、ローカル記録更新、結果画面を先に使える状態にする、ランキング送信開始の順で処理する。`state.resultShownPlayId` で同一クリアの二重処理を防ぐ。
+クリア時は `state.cleared = true`、`state.inputLocked = true`、リタイアボタン無効化、タイマー停止、最終時間確定、既存クリア演出、対象 `playId` 保存、結果画面の1回表示、ローカル記録更新、結果画面を先に使える状態にする、ランキング送信開始の順で処理する。新しいクリア待機を設定する前に古い `clearTimerId` を解除し、待機処理の実行時は `clearTimerId` を `null` に戻す。`showResult()` 直前に `playId` を確認し、`state.resultShownPlayId` で同一クリアの二重処理を防ぐ。クリア確定後はリタイア不可とし、通常プレイ中のリタイアだけホームへ戻す。
 
 ## シェアと導線
 
@@ -99,7 +99,7 @@ https://chameleonjp.codeberg.page/ironarabe/
 https://chameleonjp.codeberg.page/ironarabe/
 ```
 
-共有は Web Share API、Clipboard API、一時 `textarea` コピーの順で試す。共有キャンセルはエラー扱いせず、勝手にコピーへ進めない。成功時は「シェア文をコピーしました」、失敗時は「コピーできませんでした」を `aria-live` のトーストで通知する。共有テキストには `GAME_URL` を1回だけ入れ、ローカルURLは使わない。
+共有は Web Share API、Clipboard API、一時 `textarea` コピーの順で試す。Web Share API が成功した場合は追加通知を出さない。共有キャンセルはエラー扱いせず、勝手にコピーへ進めない。共有キャンセル以外の Web Share 失敗、または Web Share API がない場合はコピー処理へ進む。Clipboard API が存在して失敗した場合も、その時点で失敗確定にせず一時 `textarea` コピーへ切り替える。成功時は「シェア文をコピーしました」、Clipboard API と一時 `textarea` の両方が失敗した時だけ「コピーできませんでした」を `aria-live` のトーストで通知する。ホーム通知と結果通知は独立したタイマーで管理し、画面を離れる時は対象画面の古い通知文とエラー表示を消す。共有テキストには `GAME_URL` を1回だけ入れ、ローカルURLは使わない。
 
 ホームと結果画面の両方に、`LAB_URL` へ向かう実際の `a` 要素「カメレオンJPの実験場へ」を置く。
 
@@ -160,6 +160,10 @@ Publishable key以外の秘密鍵、service role key、Bearer認証、`public.ga
 `index.html` のクライアント設定には Supabase URL と Publishable key を反映済み。キー実値はこの文書へ書かない。
 
 共通RPC契約は維持しているが、本番ランキングを汚す検証スコアは送信していない。そのため、実Supabaseへの疎通、RPC正常応答、スコア保存成功、`public.games` への `ironarabe` 登録状況、実験場ランキングへの反映は未確認。
+
+## 第2.5回安定化で変更しない範囲
+
+第2.5回では、クリア直後のリタイア競合、古いクリア待機処理、共有通知の残留、Clipboard API 失敗時のコピー fallback だけを安定化対象とする。難易度、盤面サイズ、固定タイル、色、シャッフルシード、タイルIDによる正解判定、Supabaseランキング契約、スコア換算、`GAME_URL`、`LAB_URL` は変更しない。
 
 ## 今回未実装の項目
 
