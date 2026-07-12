@@ -6,798 +6,174 @@
 <meta name="theme-color" content="#161822">
 <title>イロナラベ</title>
 <style>
-  :root {
-    --bg: #12131c;
-    --panel: #1c1e2b;
-    --panel-2: #242739;
-    --text: #e7e9f2;
-    --muted: #9aa0b8;
-    --accent: #7fd7c4;
-    --accent-2: #f0b96a;
-    --border: #2f3350;
-    --gap: 3px;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    width: 100%;
-    min-height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-    overscroll-behavior: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
-    -webkit-tap-highlight-color: transparent;
-  }
-  body {
-    display: flex;
-    justify-content: center;
-  }
-  .app {
-    width: 100%;
-    max-width: 520px;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
-  }
-  .screen { display: none; flex-direction: column; flex: 1; }
-  .screen.active { display: flex; }
-
-  h1.logo {
-    font-size: 30px;
-    letter-spacing: 0.18em;
-    margin: 18px 0 6px;
-    text-align: center;
-    font-weight: 700;
-    background: linear-gradient(90deg, #f36b6b, #f0c46a 33%, #5fd0b5 66%, #7b6ff0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .logo-chips {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-  .logo-chips span {
-    width: 20px; height: 20px; border-radius: 5px;
-  }
-  .lead {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.7;
-    text-align: center;
-    margin: 0 auto 22px;
-    max-width: 340px;
-  }
-  .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    letter-spacing: 0.04em;
-  }
-  input[type="text"] {
-    width: 100%;
-    padding: 13px 14px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    font-size: 16px;
-    outline: none;
-  }
-  input[type="text"]:focus { border-color: var(--accent); }
-
-  button {
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-  }
-  .btn {
-    width: 100%;
-    padding: 15px;
-    border-radius: 14px;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    background: var(--accent);
-    color: #10221d;
-    transition: transform .06s ease, opacity .2s ease;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn.secondary {
-    background: var(--panel-2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    font-weight: 600;
-  }
-  .btn.ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    font-weight: 600;
-    padding: 12px;
-    font-size: 15px;
-  }
-  .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-  .btn-row .btn { margin: 0; }
-
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-  }
-  .card h3 {
-    margin: 0 0 8px;
-    font-size: 13px;
-    color: var(--accent);
-    letter-spacing: 0.06em;
-  }
-  .card p, .card li { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 0; }
-  .card ol { margin: 0; padding-left: 18px; }
-  .best-line {
-    display: flex; justify-content: space-between; align-items: baseline;
-  }
-  .best-line .val { font-size: 22px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-
-  /* Game screen */
-  .hud {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .hud .stat {
-    flex: 1;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 8px 12px;
-    text-align: center;
-  }
-  .hud .stat .k { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
-  .hud .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
-
-  .board-wrap { display: flex; justify-content: center; flex: 1; align-items: center; }
-  .board {
-    width: min(94vw, calc((100dvh - 260px) * 7 / 9), 460px);
-    aspect-ratio: 7 / 9;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(9, 1fr);
-    gap: var(--gap);
-    background: var(--panel);
-    padding: var(--gap);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-  }
-  .tile {
-    border-radius: 7px;
-    position: relative;
-    transition: transform .08s ease, box-shadow .12s ease, outline-color .12s ease;
-    outline: 2px solid transparent;
-    outline-offset: -2px;
-  }
-  .tile.movable { cursor: pointer; }
-  .tile.selected {
-    outline-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 0 14px 2px rgba(255,255,255,0.5);
-    transform: scale(1.08);
-    z-index: 3;
-  }
-  .tile.fixed::after {
-    content: "";
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 26%; height: 26%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: rgba(20,22,32,0.55);
-    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.85);
-  }
-  .board.cleared .tile { outline-color: transparent; box-shadow: none; }
-  .board.cleared { animation: clearPulse .6s ease; }
-  @keyframes clearPulse {
-    0% { box-shadow: 0 0 0 0 rgba(127,215,196,0.0); }
-    40% { box-shadow: 0 0 0 6px rgba(127,215,196,0.35); }
-    100% { box-shadow: 0 0 0 0 rgba(127,215,196,0.0); }
-  }
-
-  .game-hint {
-    font-size: 12px; color: var(--muted); text-align: center;
-    margin: 10px 0; line-height: 1.6;
-  }
-  .game-footer { margin-top: auto; }
-
-  /* Result */
-  .result-head { text-align: center; margin: 20px 0 18px; }
-  .result-head .big-time {
-    font-size: 46px; font-weight: 800; font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
-  }
-  .result-head .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
-  .badge {
-    display: inline-block; margin-top: 10px;
-    background: linear-gradient(90deg, var(--accent-2), var(--accent));
-    color: #201a10; font-weight: 700; font-size: 13px;
-    padding: 5px 14px; border-radius: 999px; letter-spacing: 0.04em;
-  }
-  .rank-note { text-align: center; font-size: 12px; color: var(--muted); margin: 12px 0 4px; min-height: 16px; }
-  .rank-note.err { color: #e08a8a; }
-
-  .spacer { flex: 1; }
+  :root { --bg:#12131c; --panel:#1c1e2b; --panel-2:#242739; --text:#e7e9f2; --muted:#9aa0b8; --accent:#7fd7c4; --accent-2:#f0b96a; --danger:#e08a8a; --border:#2f3350; --gap:3px; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; width:100%; min-height:100%; background:var(--bg); color:var(--text); overflow-x:hidden; touch-action:manipulation; -webkit-user-select:none; user-select:none; overscroll-behavior:none; font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif; -webkit-tap-highlight-color:transparent; }
+  body { display:flex; justify-content:center; }
+  input, textarea, a { -webkit-user-select:auto; user-select:auto; -webkit-touch-callout:default; }
+  .app { width:100%; max-width:520px; min-height:100dvh; display:flex; flex-direction:column; padding:12px 14px calc(14px + env(safe-area-inset-bottom)); }
+  .screen { display:none; flex-direction:column; flex:1; width:100%; }
+  .screen.active { display:flex; }
+  h1.logo { font-size:30px; letter-spacing:.18em; margin:18px 0 6px; text-align:center; font-weight:700; background:linear-gradient(90deg,#f36b6b,#f0c46a 33%,#5fd0b5 66%,#7b6ff0); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  h2 { margin:18px 0 12px; text-align:center; font-size:22px; }
+  .logo-chips { display:flex; gap:4px; justify-content:center; margin-bottom:16px; }
+  .logo-chips span { width:20px; height:20px; border-radius:5px; }
+  .lead { color:var(--muted); font-size:14px; line-height:1.7; text-align:center; margin:0 auto 18px; max-width:360px; }
+  .field { margin-bottom:12px; }
+  .field label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; letter-spacing:.04em; }
+  input[type="text"] { width:100%; padding:13px 14px; background:var(--panel); border:1px solid var(--border); border-radius:12px; color:var(--text); font-size:16px; outline:none; -webkit-user-select:text; user-select:text; }
+  input[type="text"]:focus { border-color:var(--accent); }
+  .error { min-height:20px; color:var(--danger); font-size:13px; line-height:1.5; margin:6px 0 0; }
+  button { font-family:inherit; cursor:pointer; border:none; }
+  .btn { width:100%; padding:15px; border-radius:14px; font-size:17px; font-weight:700; letter-spacing:.05em; background:var(--accent); color:#10221d; transition:transform .06s ease, opacity .2s ease; margin-top:10px; }
+  .btn:active { transform:scale(.98); }
+  .btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+  .btn.secondary { background:var(--panel-2); color:var(--text); border:1px solid var(--border); font-weight:600; }
+  .btn.ghost { background:transparent; color:var(--muted); border:1px solid var(--border); font-weight:600; padding:12px; font-size:15px; }
+  .btn-row { display:flex; gap:10px; margin-top:0; }
+  .btn-row .btn { margin-top:10px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:14px; }
+  .card h3 { margin:0 0 8px; font-size:13px; color:var(--accent); letter-spacing:.06em; }
+  .card p, .card li { font-size:13px; color:var(--muted); line-height:1.7; margin:0; }
+  .card ol { margin:0; padding-left:18px; }
+  .panel-link { color:var(--accent); text-align:center; display:block; margin:12px 0; text-decoration:none; font-weight:700; }
+  .best-line, .record-line { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .best-line .val, .record-line .val { font-size:22px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .record-line { padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  .record-line:last-child { border-bottom:0; }
+  .record-line .label { color:var(--muted); font-size:13px; }
+  .countdown-screen { align-items:center; justify-content:center; text-align:center; min-height:70dvh; }
+  .countdown-value { font-size:72px; font-weight:900; letter-spacing:.08em; color:var(--accent); text-shadow:0 0 22px rgba(127,215,196,.18); }
+  .hud { display:flex; gap:10px; margin-bottom:10px; }
+  .hud .stat { flex:1; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:8px 12px; text-align:center; }
+  .hud .stat .k { font-size:11px; color:var(--muted); letter-spacing:.08em; }
+  .hud .stat .v { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .board-wrap { display:flex; justify-content:center; flex:1; align-items:center; }
+  .board { width:min(94vw, calc((100dvh - 260px) * 7 / 9), 460px); aspect-ratio:7/9; display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(9,1fr); gap:var(--gap); background:var(--panel); padding:var(--gap); border-radius:12px; border:1px solid var(--border); }
+  .tile { border-radius:7px; position:relative; transition:transform .08s ease, box-shadow .12s ease, outline-color .12s ease; outline:2px solid transparent; outline-offset:-2px; }
+  .tile.movable { cursor:pointer; }
+  .tile.selected { outline-color:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.35),0 0 14px 2px rgba(255,255,255,.5); transform:scale(1.08); z-index:3; }
+  .tile.fixed::after { content:""; position:absolute; top:50%; left:50%; width:26%; height:26%; transform:translate(-50%,-50%); border-radius:50%; background:rgba(20,22,32,.55); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.85); }
+  .board.cleared .tile { outline-color:transparent; box-shadow:none; }
+  .board.cleared { animation:clearPulse .6s ease; }
+  @keyframes clearPulse { 0%{box-shadow:0 0 0 0 rgba(127,215,196,0)} 40%{box-shadow:0 0 0 6px rgba(127,215,196,.35)} 100%{box-shadow:0 0 0 0 rgba(127,215,196,0)} }
+  .game-hint { font-size:12px; color:var(--muted); text-align:center; margin:10px 0; line-height:1.6; }
+  .game-footer { margin-top:auto; }
+  .result-head { text-align:center; margin:16px 0 12px; }
+  .result-head .big-time { font-size:46px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+  .result-head .sub { color:var(--muted); font-size:14px; margin-top:4px; }
+  .badge { display:inline-block; margin-top:10px; background:linear-gradient(90deg,var(--accent-2),var(--accent)); color:#201a10; font-weight:700; font-size:13px; padding:5px 14px; border-radius:999px; letter-spacing:.04em; }
+  .rank-note, .toast { text-align:center; font-size:12px; color:var(--muted); margin:10px 0 4px; min-height:18px; }
+  .rank-note.err, .toast.err { color:var(--danger); }
+  .spacer { flex:1; }
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- HOME -->
   <section id="screen-home" class="screen active">
-    <h1 class="logo">イロナラベ</h1>
-    <div class="logo-chips" id="logoChips"></div>
-    <p class="lead">色の流れを見ながら、タイルを正しい場所に並べ直す7×9のタイムアタックです。</p>
-
-    <div class="field">
-      <label for="playerName">プレイヤー名</label>
-      <input type="text" id="playerName" maxlength="16" placeholder="なまえを入力" autocomplete="off">
-    </div>
-
-    <button class="btn" id="startBtn">スタート</button>
-
-    <div class="card" style="margin-top:18px;">
-      <h3>遊び方</h3>
-      <ol>
-        <li>2つのタイルを順番にタップすると入れ替わります。</li>
-        <li>印のあるタイルは動かせません（手がかりです）。</li>
-        <li>すべてを正しいグラデーション位置に戻すとクリア。</li>
-        <li>クリアまでのタイムが短いほど好成績です。</li>
-      </ol>
-    </div>
-
-    <div class="card best-line">
-      <div>
-        <h3 style="margin-bottom:2px;">ベストタイム</h3>
-        <p style="font-size:11px;">この端末に保存された記録</p>
-      </div>
-      <div class="val" id="homeBest">--.--</div>
-    </div>
+    <h1 class="logo">イロナラベ</h1><div class="logo-chips" id="logoChips"></div>
+    <p class="lead">色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。</p>
+    <button class="btn" id="startBtn">ゲームを始める</button>
+    <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel">遊び方</button>
+    <div class="card" id="howToPanel" hidden><h3>遊び方</h3><ol><li>動かせるタイルを1枚選ぶ</li><li>別のタイルを選ぶと2枚が入れ替わる</li><li>印のあるタイルは固定で動かせない</li><li>全体を正しい色の流れへ戻すとクリア</li><li>タイム計測はカウントダウン後に始まる</li></ol></div>
+    <div class="card best-line"><div><h3 style="margin-bottom:2px;">この端末のベスト記録</h3><p style="font-size:11px;">この端末に保存されたローカル記録です。サーバーランキングではありません。</p></div><div class="val"><span id="homeBest">--.--</span>秒</div></div>
+    <button class="btn secondary" id="homeShareBtn">ゲームをシェア</button>
+    <a class="panel-link" id="homeLabLink" href="https://chameleonjp.codeberg.page/chameleonjp_lab/">カメレオンJPの実験場へ</a>
+    <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
-
-  <!-- GAME -->
-  <section id="screen-game" class="screen">
-    <div class="hud">
-      <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.00</div></div>
-      <div class="stat"><div class="k">MOVES</div><div class="v" id="moveDisplay">0</div></div>
-    </div>
-    <div class="board-wrap">
-      <div class="board" id="board"></div>
-    </div>
+  <section id="screen-nameConfirm" class="screen">
+    <h2>プレイヤー名を確認</h2>
+    <p class="lead">ランキング送信と結果表示に使う名前を確認してください。</p>
+    <div class="card"><p>現在の保存名: <strong id="savedNameLabel">--</strong></p></div>
+    <div class="field"><label for="playerNameInput">プレイヤー名</label><input type="text" id="playerNameInput" autocomplete="nickname" enterkeyhint="done" placeholder="なまえを入力"></div>
+    <p class="error" id="nameError" aria-live="polite"></p>
+    <button class="btn" id="confirmNameBtn">この名前で始める</button>
+    <button class="btn secondary" id="nameBackBtn">戻る</button>
+  </section>
+  <section id="screen-countdown" class="screen countdown-screen"><div class="countdown-value" id="countdownValue" aria-live="assertive">3</div></section>
+  <section id="screen-playing" class="screen">
+    <div class="hud"><div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.00</div></div><div class="stat"><div class="k">MOVES</div><div class="v" id="moveDisplay">0</div></div></div>
+    <div class="board-wrap"><div class="board" id="board"></div></div>
     <p class="game-hint">2つのタイルを順番にタップすると入れ替わります。印のあるタイルは動かせません。</p>
-    <div class="game-footer">
-      <button class="btn ghost" id="retireBtn">リタイア</button>
-    </div>
+    <div class="game-footer"><button class="btn ghost" id="retireBtn">リタイア</button></div>
   </section>
-
-  <!-- RESULT -->
   <section id="screen-result" class="screen">
-    <div class="result-head">
-      <div style="font-size:14px;color:var(--muted);letter-spacing:0.1em;">CLEAR!</div>
-      <div class="big-time" id="resultTime">0.00<span style="font-size:22px;">秒</span></div>
-      <div class="sub">移動回数 <b id="resultMoves">0</b> 回</div>
-      <div id="bestBadge" class="badge" style="display:none;">ベスト更新！</div>
-    </div>
-    <div class="rank-note" id="rankNote"></div>
-    <div class="spacer"></div>
-    <button class="btn" id="againBtn">もう一度遊ぶ</button>
-    <div class="btn-row">
-      <button class="btn secondary" id="shareBtn">シェア</button>
-      <button class="btn secondary" id="homeBtn">ホームへ</button>
-    </div>
+    <div class="result-head"><div style="font-size:14px;color:var(--muted);letter-spacing:.1em;">今回の記録</div><div class="big-time" id="resultTime">0.00<span style="font-size:22px;">秒</span></div><div id="bestBadge" class="badge" style="display:none;"></div></div>
+    <div class="card"><h3>この端末の記録</h3><div class="record-line"><span class="label">この端末の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div><div class="record-line"><span class="label">この端末のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div><div class="record-line"><span class="label">この端末のプレイ回数</span><span class="val" id="playCountDisplay">--回</span></div><div class="record-line"><span class="label">移動回数</span><span class="val" id="resultMoves">0回</span></div></div>
+    <div class="rank-note" id="rankNote" aria-live="polite"></div><div class="toast" id="resultToast" aria-live="polite"></div>
+    <div class="spacer"></div><button class="btn" id="againBtn">もう一度遊ぶ</button><div class="btn-row"><button class="btn secondary" id="resultShareBtn">結果をシェア</button><button class="btn secondary" id="homeBtn">ホームへ戻る</button></div><a class="panel-link" id="resultLabLink" href="https://chameleonjp.codeberg.page/chameleonjp_lab/">カメレオンJPの実験場へ</a>
   </section>
-
 </div>
-
 <script>
 "use strict";
 (function () {
-  // ---------- Config ----------
-  const COLS = 7;
-  const ROWS = 9;
-  const TOTAL = COLS * ROWS; // 63
-
-  const GAME_SLUG = 'ironarabe';
-  const CHALLENGE_ID = 'ironarabe-official-001';
-  const BOARD_VERSION = 2;
-  const CLIENT_VERSION = 'ironarabe-web-1.0.0-official001-v2';
-  const SCORE_SCALE = 100;
-  const SCORE_DECIMALS = 2;
-  const SCORE_SUBMIT_TIMEOUT_MS = 10000;
-
-  const OFFICIAL_CHALLENGE = {
-    id: CHALLENGE_ID,
-    topLeft:     '#f36b6b',
-    topRight:    '#f0c46a',
-    bottomLeft:  '#7b6ff0',
-    bottomRight: '#5fd0b5'
-  };
-  const SHUFFLE_SEED = 'ironarabe-official-001-v1';
-
-  // Fixed tile positions as [col,row]
-  const FIXED_COORDS = [
-    [0,0],[3,0],[6,0],
-    [0,4],      [6,4],
-    [0,8],[3,8],[6,8]
-  ];
-
-  // Ranking backend config. Supabase URL and publishable key are safe for
-  // browser exposure. Never put a secret key or service_role key here.
-  // Ranking submission uses only the shared submit_score RPC.
-  const RANKING_CONFIG = {
-    supabaseUrl: 'https://mlpnjgezrnhdxsxolyzj.supabase.co',
-    publishableKey: 'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM'
-  };
-
-  const LS = {
-    playerName: 'ironarabe.playerName',
-    bestTimeMs: 'ironarabe.bestTimeMs',
-    lastResult: 'ironarabe.lastResult'
-  };
-
-  // ---------- Color helpers ----------
-  function hexToRgb(hex) {
-    const h = hex.replace('#', '');
-    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
-  }
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function lerpRgb(c1, c2, t) {
-    return [Math.round(lerp(c1[0],c2[0],t)), Math.round(lerp(c1[1],c2[1],t)), Math.round(lerp(c1[2],c2[2],t))];
-  }
-  function rgbToCss(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
-
-  function buildTiles(challenge) {
-    const tl = hexToRgb(challenge.topLeft);
-    const tr = hexToRgb(challenge.topRight);
-    const bl = hexToRgb(challenge.bottomLeft);
-    const br = hexToRgb(challenge.bottomRight);
-    const tiles = [];
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLS; col++) {
-        const x = col / (COLS - 1);
-        const y = row / (ROWS - 1);
-        const top = lerpRgb(tl, tr, x);
-        const bottom = lerpRgb(bl, br, x);
-        const color = lerpRgb(top, bottom, y);
-        const id = row * COLS + col;
-        tiles.push({ id: id, targetRow: row, targetCol: col, color: rgbToCss(color) });
-      }
-    }
-    return tiles;
-  }
-
-  // ---------- Seeded PRNG ----------
-  function xfnv1a(str) {
-    let h = 2166136261 >>> 0;
-    for (let i = 0; i < str.length; i++) {
-      h ^= str.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return h >>> 0;
-  }
-  function mulberry32(seed) {
-    let a = seed >>> 0;
-    return function () {
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  // ---------- State ----------
-  const state = {
-    tiles: [],
-    solution: [],       // position index -> correct tile id (equals index)
-    board: [],          // position index -> current tile id
-    fixedSet: new Set(),
-    selectedIndex: null,
-    moves: 0,
-    startTime: null,
-    elapsedMs: 0,
-    cleared: false,
-    submitted: false,
-    playId: 0,
-    clearPlayId: null,
-    rafId: null
-  };
-
-  // ---------- DOM ----------
-  const el = {
-    screens: {
-      home: document.getElementById('screen-home'),
-      game: document.getElementById('screen-game'),
-      result: document.getElementById('screen-result')
-    },
-    playerName: document.getElementById('playerName'),
-    startBtn: document.getElementById('startBtn'),
-    homeBest: document.getElementById('homeBest'),
-    logoChips: document.getElementById('logoChips'),
-    board: document.getElementById('board'),
-    timeDisplay: document.getElementById('timeDisplay'),
-    moveDisplay: document.getElementById('moveDisplay'),
-    retireBtn: document.getElementById('retireBtn'),
-    resultTime: document.getElementById('resultTime'),
-    resultMoves: document.getElementById('resultMoves'),
-    bestBadge: document.getElementById('bestBadge'),
-    rankNote: document.getElementById('rankNote'),
-    againBtn: document.getElementById('againBtn'),
-    shareBtn: document.getElementById('shareBtn'),
-    homeBtn: document.getElementById('homeBtn')
-  };
-
-  function showScreen(name) {
-    Object.keys(el.screens).forEach(function (k) {
-      el.screens[k].classList.toggle('active', k === name);
-    });
-    window.scrollTo(0, 0);
-  }
-
-  // ---------- Formatting ----------
-  function elapsedMsToScore(ms) {
-    return Math.round(ms / 10);
-  }
-
-  function isValidScore(score) {
-    return Number.isFinite(score) && Number.isInteger(score) && score > 0;
-  }
-
-  function formatElapsedMs(ms) {
-    const score = elapsedMsToScore(ms);
-    return isValidScore(score) ? (score / SCORE_SCALE).toFixed(SCORE_DECIMALS) : (0).toFixed(SCORE_DECIMALS);
-  }
-
-  // ---------- Local storage ----------
-  function loadBest() {
-    const raw = localStorage.getItem(LS.bestTimeMs);
-    if (raw === null) return null;
-    const n = parseInt(raw, 10);
-    return isNaN(n) ? null : n;
-  }
-  function refreshHomeBest() {
-    const best = loadBest();
-    el.homeBest.textContent = best === null ? '--.--' : formatElapsedMs(best);
-    const savedName = localStorage.getItem(LS.playerName);
-    if (savedName) el.playerName.value = savedName;
-  }
-
-  // ---------- Board building ----------
-  function coordIndex(col, row) { return row * COLS + col; }
-
-  function initFixedSet() {
-    state.fixedSet = new Set(FIXED_COORDS.map(function (c) { return coordIndex(c[0], c[1]); }));
-  }
-
-  function shuffledBoard() {
-    // solution[i] = i (each position's correct tile id equals its index)
-    const solution = [];
-    for (let i = 0; i < TOTAL; i++) solution.push(i);
-
-    const board = solution.slice();
-    // Collect non-fixed positions
-    const movable = [];
-    for (let i = 0; i < TOTAL; i++) {
-      if (!state.fixedSet.has(i)) movable.push(i);
-    }
-    // Fisher-Yates on the tile ids sitting in movable positions, seeded
-    const rand = mulberry32(xfnv1a(SHUFFLE_SEED));
-    const ids = movable.map(function (i) { return board[i]; });
-    for (let i = ids.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      const tmp = ids[i]; ids[i] = ids[j]; ids[j] = tmp;
-    }
-    // Guard: ensure not already fully solved (extremely unlikely, but required)
-    let allSame = true;
-    for (let i = 0; i < ids.length; i++) {
-      if (ids[i] !== movable[i]) { allSame = false; break; }
-    }
-    if (allSame && ids.length >= 2) {
-      const t = ids[0]; ids[0] = ids[1]; ids[1] = t;
-    }
-    for (let i = 0; i < movable.length; i++) board[movable[i]] = ids[i];
-
-    return { solution: solution, board: board };
-  }
-
-  function renderBoard() {
-    el.board.innerHTML = '';
-    el.board.classList.remove('cleared');
-    for (let i = 0; i < TOTAL; i++) {
-      const tileId = state.board[i];
-      const tile = state.tiles[tileId];
-      const div = document.createElement('div');
-      div.className = 'tile';
-      div.style.background = tile.color;
-      div.dataset.pos = i;
-      if (state.fixedSet.has(i)) {
-        div.classList.add('fixed');
-      } else {
-        div.classList.add('movable');
-      }
-      el.board.appendChild(div);
-    }
-  }
-
-  function updateTileVisual(pos) {
-    const div = el.board.children[pos];
-    if (!div) return;
-    const tileId = state.board[pos];
-    div.style.background = state.tiles[tileId].color;
-  }
-
-  // ---------- Timer ----------
-  function tick() {
-    if (state.cleared || state.startTime === null) return;
-    state.elapsedMs = Math.round(performance.now() - state.startTime);
-    el.timeDisplay.textContent = formatElapsedMs(state.elapsedMs);
-    state.rafId = requestAnimationFrame(tick);
-  }
-  function startTimer() {
-    state.startTime = performance.now();
-    state.elapsedMs = 0;
-    el.timeDisplay.textContent = '0.00';
-    state.rafId = requestAnimationFrame(tick);
-  }
-  function stopTimer() {
-    if (state.rafId !== null) { cancelAnimationFrame(state.rafId); state.rafId = null; }
-  }
-
-  // ---------- Gameplay ----------
-  function selectTile(pos) {
-    if (state.cleared) return;
-    if (state.fixedSet.has(pos)) return; // fixed tiles are not selectable
-
-    if (state.selectedIndex === null) {
-      state.selectedIndex = pos;
-      el.board.children[pos].classList.add('selected');
-      return;
-    }
-    if (state.selectedIndex === pos) {
-      // tapping the same tile again -> deselect
-      el.board.children[pos].classList.remove('selected');
-      state.selectedIndex = null;
-      return;
-    }
-    // second distinct movable tile -> swap
-    const a = state.selectedIndex;
-    const b = pos;
-    const tmp = state.board[a];
-    state.board[a] = state.board[b];
-    state.board[b] = tmp;
-
-    el.board.children[a].classList.remove('selected');
-    state.selectedIndex = null;
-
-    updateTileVisual(a);
-    updateTileVisual(b);
-
-    state.moves += 1;
-    el.moveDisplay.textContent = String(state.moves);
-
-    if (checkCleared()) onClear();
-  }
-
-  function checkCleared() {
-    for (let i = 0; i < TOTAL; i++) {
-      if (state.board[i] !== state.solution[i]) return false;
-    }
-    return true;
-  }
-
-  function onClear() {
-    state.cleared = true;
-    stopTimer();
-    // finalize elapsed time
-    state.elapsedMs = Math.round(performance.now() - state.startTime);
-    el.timeDisplay.textContent = formatElapsedMs(state.elapsedMs);
-    el.board.classList.add('cleared');
-    state.clearPlayId = state.playId;
-    setTimeout(function () { showResult(state.clearPlayId); }, 650);
-  }
-
-  function onBoardTap(e) {
-    const target = e.target.closest('.tile');
-    if (!target) return;
-    const pos = parseInt(target.dataset.pos, 10);
-    if (isNaN(pos)) return;
-    selectTile(pos);
-  }
-
-  // ---------- Result ----------
-  function showResult(playId) {
-    if (playId !== state.playId) return;
-    const timeMs = state.elapsedMs;
-    el.resultTime.innerHTML = formatElapsedMs(timeMs) + '<span style="font-size:22px;">秒</span>';
-    el.resultMoves.textContent = String(state.moves);
-
-    // Best time update
-    const prevBest = loadBest();
-    let isBest = false;
-    if (prevBest === null || timeMs < prevBest) {
-      isBest = true;
-      try { localStorage.setItem(LS.bestTimeMs, String(timeMs)); } catch (e) {}
-    }
-    el.bestBadge.style.display = isBest ? 'inline-block' : 'none';
-
-    // Save last result
-    const playerName = (el.playerName.value || '').trim() || 'ゲスト';
-    try {
-      localStorage.setItem(LS.lastResult, JSON.stringify({
-        playerName: playerName,
-        timeMs: timeMs,
-        moves: state.moves,
-        challengeId: OFFICIAL_CHALLENGE.id,
-        at: Date.now()
-      }));
-    } catch (e) {}
-
-    // Ranking submission (isolated, safe on failure, once per play)
-    showScreen('result');
-    updateRankingStatus('idle');
-    submitScoreForCurrentPlay(playId, playerName, timeMs);
-  }
-
-  // ---------- Ranking submission (isolated) ----------
-  function getSubmitScoreUrl() {
-    const base = (RANKING_CONFIG.supabaseUrl || '').trim().replace(/\/+$/, '');
-    return base ? base + '/rest/v1/rpc/submit_score' : '';
-  }
-
-  function isRankingConfigured() {
-    return Boolean(getSubmitScoreUrl() && (RANKING_CONFIG.publishableKey || '').trim());
-  }
-
-  function updateRankingStatus(status) {
-    el.rankNote.classList.toggle('err', status === 'failed');
-    if (status === 'submitting') el.rankNote.textContent = 'ランキング送信中…';
-    else if (status === 'success') el.rankNote.textContent = 'ランキングへ登録しました';
-    else if (status === 'failed') el.rankNote.textContent = 'ランキング送信に失敗しました';
-    else if (status === 'unconfigured') el.rankNote.textContent = 'ランキングは未設定です';
-    else el.rankNote.textContent = '';
-  }
-
-  function submitScoreForCurrentPlay(playId, playerName, elapsedMs) {
-    if (state.submitted) return;
-    state.submitted = true;
-    updateRankingStatus(isRankingConfigured() ? 'submitting' : 'unconfigured');
-    submitScore(playerName, elapsedMs).then(function (result) {
-      if (playId !== state.playId) return;
-      updateRankingStatus(result.status);
-    }).catch(function () {
-      if (playId !== state.playId) return;
-      updateRankingStatus('failed');
-    });
-  }
-
-  function submitScore(playerName, elapsedMs) {
-    return new Promise(function (resolve) {
-      const score = elapsedMsToScore(elapsedMs);
-      if (!isRankingConfigured()) {
-        resolve({ status: 'unconfigured', httpStatus: null });
-        return;
-      }
-      if (!isValidScore(score)) {
-        resolve({ status: 'failed', httpStatus: null });
-        return;
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(function () { controller.abort(); }, SCORE_SUBMIT_TIMEOUT_MS);
-      const payload = {
-        p_display_name: playerName,
-        p_game_slug: GAME_SLUG,
-        p_score: score,
-        p_client_version: CLIENT_VERSION
-      };
-
-      fetch(getSubmitScoreUrl(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': RANKING_CONFIG.publishableKey
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      }).then(function (res) {
-        clearTimeout(timeoutId);
-        resolve({ status: res.ok ? 'success' : 'failed', httpStatus: res.status });
-      }).catch(function () {
-        clearTimeout(timeoutId);
-        resolve({ status: 'failed', httpStatus: null });
-      });
-    });
-  }
-
-  // ---------- Flow ----------
-  function startGame() {
-    const name = (el.playerName.value || '').trim();
-    try { localStorage.setItem(LS.playerName, name); } catch (e) {}
-
-    initFixedSet();
-    state.tiles = buildTiles(OFFICIAL_CHALLENGE);
-    const s = shuffledBoard();
-    state.solution = s.solution;
-    state.board = s.board;
-    state.selectedIndex = null;
-    state.moves = 0;
-    state.cleared = false;
-    state.submitted = false;
-    state.playId += 1;
-    state.clearPlayId = null;
-    updateRankingStatus('idle');
-    el.moveDisplay.textContent = '0';
-
-    renderBoard();
-    showScreen('game');
-    startTimer();
-  }
-
-  function retire() {
-    // No ranking submission on retire.
-    stopTimer();
-    state.cleared = true;
-    state.selectedIndex = null;
-    showScreen('home');
-    refreshHomeBest();
-  }
-
-  function shareResult() {
-    const timeStr = formatElapsedMs(state.elapsedMs);
-    const url = location.href.split('#')[0];
-    const text = 'イロナラベ 公式チャレンジをクリア！ タイム ' + timeStr + '秒 / 移動 ' + state.moves + '回\n' + url;
-    if (navigator.share) {
-      navigator.share({ title: 'イロナラベ', text: text, url: url }).catch(function () {});
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        el.shareBtn.textContent = 'コピーしました';
-        setTimeout(function () { el.shareBtn.textContent = 'シェア'; }, 1500);
-      }).catch(function () {
-        window.prompt('シェア文をコピーしてください', text);
-      });
-    } else {
-      window.prompt('シェア文をコピーしてください', text);
-    }
-  }
-
-  // ---------- Logo chips (decorative, from challenge colors) ----------
-  function buildLogoChips() {
-    const c = OFFICIAL_CHALLENGE;
-    [c.topLeft, c.topRight, c.bottomRight, c.bottomLeft].forEach(function (hex) {
-      const s = document.createElement('span');
-      s.style.background = hex;
-      el.logoChips.appendChild(s);
-    });
-  }
-
-  // ---------- Wire up ----------
-  el.startBtn.addEventListener('click', startGame);
-  el.retireBtn.addEventListener('click', retire);
-  el.board.addEventListener('click', onBoardTap);
-  el.againBtn.addEventListener('click', startGame);
-  el.shareBtn.addEventListener('click', shareResult);
-  el.homeBtn.addEventListener('click', function () { showScreen('home'); refreshHomeBest(); });
-
-  // Suppress long-press context menu on the board.
-  el.board.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-
-  buildLogoChips();
-  refreshHomeBest();
+  const COLS=7, ROWS=9, TOTAL=COLS*ROWS;
+  const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.1.0-official001-v2';
+  const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000;
+  const COUNTDOWN_STEP_MS=700, COUNTDOWN_START_MS=300;
+  const GAME_URL='https://chameleonjp.codeberg.page/ironarabe/';
+  const LAB_URL='https://chameleonjp.codeberg.page/chameleonjp_lab/';
+  const OFFICIAL_CHALLENGE={id:CHALLENGE_ID,topLeft:'#f36b6b',topRight:'#f0c46a',bottomLeft:'#7b6ff0',bottomRight:'#5fd0b5'};
+  const SHUFFLE_SEED='ironarabe-official-001-v1';
+  const FIXED_COORDS=[[0,0],[3,0],[6,0],[0,4],[6,4],[0,8],[3,8],[6,8]];
+  const RANKING_CONFIG={supabaseUrl:'https://mlpnjgezrnhdxsxolyzj.supabase.co',publishableKey:'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM'};
+  const LS={playerName:'ironarabe.v2.playerName',firstScore:'ironarabe.v2.official001.firstScore',bestScore:'ironarabe.v2.official001.bestScore',playCount:'ironarabe.v2.official001.playCount',lastResult:'ironarabe.v2.official001.lastResult',oldPlayerName:'ironarabe.playerName',oldBestTimeMs:'ironarabe.bestTimeMs',oldLastResult:'ironarabe.lastResult'};
+  const COUNTDOWN_STEPS=['3','2','1','START'];
+  const state={phase:'home',inputLocked:false,playerName:'',tiles:[],solution:[],board:[],fixedSet:new Set(),selectedIndex:null,moves:0,startTime:null,elapsedMs:0,cleared:false,submitted:false,playId:0,clearPlayId:null,rafId:null,countdownToken:0,countdownTimerIds:[],resultShownPlayId:null,playCountIncrementedPlayId:null,clearTimerId:null,toastTimerId:null};
+  const el={screens:{home:document.getElementById('screen-home'),nameConfirm:document.getElementById('screen-nameConfirm'),countdown:document.getElementById('screen-countdown'),playing:document.getElementById('screen-playing'),result:document.getElementById('screen-result')},logoChips:document.getElementById('logoChips'),startBtn:document.getElementById('startBtn'),howToBtn:document.getElementById('howToBtn'),howToPanel:document.getElementById('howToPanel'),homeBest:document.getElementById('homeBest'),homeShareBtn:document.getElementById('homeShareBtn'),homeToast:document.getElementById('homeToast'),homeLabLink:document.getElementById('homeLabLink'),playerNameInput:document.getElementById('playerNameInput'),savedNameLabel:document.getElementById('savedNameLabel'),nameError:document.getElementById('nameError'),confirmNameBtn:document.getElementById('confirmNameBtn'),nameBackBtn:document.getElementById('nameBackBtn'),countdownValue:document.getElementById('countdownValue'),board:document.getElementById('board'),timeDisplay:document.getElementById('timeDisplay'),moveDisplay:document.getElementById('moveDisplay'),retireBtn:document.getElementById('retireBtn'),resultTime:document.getElementById('resultTime'),resultMoves:document.getElementById('resultMoves'),bestBadge:document.getElementById('bestBadge'),firstScoreDisplay:document.getElementById('firstScoreDisplay'),bestScoreDisplay:document.getElementById('bestScoreDisplay'),playCountDisplay:document.getElementById('playCountDisplay'),rankNote:document.getElementById('rankNote'),resultToast:document.getElementById('resultToast'),againBtn:document.getElementById('againBtn'),resultShareBtn:document.getElementById('resultShareBtn'),homeBtn:document.getElementById('homeBtn'),resultLabLink:document.getElementById('resultLabLink')};
+  function safeStorageGet(key){try{return localStorage.getItem(key);}catch(e){return null;}}
+  function safeStorageSet(key,value){try{localStorage.setItem(key,value);return true;}catch(e){return false;}}
+  function safeStorageRemove(key){try{localStorage.removeItem(key);return true;}catch(e){return false;}}
+  function parsePositiveInt(raw){if(raw===null)return null;const n=Number(raw);return Number.isFinite(n)&&Number.isInteger(n)&&n>0?n:null;}
+  function elapsedMsToScore(ms){return Math.round(ms/10);}
+  function isValidScore(score){return Number.isFinite(score)&&Number.isInteger(score)&&score>0;}
+  function formatScore(score){return isValidScore(score)?(score/SCORE_SCALE).toFixed(SCORE_DECIMALS):'--.--';}
+  function formatElapsedMs(ms){const score=elapsedMsToScore(ms);return isValidScore(score)?formatScore(score):(0).toFixed(SCORE_DECIMALS);}
+  function countGraphemes(value){if(window.Intl&&Intl.Segmenter){return Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(value)).length;}return Array.from(value).length;}
+  function normalizeName(value){return String(value||'').trim();}
+  function validateName(value){const name=normalizeName(value), len=countGraphemes(name); if(len<1)return {ok:false,message:'プレイヤー名を1文字以上入力してください。'}; if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'}; return {ok:true,name:name};}
+  function migrateOldStorage(){if(!safeStorageGet(LS.playerName)){const old=validateName(safeStorageGet(LS.oldPlayerName)||''); if(old.ok)safeStorageSet(LS.playerName,old.name);} if(!safeStorageGet(LS.bestScore)){const oldMs=parsePositiveInt(safeStorageGet(LS.oldBestTimeMs)); if(oldMs)safeStorageSet(LS.bestScore,String(elapsedMsToScore(oldMs)));}}
+  function loadLocalRecords(){return {playerName:safeStorageGet(LS.playerName)||'', firstScore:parsePositiveInt(safeStorageGet(LS.firstScore)), bestScore:parsePositiveInt(safeStorageGet(LS.bestScore)), playCount:parsePositiveInt(safeStorageGet(LS.playCount))||0};}
+  function refreshHomeRecords(){const r=loadLocalRecords(); state.playerName=r.playerName; el.homeBest.textContent=formatScore(r.bestScore);}
+  function setPhase(nextPhase){state.phase=nextPhase; Object.keys(el.screens).forEach(k=>el.screens[k].classList.toggle('active',k===nextPhase)); window.scrollTo(0,0);}
+  function clearCountdownTimers(){state.countdownTimerIds.forEach(id=>clearTimeout(id)); state.countdownTimerIds=[]; state.countdownToken+=1; el.confirmNameBtn.disabled=false;}
+  function clearPendingTimers(){clearCountdownTimers(); if(state.clearTimerId!==null){clearTimeout(state.clearTimerId); state.clearTimerId=null;} if(state.toastTimerId!==null){clearTimeout(state.toastTimerId); state.toastTimerId=null;}}
+  function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function lerp(a,b,t){return a+(b-a)*t;} function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];} function rgbToCss(c){return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
+  function buildTiles(challenge){const tl=hexToRgb(challenge.topLeft),tr=hexToRgb(challenge.topRight),bl=hexToRgb(challenge.bottomLeft),br=hexToRgb(challenge.bottomRight),tiles=[]; for(let row=0;row<ROWS;row++){for(let col=0;col<COLS;col++){const x=col/(COLS-1),y=row/(ROWS-1),top=lerpRgb(tl,tr,x),bottom=lerpRgb(bl,br,x),color=lerpRgb(top,bottom,y),id=row*COLS+col;tiles.push({id,targetRow:row,targetCol:col,color:rgbToCss(color)});}} return tiles;}
+  function xfnv1a(str){let h=2166136261>>>0; for(let i=0;i<str.length;i++){h^=str.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0;} function mulberry32(seed){let a=seed>>>0; return function(){a|=0; a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296;};}
+  function coordIndex(col,row){return row*COLS+col;} function initFixedSet(){state.fixedSet=new Set(FIXED_COORDS.map(c=>coordIndex(c[0],c[1])));}
+  function shuffledBoard(){const solution=[]; for(let i=0;i<TOTAL;i++)solution.push(i); const board=solution.slice(), movable=[]; for(let i=0;i<TOTAL;i++){if(!state.fixedSet.has(i))movable.push(i);} const rand=mulberry32(xfnv1a(SHUFFLE_SEED)), ids=movable.map(i=>board[i]); for(let i=ids.length-1;i>0;i--){const j=Math.floor(rand()*(i+1)); const tmp=ids[i]; ids[i]=ids[j]; ids[j]=tmp;} let allSame=true; for(let i=0;i<ids.length;i++){if(ids[i]!==movable[i]){allSame=false;break;}} if(allSame&&ids.length>=2){const t=ids[0]; ids[0]=ids[1]; ids[1]=t;} for(let i=0;i<movable.length;i++)board[movable[i]]=ids[i]; return {solution,board};}
+  function renderBoard(){el.board.innerHTML=''; el.board.classList.remove('cleared'); for(let i=0;i<TOTAL;i++){const tile=state.tiles[state.board[i]], div=document.createElement('div'); div.className='tile'; div.style.background=tile.color; div.dataset.pos=String(i); div.classList.add(state.fixedSet.has(i)?'fixed':'movable'); el.board.appendChild(div);}}
+  function updateTileVisual(pos){const div=el.board.children[pos]; if(div)div.style.background=state.tiles[state.board[pos]].color;}
+  function tick(){if(state.phase!=='playing'||state.cleared||state.startTime===null)return; state.elapsedMs=Math.round(performance.now()-state.startTime); el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs); state.rafId=requestAnimationFrame(tick);}
+  function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId); state.rafId=null;}}
+  function preparePlay(){stopTimer(); clearPendingTimers(); initFixedSet(); state.tiles=buildTiles(OFFICIAL_CHALLENGE); const s=shuffledBoard(); state.solution=s.solution; state.board=s.board; state.selectedIndex=null; state.moves=0; state.startTime=null; state.elapsedMs=0; state.cleared=false; state.submitted=false; state.playId+=1; state.clearPlayId=null; state.resultShownPlayId=null; state.inputLocked=true; el.board.innerHTML=''; el.moveDisplay.textContent='0'; el.timeDisplay.textContent='0.00'; updateRankingStatus('idle'); return state.playId;}
+  function beginPlaying(playId){if(playId!==state.playId)return; requestAnimationFrame(function(){if(playId!==state.playId)return; renderBoard(); setPhase('playing'); state.startTime=performance.now(); state.elapsedMs=0; state.inputLocked=false; incrementPlayCountOnce(playId); state.rafId=requestAnimationFrame(tick);});}
+  function startCountdown(playId){if(state.phase!=='nameConfirm')return; clearCountdownTimers(); state.inputLocked=true; const token=state.countdownToken+1; state.countdownToken=token; el.confirmNameBtn.disabled=true; setPhase('countdown'); el.countdownValue.textContent=COUNTDOWN_STEPS[0]; COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return; el.countdownValue.textContent=step;},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1)); state.countdownTimerIds.push(id);}); const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return; state.countdownTimerIds=[]; beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length); state.countdownTimerIds.push(done);}
+  function openNameConfirm(){stopTimer(); clearPendingTimers(); const r=loadLocalRecords(); el.playerNameInput.value=r.playerName; el.savedNameLabel.textContent=r.playerName||'--'; el.nameError.textContent=''; el.confirmNameBtn.disabled=false; state.inputLocked=false; setPhase('nameConfirm'); setTimeout(()=>el.playerNameInput.focus(),0);}
+  function confirmPlayerName(){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return; const v=validateName(el.playerNameInput.value); if(!v.ok){el.nameError.textContent=v.message; return;} state.playerName=v.name; safeStorageSet(LS.playerName,v.name); el.playerNameInput.blur(); if(document.activeElement===el.playerNameInput)document.activeElement.blur(); const playId=preparePlay(); startCountdown(playId);}
+  function incrementPlayCountOnce(playId){if(state.playCountIncrementedPlayId===playId)return; state.playCountIncrementedPlayId=playId; const current=parsePositiveInt(safeStorageGet(LS.playCount))||0; safeStorageSet(LS.playCount,String(current+1));}
+  function selectTile(pos){if(state.phase!=='playing'||state.inputLocked||state.cleared)return; if(state.fixedSet.has(pos))return; if(state.selectedIndex===null){state.selectedIndex=pos; el.board.children[pos].classList.add('selected'); return;} if(state.selectedIndex===pos){el.board.children[pos].classList.remove('selected'); state.selectedIndex=null; return;} const a=state.selectedIndex,b=pos,tmp=state.board[a]; state.board[a]=state.board[b]; state.board[b]=tmp; el.board.children[a].classList.remove('selected'); state.selectedIndex=null; updateTileVisual(a); updateTileVisual(b); state.moves+=1; el.moveDisplay.textContent=String(state.moves); if(checkCleared())onClear();}
+  function checkCleared(){for(let i=0;i<TOTAL;i++){if(state.board[i]!==state.solution[i])return false;} return true;}
+  function onClear(){if(state.cleared||state.resultShownPlayId===state.playId)return; state.cleared=true; state.inputLocked=true; stopTimer(); state.elapsedMs=Math.round(performance.now()-state.startTime); el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs); el.board.classList.add('cleared'); state.clearPlayId=state.playId; const playId=state.clearPlayId; state.clearTimerId=setTimeout(function(){if(playId!==state.playId)return; showResult(playId);},650);}
+  function onBoardTap(e){const target=e.target.closest('.tile'); if(!target)return; const pos=parseInt(target.dataset.pos,10); if(!Number.isNaN(pos))selectTile(pos);}
+  function updateLocalResult(playerName,elapsedMs,moves){const score=elapsedMsToScore(elapsedMs), r=loadLocalRecords(); let badge=''; if(!r.firstScore){safeStorageSet(LS.firstScore,String(score)); badge='初回記録';} if(!r.bestScore||score<r.bestScore){safeStorageSet(LS.bestScore,String(score)); if(badge!=='初回記録')badge='ベスト更新！';} safeStorageSet(LS.lastResult,JSON.stringify({playerName,elapsedMs,score,moves,challengeId:CHALLENGE_ID,boardVersion:BOARD_VERSION,clientVersion:CLIENT_VERSION,at:Date.now()})); return badge;}
+  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return; state.resultShownPlayId=playId; const score=elapsedMsToScore(state.elapsedMs), badge=updateLocalResult(state.playerName,state.elapsedMs,state.moves), r=loadLocalRecords(); el.resultTime.innerHTML=formatScore(score)+'<span style="font-size:22px;">秒</span>'; el.resultMoves.textContent=String(state.moves)+'回'; el.firstScoreDisplay.textContent=formatScore(r.firstScore)+'秒'; el.bestScoreDisplay.textContent=formatScore(r.bestScore)+'秒'; el.playCountDisplay.textContent=String(r.playCount||0)+'回'; el.bestBadge.textContent=badge; el.bestBadge.style.display=badge?'inline-block':'none'; setPhase('result'); updateRankingStatus('idle'); submitScoreForCurrentPlay(playId,state.playerName,state.elapsedMs); refreshHomeRecords();}
+  function retire(){if(state.phase!=='playing')return; stopTimer(); clearCountdownTimers(); state.cleared=true; state.inputLocked=true; state.selectedIndex=null; el.board.innerHTML=''; setPhase('home'); refreshHomeRecords();}
+  function getSubmitScoreUrl(){const base=(RANKING_CONFIG.supabaseUrl||'').trim().replace(/\/+$/,''); return base?base+'/rest/v1/rpc/submit_score':'';}
+  function isRankingConfigured(){return Boolean(getSubmitScoreUrl()&&(RANKING_CONFIG.publishableKey||'').trim());}
+  function updateRankingStatus(status){el.rankNote.classList.toggle('err',status==='failed'); if(status==='submitting')el.rankNote.textContent='ランキング送信中…'; else if(status==='success')el.rankNote.textContent='ランキングへ登録しました'; else if(status==='failed')el.rankNote.textContent='ランキング送信に失敗しました'; else if(status==='unconfigured')el.rankNote.textContent='ランキングは未設定です'; else el.rankNote.textContent='';}
+  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(state.submitted)return; state.submitted=true; updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured'); submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return; updateRankingStatus(result.status);}).catch(function(){if(playId!==state.playId)return; updateRankingStatus('failed');});}
+  function submitScore(playerName,elapsedMs){return new Promise(function(resolve){const score=elapsedMsToScore(elapsedMs); if(!isRankingConfigured()){resolve({status:'unconfigured'}); return;} if(!isValidScore(score)){resolve({status:'failed'}); return;} const controller=new AbortController(), timeoutId=setTimeout(()=>controller.abort(),SCORE_SUBMIT_TIMEOUT_MS), payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:CLIENT_VERSION}; fetch(getSubmitScoreUrl(),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal}).then(function(res){clearTimeout(timeoutId); resolve({status:res.ok?'success':'failed',httpStatus:res.status});}).catch(function(){clearTimeout(timeoutId); resolve({status:'failed'});});});}
+  function showToast(target,message,isError){target.textContent=message; target.classList.toggle('err',Boolean(isError)); if(state.toastTimerId!==null)clearTimeout(state.toastTimerId); state.toastTimerId=setTimeout(function(){target.textContent=''; target.classList.remove('err');},1800);}
+  function fallbackCopy(text){if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text); return new Promise(function(resolve,reject){const ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.top='-1000px'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy')?resolve():reject(new Error('copy failed'));}catch(e){reject(e);} finally{document.body.removeChild(ta);}});}
+  function shareText(text,toastEl){if(navigator.share){navigator.share({title:'イロナラベ',text:text}).catch(function(err){if(err&&err.name==='AbortError')return; fallbackCopy(text).then(()=>showToast(toastEl,'シェア文をコピーしました',false)).catch(()=>showToast(toastEl,'コピーできませんでした',true));}); return;} fallbackCopy(text).then(()=>showToast(toastEl,'シェア文をコピーしました',false)).catch(()=>showToast(toastEl,'コピーできませんでした',true));}
+  function shareHome(){shareText('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n'+GAME_URL,el.homeToast);}
+  function shareResult(){shareText('イロナラベ\n公式チャレンジを'+formatElapsedMs(state.elapsedMs)+'秒・'+state.moves+'回でクリア！\n'+GAME_URL,el.resultToast);}
+  function buildLogoChips(){[OFFICIAL_CHALLENGE.topLeft,OFFICIAL_CHALLENGE.topRight,OFFICIAL_CHALLENGE.bottomRight,OFFICIAL_CHALLENGE.bottomLeft].forEach(function(hex){const s=document.createElement('span'); s.style.background=hex; el.logoChips.appendChild(s);});}
+  el.startBtn.addEventListener('click',openNameConfirm); el.howToBtn.addEventListener('click',function(){const open=el.howToPanel.hidden; el.howToPanel.hidden=!open; el.howToBtn.setAttribute('aria-expanded',String(open));}); el.confirmNameBtn.addEventListener('click',confirmPlayerName); el.nameBackBtn.addEventListener('click',function(){clearPendingTimers(); setPhase('home'); refreshHomeRecords();}); el.playerNameInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.isComposing){e.preventDefault(); confirmPlayerName();}}); el.retireBtn.addEventListener('click',retire); el.board.addEventListener('click',onBoardTap); el.board.addEventListener('contextmenu',function(e){e.preventDefault();}); el.againBtn.addEventListener('click',openNameConfirm); el.homeBtn.addEventListener('click',function(){clearPendingTimers(); setPhase('home'); refreshHomeRecords();}); el.homeShareBtn.addEventListener('click',shareHome); el.resultShareBtn.addEventListener('click',shareResult); el.homeLabLink.href=LAB_URL; el.resultLabLink.href=LAB_URL;
+  buildLogoChips(); migrateOldStorage(); refreshHomeRecords(); setPhase('home');
 })();
 </script>
 </body>
