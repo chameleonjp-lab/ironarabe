@@ -54,22 +54,60 @@ https://chameleonjp.codeberg.page/ironarabe/
 
 Codeberg Pagesは、公開対象リポジトリの`pages`ブランチとWebhookまたはActionsを使って配信する。GitHubの既定ブランチへマージしただけでは、Codeberg Pagesへ自動反映されるとは限らない。
 
+## GitHubからCodebergへの手動公開
+
+公開同期用Workflow:
+
+```text
+.github/workflows/publish-codeberg-pages.yml
+```
+
+初期設定とiPhoneからの実行手順:
+
+```text
+CODEBERG_PUBLISH_SETUP_v1.md
+```
+
+Workflowは`workflow_dispatch`専用で、自動実行しない。GitHub Actions Secretsの`CODEBERG_USERNAME`と`CODEBERG_TOKEN`を使用し、トークンをリポジトリやログへ直書きしない。
+
+最初は次の入力でdry runを行う。
+
+```text
+confirmation: VERIFY
+dry_run: true
+```
+
+dry runは、公開対象ファイル、Codebergリポジトリへの認証、push権限を、書き込みを行わず検査する。
+
+成功後だけ次で公開する。
+
+```text
+confirmation: PUBLISH
+dry_run: false
+```
+
+公開時はGitHubの`pages`ブランチだけをCodebergの`pages`ブランチへ同期する。Codeberg側へ別更新が入った場合は`force-with-lease`の不一致で停止し、無条件上書きしない。このWorkflowはSupabaseを変更しない。
+
+Codeberg側では、Target URLを公開URL、Branch filterを`pages`としたForgejo Webhookが必要である。Webhookがなければブランチ更新後もPagesへ反映されない。
+
 ## 残る公開ゲート
 
 次を上から順に確認する。途中で失敗した場合は`is_active=false`を維持する。
 
-1. 最新の`index.html`をCodeberg側の公開用`pages`ブランチへ反映する。
-2. iPhone 17 ProのSafariで公開URLを開き、タイトルとホーム画面が表示されることを確認する。
-3. 名前確認、`3 → 2 → 1 → START`、7×9盤面、2タップ交換、リタイアを確認する。
-4. 横スクロールがなく、固定印、選択表示、140msの交換反応を判別できることを確認する。
-5. ホームと結果の共有文に公開URLが1回だけ入ることを確認する。
-6. `node tools/verify-production-ui.cjs`を実行する。
-7. `node tools/verify-release-contract.cjs`を実行する。
-8. Supabaseの登録値が正本JSONと一致し、まだ`is_active=false`であることを確認する。
-9. ここまで成功した後だけ、Supabaseを有効化する。
-10. 公開ページから実際のプレイヤー名で1回クリアし、結果画面に「ランキングへ登録しました」が出ることを確認する。
-11. `score_runs`と`game_scores`へ1件だけ保存され、スコアが1秒=100の整数であることを確認する。
-12. 実験場のゲームカード、詳細ランキング、昇順表示、小数2桁表示を確認する。
+1. `Publish Codeberg Pages`を`VERIFY`・dry runで実行し、認証とpush権限を確認する。
+2. 同Workflowを`PUBLISH`・非dry runで実行し、GitHubの`pages`をCodebergへ反映する。
+3. 公開`release.json`が期待する`client_version`、`challenge_id`、`board_version`、`source_index_blob`と一致することを確認する。
+4. iPhone 17 ProのSafariで公開URLを開き、タイトルとホーム画面が表示されることを確認する。
+5. 名前確認、`3 → 2 → 1 → START`、7×9盤面、2タップ交換、リタイアを確認する。
+6. 横スクロールがなく、固定印、選択表示、140msの交換反応を判別できることを確認する。
+7. ホームと結果の共有文に公開URLが1回だけ入ることを確認する。
+8. `node tools/verify-production-ui.cjs`を実行する。
+9. `node tools/verify-release-contract.cjs`を実行する。
+10. Supabaseの登録値が正本JSONと一致し、まだ`is_active=false`であることを確認する。
+11. ここまで成功した後だけ、Supabaseを有効化する。
+12. 公開ページから実際のプレイヤー名で1回クリアし、結果画面に「ランキングへ登録しました」が出ることを確認する。
+13. `score_runs`と`game_scores`へ1件だけ保存され、スコアが1秒=100の整数であることを確認する。
+14. 実験場のゲームカード、詳細ランキング、昇順表示、小数2桁表示を確認する。
 
 ## Supabase有効化SQL
 
@@ -176,6 +214,10 @@ ironarabe-official-001-v1
 
 ## 未確認
 
+- GitHub Actions Secretsが設定されていること
+- Codeberg側の`chameleonjp/ironarabe`リポジトリが存在すること
+- Codeberg側にPages用Webhookが設定されていること
+- `Publish Codeberg Pages`のdry runが成功すること
 - Codeberg Pagesの公開URLが現在200で応答すること
 - iPhone 17 Pro実機での最新版操作
 - 公開ページのJavaScriptからREST RPCが成功すること
