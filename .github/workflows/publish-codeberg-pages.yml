@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       dry_run:
-        description: 'Verify connection without pushing'
+        description: 'Verify connection and push permission without writing'
         required: true
         default: true
         type: boolean
@@ -113,7 +113,8 @@ jobs:
           CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
-          git ls-remote "$CODEBERG_REPOSITORY" HEAD >/dev/null
+          git remote add codeberg "$CODEBERG_REPOSITORY"
+          git ls-remote codeberg HEAD >/dev/null
           echo 'Codeberg repository access verified.'
 
       - name: Show planned update
@@ -124,9 +125,25 @@ jobs:
         run: |
           set -euo pipefail
           local_sha="$(git rev-parse HEAD)"
-          remote_sha="$(git ls-remote "$CODEBERG_REPOSITORY" refs/heads/pages | awk '{print $1}')"
+          remote_sha="$(git ls-remote codeberg refs/heads/pages | awk '{print $1}')"
           echo "GitHub pages SHA: $local_sha"
           echo "Codeberg pages SHA: ${remote_sha:-<not-created>}"
+
+      - name: Verify push permission without writing
+        if: ${{ inputs.dry_run == true }}
+        shell: bash
+        env:
+          CODEBERG_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          remote_sha="$(git ls-remote codeberg refs/heads/pages | awk '{print $1}')"
+          if [[ -n "$remote_sha" ]]; then
+            git push --dry-run --force-with-lease="refs/heads/pages:$remote_sha" codeberg HEAD:pages
+          else
+            git push --dry-run codeberg HEAD:pages
+          fi
+          echo 'Codeberg push permission verified without writing.'
 
       - name: Publish pages branch to Codeberg
         if: ${{ inputs.dry_run == false }}
@@ -136,8 +153,7 @@ jobs:
           CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
-          git remote add codeberg "$CODEBERG_REPOSITORY"
-          remote_sha="$(git ls-remote "$CODEBERG_REPOSITORY" refs/heads/pages | awk '{print $1}')"
+          remote_sha="$(git ls-remote codeberg refs/heads/pages | awk '{print $1}')"
           if [[ -n "$remote_sha" ]]; then
             git push --force-with-lease="refs/heads/pages:$remote_sha" codeberg HEAD:pages
           else
