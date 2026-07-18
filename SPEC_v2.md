@@ -15,7 +15,7 @@
 - `GAME_SLUG`: `ironarabe`
 - `CHALLENGE_ID`: `ironarabe-official-001`
 - `BOARD_VERSION`: `2`
-- `CLIENT_VERSION`: `ironarabe-web-1.1.0-official001-v2`
+- `CLIENT_VERSION`: `ironarabe-web-1.2.0-official001-v2`
 - `GAME_URL`: `https://chameleonjp.codeberg.page/ironarabe/`（公開予定URL）
 - `LAB_URL`: `https://chameleonjp.codeberg.page/chameleonjp_lab/`
 
@@ -23,7 +23,7 @@
 
 ## 画面状態と遷移
 
-画面状態は `home`、`nameConfirm`、`countdown`、`playing`、`result` の5つとする。DOM表示と `state.phase` は `setPhase(nextPhase)` で揃える。
+画面状態は `home`、`nameConfirm`、`countdown`、`playing`、`result` の5つとする。DOM表示、`state.phase`、`body[data-phase]` は `setPhase(nextPhase)` で揃える。
 
 許可する主な遷移:
 
@@ -37,7 +37,7 @@
 - `result → nameConfirm`（もう一度遊ぶ）
 - `result → home`
 
-盤面操作は `state.phase === 'playing' && state.inputLocked === false && state.cleared === false` の時だけ受け付ける。クリア確定後は演出待機中で `state.phase` が一時的に `playing` でも、リタイア処理を受け付けない。ホームへ戻る共通処理はカウントダウン、クリア待機、通知など画面をまたぐ待機処理を解除する。
+盤面操作は `state.phase === 'playing' && state.inputLocked === false && state.cleared === false` の時だけ受け付ける。クリア確定後は演出待機中で `state.phase` が一時的に `playing` でも、リタイア処理を受け付けない。ホームへ戻る共通処理はカウントダウン、交換、クリア待機、通知など画面をまたぐ待機処理を解除する。
 
 ## ホームと名前確認
 
@@ -56,6 +56,25 @@
 二重開始防止として、`state.phase`、確定ボタンの `disabled`、カウントダウントークン、タイマーID配列、`clearCountdownTimers()` を使う。古い `setTimeout` はホームへ戻る時、リタイア時、別プレイ開始時に解除または無効化する。
 
 `START` 表示が終わった後の `requestAnimationFrame` で `renderBoard()`、`setPhase('playing')`、`state.startTime = performance.now()`、`state.elapsedMs = 0`、`state.inputLocked = false`、`requestAnimationFrame(tick)` を行う。名前入力中・カウントダウン中は計測せず、START前に `state.startTime` を設定しない。記録の正本は `performance.now() - state.startTime` で、表示は小数2桁とする。
+
+## 見た目と操作感
+
+この版では、ゲームルール、色、固定位置、公式seedを変えずに、盤面を読み取りやすくする。
+
+- タイル間隔は `2px` とし、色の連続性を見やすくする。
+- タイル角丸は `4px` とし、各色面の面積を確保する。
+- 固定タイルの印は中央を覆わず、右上の小さな丸で示す。
+- 選択中の拡大率は `1.025` とし、隣の色を隠しにくくする。白い枠と控えめな明るさでも選択を示す。
+- 2枚を交換した直後は、対象2枚だけに `140ms` の短い交換反応を付ける。
+- 交換反応中は `state.inputLocked = true` とし、3枚目の入力や重複交換を受け付けない。
+- 交換終了後、同じ `playId` のプレイ中であることを確認してから、クリア判定または入力解除を行う。
+- `swapTimerId` は新しいプレイ、ホーム復帰、リタイア、クリア、ページ離脱時に解除する。
+- 動きを減らす設定が有効な場合は、交換待ちを入れずに同じ処理結果へ進み、CSSの遷移とアニメーションもほぼ無効にする。
+- HUDは高さと装飾を減らし、盤面を優先する。TIMEとMOVESの意味、値、スコア計算は変えない。
+- 通常画面では盤面幅を画面幅と高さの両方から決め、短い画面では説明文を隠して盤面とリタイア操作を優先する。
+- 幅360px以下では左右余白と結果記録の文字を調整する。
+
+交換アニメーションは見た目だけを補助する。移動回数は従来どおり交換成立時に1増え、ランキングはクリアタイムだけで決まる。
 
 ## ローカル保存
 
@@ -134,7 +153,7 @@ apikey: {SUPABASE_PUBLISHABLE_KEY}
   "p_display_name": "確認済みのプレイヤー名",
   "p_game_slug": "ironarabe",
   "p_score": 7244,
-  "p_client_version": "ironarabe-web-1.1.0-official001-v2"
+  "p_client_version": "ironarabe-web-1.2.0-official001-v2"
 }
 ```
 
@@ -161,10 +180,10 @@ Publishable key以外の秘密鍵、service role key、Bearer認証、`public.ga
 
 共通RPC契約は維持しているが、本番ランキングを汚す検証スコアは送信していない。そのため、実Supabaseへの疎通、RPC正常応答、スコア保存成功、`public.games` への `ironarabe` 登録状況、実験場ランキングへの反映は未確認。
 
-## 第2.5回安定化で変更しない範囲
+## 第4回で変更しない範囲
 
-第2.5回では、クリア直後のリタイア競合、古いクリア待機処理、共有通知の残留、Clipboard API 失敗時のコピー fallback だけを安定化対象とする。難易度、盤面サイズ、固定タイル、色、シャッフルシード、タイルIDによる正解判定、Supabaseランキング契約、スコア換算、`GAME_URL`、`LAB_URL` は変更しない。
+第4回では、タイル間隔、角丸、固定印、選択表示、交換反応、HUD、短い画面対応だけを調整する。難易度、盤面サイズ、固定タイル数、四隅の色、シャッフルシード、タイルIDによる正解判定、スコア換算、Supabaseランキング契約、`GAME_URL`、`LAB_URL`、ローカル保存キーは変更しない。
 
 ## 今回未実装の項目
 
-難易度調整、盤面サイズ変更、色変更、固定位置変更、シャッフルシード変更、タイルデザイン調整、交換アニメーション強化、リタイア確認、音、振動、ヒント、ドラッグ操作、オンラインランキング一覧取得、Supabase表/RPC/SQL変更、実験場側コード変更、Codeberg Pages公開、キーボードでの盤面操作対応は未実装。
+難易度候補の本番採用、盤面サイズ変更、色変更、固定位置変更、シャッフルシード変更、リタイア確認、音、振動、ヒント、ドラッグ操作、オンラインランキング一覧取得、Supabase表/RPC/SQL変更、実験場側コード変更、Codeberg Pages公開、キーボードでの盤面操作対応は未実装。
