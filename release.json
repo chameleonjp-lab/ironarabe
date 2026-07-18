@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "game_slug": "ironarabe",
+  "title": "イロナラベ",
+  "client_version": "ironarabe-web-1.2.0-official001-v2",
+  "challenge_id": "ironarabe-official-001",
+  "board_version": 2,
+  "source_branch": "claude/ironarabe-new-game-wlys30",
+  "source_commit": "aefb7194861ae90fd7a3f06072dc6b685c3054c8",
+  "source_index_blob": "34924ded8610a300e76dca6b7890a6799ded3645",
+  "published_files": [
+    "index.html",
+    "tools/difficulty-core.js",
+    "tools/difficulty-lab.html"
+  ],
+  "prepared_at": "2026-07-18"
+}
