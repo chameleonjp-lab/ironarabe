@@ -39,7 +39,7 @@ display_order: 32
 
 DB関数、`score_runs`、`game_scores`、ランキング読み取りRPCは、ロールバック前提のトランザクションで検証済みです。テスト行は残っていません。
 
-公開URLとiPhone実機の操作を確認した後だけ有効化します。公開手順、確認SQL、緊急停止SQLは [RELEASE_READINESS_v1.md](./RELEASE_READINESS_v1.md) を参照してください。登録値の正本は [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)、DBプリフライト結果は [release/supabase-preflight-v1.json](./release/supabase-preflight-v1.json) です。
+公開URLとiPhone実機の操作を確認した後だけ有効化します。公開手順、確認SQL、緊急停止SQLは [RELEASE_READINESS_v1.md](./RELEASE_READINESS_v1.md) を参照してください。GitHubからCodebergへ同期する初期設定と実行方法は [CODEBERG_PUBLISH_SETUP_v1.md](./CODEBERG_PUBLISH_SETUP_v1.md) を参照してください。登録値の正本は [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)、DBプリフライト結果は [release/supabase-preflight-v1.json](./release/supabase-preflight-v1.json) です。
 
 ## 検証
 
@@ -52,6 +52,7 @@ node tools/verify-release-contract.cjs
 - 現在の仕様: [SPEC_v2.md](./SPEC_v2.md)
 - 現在の確認項目: [REVIEW_CHECKLIST_v2.md](./REVIEW_CHECKLIST_v2.md)
 - 公開前ゲート: [RELEASE_READINESS_v1.md](./RELEASE_READINESS_v1.md)
+- Codeberg公開設定: [CODEBERG_PUBLISH_SETUP_v1.md](./CODEBERG_PUBLISH_SETUP_v1.md)
 - Supabase登録値の正本: [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)
 - Supabaseプリフライト結果: [release/supabase-preflight-v1.json](./release/supabase-preflight-v1.json)
 - 難易度比較: [DIFFICULTY_STUDY_v1.md](./DIFFICULTY_STUDY_v1.md)
