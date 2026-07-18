@@ -12,7 +12,7 @@
 
 ## 特徴
 - 単一ファイル（HTML / CSS / JavaScript のみ）。npm・フレームワーク・外部素材・CDN 不使用。
-- ホームと結果画面から共有できます。共有URLは公開予定URL `https://chameleonjp.codeberg.page/ironarabe/` を使います。
+- ホームと結果画面から共有できます。共有URLは `https://chameleonjp.codeberg.page/ironarabe/` を使います。
 - この端末内の初回記録、ベスト記録、プレイ回数、最後の結果を localStorage に保存して表示します。
 - 四隅の色から RGB 線形補間で 7×9 のグラデーションを生成します。
 - 正解判定は色ではなくタイルIDで行い、丸め誤差の影響を受けません。
@@ -27,7 +27,29 @@
 - 内部計測はミリ秒、ランキング送信値は1秒=100の整数、表示は小数2桁です。
 - 送信はクリア時のみ・1プレイ1回です。
 
+## 公開状況
+
+Supabaseの `public.games` には、公開前の安全な状態で事前登録済みです。
+
+```text
+is_active: false
+release_date: null
+display_order: 32
+```
+
+公開URLとiPhone実機の操作を確認した後だけ有効化します。公開手順、確認SQL、緊急停止SQLは [RELEASE_READINESS_v1.md](./RELEASE_READINESS_v1.md) を参照してください。登録値の正本は [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json) です。
+
+## 検証
+
+```bash
+node tools/verify-production-ui.cjs
+node tools/verify-release-contract.cjs
+```
+
 ## ドキュメント
 - 現在の仕様: [SPEC_v2.md](./SPEC_v2.md)
 - 現在の確認項目: [REVIEW_CHECKLIST_v2.md](./REVIEW_CHECKLIST_v2.md)
+- 公開前ゲート: [RELEASE_READINESS_v1.md](./RELEASE_READINESS_v1.md)
+- Supabase登録値の正本: [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)
+- 難易度比較: [DIFFICULTY_STUDY_v1.md](./DIFFICULTY_STUDY_v1.md)
 - 初回実装時の旧文書: [SPEC.md](./SPEC.md)、[IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md)
