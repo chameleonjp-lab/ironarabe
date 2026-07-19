@@ -8,6 +8,7 @@ const root = process.cwd();
 const files = {
   index: path.join(root, "index.html"),
   manifest: path.join(root, "release", "ironarabe-game-registration.json"),
+  preflight: path.join(root, "release", "supabase-preflight-v1.json"),
   readme: path.join(root, "README.md"),
   release: path.join(root, "RELEASE_READINESS_v1.md")
 };
@@ -26,18 +27,23 @@ function read(file, label) {
   }
   return fs.readFileSync(file, "utf8");
 }
+function parseJson(text, label) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    errors.push(`${label} is not valid JSON: ${error.message}`);
+    return null;
+  }
+}
 
 const index = read(files.index, "index.html");
 const manifestText = read(files.manifest, "registration manifest");
+const preflightText = read(files.preflight, "Supabase preflight result");
 const readme = read(files.readme, "README.md");
 const release = read(files.release, "RELEASE_READINESS_v1.md");
 
-let manifest = null;
-try {
-  manifest = JSON.parse(manifestText);
-} catch (error) {
-  errors.push(`registration manifest is not valid JSON: ${error.message}`);
-}
+const manifest = parseJson(manifestText, "registration manifest");
+const preflight = parseJson(preflightText, "Supabase preflight result");
 
 if (manifest) {
   const expected = {
@@ -79,14 +85,39 @@ if (manifest) {
 
   requireTrue(release.includes("is_active: false"), "release document must state inactive preregistration");
   requireTrue(release.includes("release/ironarabe-game-registration.json"), "release document must point to the manifest");
+  requireTrue(release.includes("release/supabase-preflight-v1.json"), "release document must point to the preflight result");
   requireTrue(release.includes("score_scale = 100"), "activation SQL must guard score_scale");
   requireTrue(release.includes("score_decimals = 2"), "activation SQL must guard score_decimals");
   requireTrue(release.includes("score_order = 'asc'"), "activation SQL must guard score_order");
   requireTrue(!/sb_publishable_|service_role key value/i.test(release), "release document must not contain credentials");
 }
 
+if (preflight) {
+  requireTrue(preflight.schema_version === 1, "preflight.schema_version must be 1");
+  requireTrue(preflight.game_slug === "ironarabe", "preflight.game_slug mismatch");
+  requireTrue(preflight.registration_contract?.is_active === false, "preflight must record inactive registration");
+  requireTrue(preflight.registration_contract?.release_date === null, "preflight release_date must be null");
+  requireTrue(preflight.registration_contract?.score_order === "asc", "preflight score_order mismatch");
+  requireTrue(preflight.registration_contract?.score_scale === 100, "preflight score_scale mismatch");
+  requireTrue(preflight.registration_contract?.score_decimals === 2, "preflight score_decimals mismatch");
+  requireTrue(preflight.transactional_submit_score?.passed === true, "transactional submit_score preflight must pass");
+  requireTrue(preflight.transactional_submit_score?.accepted === true, "transactional submit_score must be accepted");
+  requireTrue(preflight.transactional_persistence?.score_runs_count === 1, "preflight score_runs count must be 1 inside transaction");
+  requireTrue(preflight.transactional_persistence?.game_scores_count === 1, "preflight game_scores count must be 1 inside transaction");
+  requireTrue(preflight.transactional_read_rpcs?.passed === true, "read RPC preflight must pass");
+  requireTrue(preflight.transactional_read_rpcs?.rank_direction_observed === "asc", "read RPC rank direction must be asc");
+  requireTrue(preflight.rollback_cleanup?.passed === true, "rollback cleanup must pass");
+  requireTrue(preflight.rollback_cleanup?.is_active_after_rollback === false, "game must remain inactive after rollback");
+  requireTrue(preflight.rollback_cleanup?.residual_score_runs === 0, "probe score_runs must be removed by rollback");
+  requireTrue(preflight.rollback_cleanup?.residual_game_scores === 0, "probe game_scores must be removed by rollback");
+  requireTrue(preflight.rollback_cleanup?.residual_players === 0, "probe players must be removed by rollback");
+  requireTrue(!/iroprobe_/i.test(preflightText), "preflight result must not retain probe player names");
+  requireTrue(!/sb_publishable_|service_role|secret key/i.test(preflightText), "preflight result must not contain credentials");
+}
+
 requireTrue(readme.includes("RELEASE_READINESS_v1.md"), "README must link to release readiness document");
 requireTrue(readme.includes("release/ironarabe-game-registration.json"), "README must link to registration manifest");
+requireTrue(readme.includes("release/supabase-preflight-v1.json"), "README must link to Supabase preflight result");
 
 if (errors.length) {
   console.error(`NG: ${errors.length} release contract issue(s)`);
@@ -94,4 +125,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("OK: ironarabe release contract verified");
+console.log("OK: ironarabe release contract and Supabase preflight verified");

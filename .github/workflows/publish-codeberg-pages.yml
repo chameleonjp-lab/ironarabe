@@ -1,0 +1,168 @@
+name: Publish Codeberg Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'VERIFY for dry run, PUBLISH for actual publish'
+        required: true
+        type: string
+      dry_run:
+        description: 'Verify connection and push permission without writing'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-codeberg-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      CODEBERG_REPOSITORY: https://codeberg.org/chameleonjp/ironarabe.git
+
+    steps:
+      - name: Validate manual confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            [[ "${{ inputs.confirmation }}" == "VERIFY" ]] || {
+              echo 'Dry run requires confirmation=VERIFY.'
+              exit 1
+            }
+          else
+            [[ "${{ inputs.confirmation }}" == "PUBLISH" ]] || {
+              echo 'Publishing requires confirmation=PUBLISH.'
+              exit 1
+            }
+          fi
+
+      - name: Check out the publish-only branch
+        uses: actions/checkout@v4
+        with:
+          ref: pages
+          fetch-depth: 0
+
+      - name: Validate publish contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f release.json
+          test -f tools/difficulty-core.js
+          test -f tools/difficulty-lab.html
+          test ! -e README.md
+          test ! -e RELEASE_READINESS_v1.md
+          test ! -d .github
+          node - <<'NODE'
+          const fs = require('fs');
+          const release = JSON.parse(fs.readFileSync('release.json', 'utf8'));
+          const expected = {
+            game_slug: 'ironarabe',
+            client_version: 'ironarabe-web-1.2.0-official001-v2',
+            challenge_id: 'ironarabe-official-001',
+            board_version: 2,
+            source_index_blob: '34924ded8610a300e76dca6b7890a6799ded3645'
+          };
+          for (const [key, value] of Object.entries(expected)) {
+            if (release[key] !== value) {
+              throw new Error(`release.json ${key} mismatch: ${release[key]}`);
+            }
+          }
+          NODE
+
+      - name: Configure Codeberg HTTPS authentication
+        shell: bash
+        env:
+          CODEBERG_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${CODEBERG_USERNAME:-}" || {
+            echo 'Missing repository secret: CODEBERG_USERNAME'
+            exit 1
+          }
+          test -n "${CODEBERG_TOKEN:-}" || {
+            echo 'Missing repository secret: CODEBERG_TOKEN'
+            exit 1
+          }
+
+          askpass="$RUNNER_TEMP/codeberg-askpass.sh"
+          cat > "$askpass" <<'SH'
+          #!/usr/bin/env sh
+          case "$1" in
+            *Username*) printf '%s\n' "$CODEBERG_USERNAME" ;;
+            *Password*) printf '%s\n' "$CODEBERG_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          echo "GIT_ASKPASS=$askpass" >> "$GITHUB_ENV"
+          echo 'GIT_TERMINAL_PROMPT=0' >> "$GITHUB_ENV"
+
+      - name: Verify Codeberg repository access
+        shell: bash
+        env:
+          CODEBERG_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          git remote add codeberg "$CODEBERG_REPOSITORY"
+          git ls-remote codeberg HEAD >/dev/null
+          echo 'Codeberg repository access verified.'
+
+      - name: Show planned update
+        shell: bash
+        env:
+          CODEBERG_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          local_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git ls-remote codeberg refs/heads/pages | awk '{print $1}')"
+          echo "GitHub pages SHA: $local_sha"
+          echo "Codeberg pages SHA: ${remote_sha:-<not-created>}"
+
+      - name: Verify push permission without writing
+        if: ${{ inputs.dry_run == true }}
+        shell: bash
+        env:
+          CODEBERG_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          remote_sha="$(git ls-remote codeberg refs/heads/pages | awk '{print $1}')"
+          if [[ -n "$remote_sha" ]]; then
+            git push --dry-run --force-with-lease="refs/heads/pages:$remote_sha" codeberg HEAD:pages
+          else
+            git push --dry-run codeberg HEAD:pages
+          fi
+          echo 'Codeberg push permission verified without writing.'
+
+      - name: Publish pages branch to Codeberg
+        if: ${{ inputs.dry_run == false }}
+        shell: bash
+        env:
+          CODEBERG_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          remote_sha="$(git ls-remote codeberg refs/heads/pages | awk '{print $1}')"
+          if [[ -n "$remote_sha" ]]; then
+            git push --force-with-lease="refs/heads/pages:$remote_sha" codeberg HEAD:pages
+          else
+            git push codeberg HEAD:pages
+          fi
+          echo 'Codeberg pages branch updated.'
+
+      - name: Keep Supabase inactive reminder
+        shell: bash
+        run: |
+          echo 'This workflow does not enable Supabase.'
+          echo 'Confirm the public URL and iPhone operation before setting public.games.is_active=true.'
