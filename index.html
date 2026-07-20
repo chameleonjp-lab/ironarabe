@@ -465,7 +465,7 @@
   function tick(){if(state.phase!=='playing'||state.cleared||state.startTime===null)return;state.elapsedMs=Math.round(performance.now()-state.startTime);el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);state.rafId=requestAnimationFrame(tick);}
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
-  function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;if(checkCleared()){onClear();return;}state.inputLocked=false;}
+  function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
   function preparePlay(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();state.tiles=buildTiles(OFFICIAL_CHALLENGE);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent='0';el.timeDisplay.textContent='0.00';resetNameRecord();updateRankingStatus('idle');return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;incrementPlayCountOnce(playId);state.rafId=requestAnimationFrame(tick);});}
   function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');el.countdownValue.textContent=COUNTDOWN_STEPS[0];COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;el.countdownValue.textContent=step;},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
@@ -487,6 +487,7 @@
     updateTileVisual(b);
     state.operations+=1;
     el.operationDisplay.textContent=String(state.operations);
+    if(checkCleared()){onClear();return;}
     const aEl=el.board.children[a],bEl=el.board.children[b];
     if(aEl)aEl.classList.add('swapping');
     if(bEl)bEl.classList.add('swapping');
