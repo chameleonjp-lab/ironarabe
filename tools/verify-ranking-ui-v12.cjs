@@ -21,6 +21,7 @@ requireText('操作回数',"operation count label missing");
 requireText("submitScoreForCurrentPlay(playId,state.playerName,state.elapsedMs)","score submission must start at clear");
 requireText("},CLEAR_BOARD_DISPLAY_MS);","result delay must use clear display constant");
 requireText("state.elapsedMs=Math.round(performance.now()-state.startTime)","clear time freeze missing");
+requireText("if(checkCleared()){onClear();return;}","solving operation must clear immediately");
 requireText("record.result_play_count","submit response play count missing");
 requireText("record.result_first_score","submit response first score missing");
 requireText("record.result_best_score","submit response best score missing");
