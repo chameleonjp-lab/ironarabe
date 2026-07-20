@@ -7,6 +7,13 @@ on:
     paths:
       - '_upload-v12/**'
       - '.github/workflows/assemble-ironarabe-v12.yml'
+  pull_request:
+    branches:
+      - claude/ironarabe-new-game-wlys30
+    types: [opened, synchronize, reopened]
+    paths:
+      - '_upload-v12/**'
+      - '.github/workflows/assemble-ironarabe-v12.yml'
 
 permissions:
   contents: write
@@ -17,6 +24,7 @@ concurrency:
 
 jobs:
   assemble:
+    if: ${{ github.event_name == 'push' || github.head_ref == 'agent/ironarabe-ranking-result-v12' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
