@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(find _upload-v12 -maxdepth 1 -type f -name 'part-*' | wc -l | tr -d ' ')" = "9"
+          test "$(find _upload-v12 -maxdepth 1 -type f -name 'part-*' | wc -l | tr -d ' ')" = "11"
           cat _upload-v12/part-* | base64 --decode > index.html.next
           echo '4cdc98cce8a46edc061dbb3011526e2d646fce5c0d1ea7aa5eca59d256f9a862  index.html.next' | sha256sum -c -
           mv index.html.next index.html
