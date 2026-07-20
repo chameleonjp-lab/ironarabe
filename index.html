@@ -19,6 +19,7 @@
     --gap:2px;
     --tile-radius:4px;
     --swap-duration:140ms;
+    --ranking-row-height:42px;
   }
   * { box-sizing:border-box; }
   html, body {
@@ -36,7 +37,7 @@
     -webkit-tap-highlight-color:transparent;
   }
   body { display:flex; justify-content:center; }
-  input, textarea, a {
+  input, textarea, a, .ranking-scroll {
     -webkit-user-select:auto;
     user-select:auto;
     -webkit-touch-callout:default;
@@ -52,6 +53,7 @@
   }
   .screen { display:none; flex-direction:column; flex:1; width:100%; min-height:0; }
   .screen.active { display:flex; }
+  #screen-playing { position:relative; }
   h1.logo {
     font-size:30px;
     letter-spacing:.18em;
@@ -112,14 +114,12 @@
   .record-line { padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); }
   .record-line:last-child { border-bottom:0; }
   .record-line .label { color:var(--muted); font-size:13px; }
+  .record-status { min-height:18px; margin-top:8px; color:var(--muted); font-size:11px; line-height:1.5; }
+  .record-status.err { color:var(--danger); }
   .countdown-screen { align-items:center; justify-content:center; text-align:center; min-height:70dvh; }
   .countdown-value { font-size:72px; font-weight:900; letter-spacing:.08em; color:var(--accent); text-shadow:0 0 22px rgba(127,215,196,.18); }
 
-  .hud {
-    display:flex;
-    gap:8px;
-    margin-bottom:7px;
-  }
+  .hud { display:flex; gap:8px; margin-bottom:7px; }
   .hud .stat {
     flex:1;
     background:rgba(28,30,43,.72);
@@ -130,7 +130,7 @@
   }
   .hud .stat .k { font-size:10px; color:var(--muted); letter-spacing:.12em; line-height:1.2; }
   .hud .stat .v { font-size:20px; line-height:1.15; font-weight:700; font-variant-numeric:tabular-nums; }
-  .board-wrap { display:flex; justify-content:center; flex:1; min-height:0; align-items:center; }
+  .board-wrap { display:flex; justify-content:center; flex:1; min-height:0; align-items:center; position:relative; }
   .board {
     width:min(calc(100vw - 24px), calc((100vh - 190px) * 7 / 9), 460px);
     width:min(calc(100vw - 24px), calc((100dvh - 190px) * 7 / 9), 460px);
@@ -165,10 +165,7 @@
     filter:brightness(1.04);
     z-index:3;
   }
-  .tile.swapping {
-    animation:tileSwapPulse var(--swap-duration) ease-out;
-    z-index:2;
-  }
+  .tile.swapping { animation:tileSwapPulse var(--swap-duration) ease-out; z-index:2; }
   .tile.fixed::after {
     content:"";
     position:absolute;
@@ -183,6 +180,24 @@
   }
   .board.cleared .tile { outline-color:transparent; box-shadow:inset 0 0 0 1px rgba(255,255,255,.035); filter:none; }
   .board.cleared { animation:clearPulse .6s ease; }
+  .completion-banner {
+    position:absolute;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:8;
+    min-width:180px;
+    padding:10px 18px;
+    border-radius:999px;
+    background:rgba(18,19,28,.9);
+    border:1px solid rgba(127,215,196,.8);
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+    text-align:center;
+    pointer-events:none;
+  }
+  .completion-banner[hidden] { display:none; }
+  .completion-banner strong { display:block; color:var(--accent); font-size:22px; letter-spacing:.14em; }
+  .completion-banner span { display:block; margin-top:2px; color:var(--text); font-size:12px; font-variant-numeric:tabular-nums; }
   @keyframes tileSwapPulse {
     0% { transform:scale(.96); filter:brightness(.92); }
     55% { transform:scale(1.025); filter:brightness(1.08); }
@@ -198,21 +213,47 @@
   .game-footer .btn { margin-top:5px; padding:10px; font-size:14px; }
   .result-head { text-align:center; margin:16px 0 12px; }
   .result-head .big-time { font-size:46px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:.02em; }
-  .result-head .sub { color:var(--muted); font-size:14px; margin-top:4px; }
   .badge { display:inline-block; margin-top:10px; background:linear-gradient(90deg,var(--accent-2),var(--accent)); color:#201a10; font-weight:700; font-size:13px; padding:5px 14px; border-radius:999px; letter-spacing:.04em; }
   .rank-note, .toast { text-align:center; font-size:12px; color:var(--muted); margin:10px 0 4px; min-height:18px; }
   .rank-note.err, .toast.err { color:var(--danger); }
   .spacer { flex:1; }
 
+  .ranking-card { padding:12px 0 0; overflow:hidden; }
+  .ranking-title { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:0 14px 10px; }
+  .ranking-title h3 { margin:0; }
+  .ranking-title span { color:var(--muted); font-size:11px; }
+  .ranking-status { min-height:42px; display:flex; align-items:center; justify-content:center; padding:8px 14px; color:var(--muted); font-size:12px; text-align:center; }
+  .ranking-status.err { color:var(--danger); }
+  .ranking-scroll {
+    max-height:calc(var(--ranking-row-height) * 5);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    border-top:1px solid rgba(255,255,255,.07);
+  }
+  .ranking-row {
+    min-height:var(--ranking-row-height);
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    padding:7px 14px;
+    border-bottom:1px solid rgba(255,255,255,.055);
+    font-size:13px;
+  }
+  .ranking-row:last-child { border-bottom:0; }
+  .ranking-rank { color:var(--accent-2); font-weight:800; font-variant-numeric:tabular-nums; }
+  .ranking-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ranking-score { font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ranking-score small { color:var(--muted); font-size:10px; font-weight:500; margin-left:2px; }
+
   @media (max-width:360px) {
     .app { padding-left:10px; padding-right:10px; }
-    .board {
-      width:min(calc(100vw - 20px), calc((100dvh - 185px) * 7 / 9), 460px);
-    }
+    .board { width:min(calc(100vw - 20px), calc((100dvh - 185px) * 7 / 9), 460px); }
     .record-line .val { font-size:18px; }
     .record-line .label { font-size:12px; }
+    .ranking-row { grid-template-columns:36px minmax(0,1fr) auto; padding-left:10px; padding-right:10px; }
   }
-
   @media (max-height:620px) {
     .app { padding-top:max(6px, env(safe-area-inset-top)); padding-bottom:max(8px, env(safe-area-inset-bottom)); }
     .hud { margin-bottom:5px; }
@@ -220,11 +261,8 @@
     .hud .stat .v { font-size:18px; }
     .game-hint { display:none; }
     .game-footer .btn { margin-top:4px; padding:8px; font-size:13px; }
-    .board {
-      width:min(calc(100vw - 20px), calc((100dvh - 112px) * 7 / 9), 460px);
-    }
+    .board { width:min(calc(100vw - 20px), calc((100dvh - 112px) * 7 / 9), 460px); }
   }
-
   @media (prefers-reduced-motion:reduce) {
     *, *::before, *::after {
       scroll-behavior:auto !important;
@@ -263,6 +301,11 @@
     <button class="btn secondary" id="homeShareBtn">ゲームをシェア</button>
     <a class="panel-link" id="homeLabLink" href="https://chameleonjp.codeberg.page/chameleonjp_lab/">カメレオンJPの実験場へ</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
+    <div class="card ranking-card" aria-label="ベストタイムランキング30位まで">
+      <div class="ranking-title"><h3>ベストタイムランキング</h3><span>30位まで</span></div>
+      <div class="ranking-status" id="homeRankingStatus" aria-live="polite">読み込み中…</div>
+      <div class="ranking-scroll" id="homeRankingScroll" hidden><div id="homeRankingList" role="list"></div></div>
+    </div>
   </section>
 
   <section id="screen-nameConfirm" class="screen">
@@ -285,9 +328,15 @@
   <section id="screen-playing" class="screen">
     <div class="hud">
       <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.00</div></div>
-      <div class="stat"><div class="k">MOVES</div><div class="v" id="moveDisplay">0</div></div>
+      <div class="stat"><div class="k">操作回数</div><div class="v" id="operationDisplay">0</div></div>
     </div>
-    <div class="board-wrap"><div class="board" id="board"></div></div>
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="completion-banner" id="completionBanner" hidden aria-live="assertive">
+        <strong>完成！</strong>
+        <span id="completionSummary">0.00秒・操作0回</span>
+      </div>
+    </div>
     <p class="game-hint">2つのタイルを順番にタップすると入れ替わります。右上に印のあるタイルは動かせません。</p>
     <div class="game-footer"><button class="btn ghost" id="retireBtn">リタイア</button></div>
   </section>
@@ -299,13 +348,20 @@
       <div id="bestBadge" class="badge" style="display:none;"></div>
     </div>
     <div class="card">
-      <h3>この端末の記録</h3>
-      <div class="record-line"><span class="label">この端末の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
-      <div class="record-line"><span class="label">この端末のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
-      <div class="record-line"><span class="label">この端末のプレイ回数</span><span class="val" id="playCountDisplay">--回</span></div>
-      <div class="record-line"><span class="label">移動回数</span><span class="val" id="resultMoves">0回</span></div>
+      <h3 id="nameRecordTitle">この名前の記録</h3>
+      <div class="record-line"><span class="label">プレイヤー名</span><span class="val" id="recordNameDisplay">--</span></div>
+      <div class="record-line"><span class="label">この名前の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
+      <div class="record-line"><span class="label">この名前のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
+      <div class="record-line"><span class="label">この名前のプレイ回数</span><span class="val" id="namePlayCountDisplay">--回</span></div>
+      <div class="record-line"><span class="label">操作回数</span><span class="val" id="resultOperations">0回</span></div>
+      <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
     </div>
     <div class="rank-note" id="rankNote" aria-live="polite"></div>
+    <div class="card ranking-card" aria-label="ベストタイムランキング30位まで">
+      <div class="ranking-title"><h3>ベストタイムランキング</h3><span>30位まで</span></div>
+      <div class="ranking-status" id="resultRankingStatus" aria-live="polite">読み込み中…</div>
+      <div class="ranking-scroll" id="resultRankingScroll" hidden><div id="resultRankingList" role="list"></div></div>
+    </div>
     <div class="toast" id="resultToast" aria-live="polite"></div>
     <div class="spacer"></div>
     <button class="btn" id="againBtn">もう一度遊ぶ</button>
@@ -321,9 +377,9 @@
 "use strict";
 (function () {
   const COLS=7, ROWS=9, TOTAL=COLS*ROWS;
-  const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.2.0-official001-v2';
-  const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000;
-  const COUNTDOWN_STEP_MS=700, COUNTDOWN_START_MS=300, SWAP_ANIMATION_MS=140;
+  const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.3.0-official001-v2';
+  const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000, RANKING_FETCH_TIMEOUT_MS=10000;
+  const COUNTDOWN_STEP_MS=700, COUNTDOWN_START_MS=300, SWAP_ANIMATION_MS=140, CLEAR_BOARD_DISPLAY_MS=4000, RANKING_LIMIT=30;
   const GAME_URL='https://chameleonjp.codeberg.page/ironarabe/';
   const LAB_URL='https://chameleonjp.codeberg.page/chameleonjp_lab/';
   const OFFICIAL_CHALLENGE={id:CHALLENGE_ID,topLeft:'#f36b6b',topRight:'#f0c46a',bottomLeft:'#7b6ff0',bottomRight:'#5fd0b5'};
@@ -332,12 +388,47 @@
   const RANKING_CONFIG={supabaseUrl:'https://mlpnjgezrnhdxsxolyzj.supabase.co',publishableKey:'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM'};
   const LS={playerName:'ironarabe.v2.playerName',firstScore:'ironarabe.v2.official001.firstScore',bestScore:'ironarabe.v2.official001.bestScore',playCount:'ironarabe.v2.official001.playCount',lastResult:'ironarabe.v2.official001.lastResult',oldPlayerName:'ironarabe.playerName',oldBestTimeMs:'ironarabe.bestTimeMs',oldLastResult:'ironarabe.lastResult'};
   const COUNTDOWN_STEPS=['3','2','1','START'];
-  const state={phase:'home',inputLocked:false,playerName:'',tiles:[],solution:[],board:[],fixedSet:new Set(),selectedIndex:null,moves:0,startTime:null,elapsedMs:0,cleared:false,submitted:false,playId:0,clearPlayId:null,rafId:null,countdownToken:0,countdownTimerIds:[],resultShownPlayId:null,playCountIncrementedPlayId:null,clearTimerId:null,swapTimerId:null,toastTimerIds:{home:null,result:null}};
-  const el={screens:{home:document.getElementById('screen-home'),nameConfirm:document.getElementById('screen-nameConfirm'),countdown:document.getElementById('screen-countdown'),playing:document.getElementById('screen-playing'),result:document.getElementById('screen-result')},logoChips:document.getElementById('logoChips'),startBtn:document.getElementById('startBtn'),howToBtn:document.getElementById('howToBtn'),howToPanel:document.getElementById('howToPanel'),homeBest:document.getElementById('homeBest'),homeShareBtn:document.getElementById('homeShareBtn'),homeToast:document.getElementById('homeToast'),homeLabLink:document.getElementById('homeLabLink'),playerNameInput:document.getElementById('playerNameInput'),savedNameLabel:document.getElementById('savedNameLabel'),nameError:document.getElementById('nameError'),confirmNameBtn:document.getElementById('confirmNameBtn'),nameBackBtn:document.getElementById('nameBackBtn'),countdownValue:document.getElementById('countdownValue'),board:document.getElementById('board'),timeDisplay:document.getElementById('timeDisplay'),moveDisplay:document.getElementById('moveDisplay'),retireBtn:document.getElementById('retireBtn'),resultTime:document.getElementById('resultTime'),resultMoves:document.getElementById('resultMoves'),bestBadge:document.getElementById('bestBadge'),firstScoreDisplay:document.getElementById('firstScoreDisplay'),bestScoreDisplay:document.getElementById('bestScoreDisplay'),playCountDisplay:document.getElementById('playCountDisplay'),rankNote:document.getElementById('rankNote'),resultToast:document.getElementById('resultToast'),againBtn:document.getElementById('againBtn'),resultShareBtn:document.getElementById('resultShareBtn'),homeBtn:document.getElementById('homeBtn'),resultLabLink:document.getElementById('resultLabLink')};
+
+  const state={
+    phase:'home', inputLocked:false, playerName:'', tiles:[], solution:[], board:[], fixedSet:new Set(),
+    selectedIndex:null, operations:0, startTime:null, elapsedMs:0, cleared:false, playId:0,
+    clearPlayId:null, rafId:null, countdownToken:0, countdownTimerIds:[], resultShownPlayId:null,
+    playCountIncrementedPlayId:null, clearTimerId:null, swapTimerId:null, submittedPlayId:null,
+    rankingRequestId:0, rankingRows:[], toastTimerIds:{home:null,result:null}
+  };
+
+  const el={
+    screens:{
+      home:document.getElementById('screen-home'),
+      nameConfirm:document.getElementById('screen-nameConfirm'),
+      countdown:document.getElementById('screen-countdown'),
+      playing:document.getElementById('screen-playing'),
+      result:document.getElementById('screen-result')
+    },
+    logoChips:document.getElementById('logoChips'), startBtn:document.getElementById('startBtn'),
+    howToBtn:document.getElementById('howToBtn'), howToPanel:document.getElementById('howToPanel'),
+    homeBest:document.getElementById('homeBest'), homeShareBtn:document.getElementById('homeShareBtn'),
+    homeToast:document.getElementById('homeToast'), homeLabLink:document.getElementById('homeLabLink'),
+    homeRankingStatus:document.getElementById('homeRankingStatus'), homeRankingScroll:document.getElementById('homeRankingScroll'),
+    homeRankingList:document.getElementById('homeRankingList'), playerNameInput:document.getElementById('playerNameInput'),
+    savedNameLabel:document.getElementById('savedNameLabel'), nameError:document.getElementById('nameError'),
+    confirmNameBtn:document.getElementById('confirmNameBtn'), nameBackBtn:document.getElementById('nameBackBtn'),
+    countdownValue:document.getElementById('countdownValue'), board:document.getElementById('board'),
+    timeDisplay:document.getElementById('timeDisplay'), operationDisplay:document.getElementById('operationDisplay'),
+    completionBanner:document.getElementById('completionBanner'), completionSummary:document.getElementById('completionSummary'),
+    retireBtn:document.getElementById('retireBtn'), resultTime:document.getElementById('resultTime'),
+    resultOperations:document.getElementById('resultOperations'), bestBadge:document.getElementById('bestBadge'),
+    recordNameDisplay:document.getElementById('recordNameDisplay'), firstScoreDisplay:document.getElementById('firstScoreDisplay'),
+    bestScoreDisplay:document.getElementById('bestScoreDisplay'), namePlayCountDisplay:document.getElementById('namePlayCountDisplay'),
+    nameRecordStatus:document.getElementById('nameRecordStatus'), rankNote:document.getElementById('rankNote'),
+    resultRankingStatus:document.getElementById('resultRankingStatus'), resultRankingScroll:document.getElementById('resultRankingScroll'),
+    resultRankingList:document.getElementById('resultRankingList'), resultToast:document.getElementById('resultToast'),
+    againBtn:document.getElementById('againBtn'), resultShareBtn:document.getElementById('resultShareBtn'),
+    homeBtn:document.getElementById('homeBtn'), resultLabLink:document.getElementById('resultLabLink')
+  };
 
   function safeStorageGet(key){try{return localStorage.getItem(key);}catch(e){return null;}}
   function safeStorageSet(key,value){try{localStorage.setItem(key,value);return true;}catch(e){return false;}}
-  function safeStorageRemove(key){try{localStorage.removeItem(key);return true;}catch(e){return false;}}
   function parsePositiveInt(raw){if(raw===null)return null;const n=Number(raw);return Number.isFinite(n)&&Number.isInteger(n)&&n>0?n:null;}
   function elapsedMsToScore(ms){return Math.round(ms/10);}
   function isValidScore(score){return Number.isFinite(score)&&Number.isInteger(score)&&score>0;}
@@ -355,8 +446,9 @@
   function clearSwapTimer(){if(state.swapTimerId!==null){clearTimeout(state.swapTimerId);state.swapTimerId=null;}Array.from(el.board.children).forEach(tile=>tile.classList.remove('swapping'));}
   function clearToast(name){const target=name==='result'?el.resultToast:el.homeToast;if(state.toastTimerIds[name]!==null){clearTimeout(state.toastTimerIds[name]);state.toastTimerIds[name]=null;}target.textContent='';target.classList.remove('err');}
   function clearAllToasts(){clearToast('home');clearToast('result');}
+  function hideCompletion(){el.completionBanner.hidden=true;el.completionSummary.textContent='';}
   function clearPendingTimers(){clearCountdownTimers();clearClearTimer();clearSwapTimer();clearAllToasts();}
-  function returnHome(){stopTimer();clearCountdownTimers();clearClearTimer();clearSwapTimer();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';clearAllToasts();setPhase('home');refreshHomeRecords();}
+  function returnHome(){stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';setPhase('home');refreshHomeRecords();loadRankings(false);}
 
   function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -373,11 +465,11 @@
   function tick(){if(state.phase!=='playing'||state.cleared||state.startTime===null)return;state.elapsedMs=Math.round(performance.now()-state.startTime);el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);state.rafId=requestAnimationFrame(tick);}
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
-  function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;if(checkCleared()){onClear();return;}state.inputLocked=false;}
-  function preparePlay(){stopTimer();clearPendingTimers();el.retireBtn.disabled=true;initFixedSet();state.tiles=buildTiles(OFFICIAL_CHALLENGE);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.moves=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.submitted=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;el.board.innerHTML='';el.moveDisplay.textContent='0';el.timeDisplay.textContent='0.00';updateRankingStatus('idle');return state.playId;}
+  function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
+  function preparePlay(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();state.tiles=buildTiles(OFFICIAL_CHALLENGE);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent='0';el.timeDisplay.textContent='0.00';resetNameRecord();updateRankingStatus('idle');return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;incrementPlayCountOnce(playId);state.rafId=requestAnimationFrame(tick);});}
   function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');el.countdownValue.textContent=COUNTDOWN_STEPS[0];COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;el.countdownValue.textContent=step;},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
-  function openNameConfirm(){stopTimer();clearPendingTimers();el.retireBtn.disabled=true;const r=loadLocalRecords();el.playerNameInput.value=r.playerName;el.savedNameLabel.textContent=r.playerName||'--';el.nameError.textContent='';el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
+  function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const r=loadLocalRecords();el.playerNameInput.value=r.playerName;el.savedNameLabel.textContent=r.playerName||'--';el.nameError.textContent='';el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
   function confirmPlayerName(){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return;const v=validateName(el.playerNameInput.value);if(!v.ok){el.nameError.textContent=v.message;return;}state.playerName=v.name;safeStorageSet(LS.playerName,v.name);el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
   function incrementPlayCountOnce(playId){if(state.playCountIncrementedPlayId===playId)return;state.playCountIncrementedPlayId=playId;const current=parsePositiveInt(safeStorageGet(LS.playCount))||0;safeStorageSet(LS.playCount,String(current+1));}
   function selectTile(pos){
@@ -393,8 +485,9 @@
     state.selectedIndex=null;
     updateTileVisual(a);
     updateTileVisual(b);
-    state.moves+=1;
-    el.moveDisplay.textContent=String(state.moves);
+    state.operations+=1;
+    el.operationDisplay.textContent=String(state.operations);
+    if(checkCleared()){onClear();return;}
     const aEl=el.board.children[a],bEl=el.board.children[b];
     if(aEl)aEl.classList.add('swapping');
     if(bEl)bEl.classList.add('swapping');
@@ -406,17 +499,51 @@
     state.swapTimerId=setTimeout(function(){finishSwap(playId,a,b);},duration);
   }
   function checkCleared(){for(let i=0;i<TOTAL;i++){if(state.board[i]!==state.solution[i])return false;}return true;}
-  function onClear(){if(state.cleared||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();state.cleared=true;state.inputLocked=true;el.retireBtn.disabled=true;stopTimer();state.elapsedMs=Math.round(performance.now()-state.startTime);el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);el.board.classList.add('cleared');state.clearPlayId=state.playId;const playId=state.clearPlayId;state.clearTimerId=setTimeout(function(){state.clearTimerId=null;if(playId!==state.playId||state.resultShownPlayId===playId)return;showResult(playId);},650);}
+  function onClear(){
+    if(state.cleared||state.resultShownPlayId===state.playId)return;
+    clearClearTimer();
+    clearSwapTimer();
+    state.cleared=true;
+    state.inputLocked=true;
+    el.retireBtn.disabled=true;
+    stopTimer();
+    state.elapsedMs=Math.round(performance.now()-state.startTime);
+    el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);
+    el.board.classList.add('cleared');
+    el.completionSummary.textContent=formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回';
+    el.completionBanner.hidden=false;
+    state.clearPlayId=state.playId;
+    const playId=state.clearPlayId;
+    updateLocalResult(state.playerName,state.elapsedMs,state.operations);
+    setNameRecordPending(state.playerName);
+    submitScoreForCurrentPlay(playId,state.playerName,state.elapsedMs);
+    state.clearTimerId=setTimeout(function(){
+      state.clearTimerId=null;
+      if(playId!==state.playId||state.resultShownPlayId===playId)return;
+      showResult(playId);
+    },CLEAR_BOARD_DISPLAY_MS);
+  }
   function onBoardTap(e){const target=e.target.closest('.tile');if(!target)return;const pos=parseInt(target.dataset.pos,10);if(!Number.isNaN(pos))selectTile(pos);}
-  function updateLocalResult(playerName,elapsedMs,moves){const score=elapsedMsToScore(elapsedMs),r=loadLocalRecords();let badge='';if(!r.firstScore){safeStorageSet(LS.firstScore,String(score));badge='初回記録';}if(!r.bestScore||score<r.bestScore){safeStorageSet(LS.bestScore,String(score));if(badge!=='初回記録')badge='ベスト更新！';}safeStorageSet(LS.lastResult,JSON.stringify({playerName,elapsedMs,score,moves,challengeId:CHALLENGE_ID,boardVersion:BOARD_VERSION,clientVersion:CLIENT_VERSION,at:Date.now()}));return badge;}
-  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs),badge=updateLocalResult(state.playerName,state.elapsedMs,state.moves),r=loadLocalRecords();el.resultTime.innerHTML=formatScore(score)+'<span style="font-size:22px;">秒</span>';el.resultMoves.textContent=String(state.moves)+'回';el.firstScoreDisplay.textContent=formatScore(r.firstScore)+'秒';el.bestScoreDisplay.textContent=formatScore(r.bestScore)+'秒';el.playCountDisplay.textContent=String(r.playCount||0)+'回';el.bestBadge.textContent=badge;el.bestBadge.style.display=badge?'inline-block':'none';setPhase('result');updateRankingStatus('idle');submitScoreForCurrentPlay(playId,state.playerName,state.elapsedMs);refreshHomeRecords();}
+  function updateLocalResult(playerName,elapsedMs,operations){const score=elapsedMsToScore(elapsedMs),r=loadLocalRecords();if(!r.firstScore)safeStorageSet(LS.firstScore,String(score));if(!r.bestScore||score<r.bestScore)safeStorageSet(LS.bestScore,String(score));safeStorageSet(LS.lastResult,JSON.stringify({playerName,elapsedMs,score,operations,challengeId:CHALLENGE_ID,boardVersion:BOARD_VERSION,clientVersion:CLIENT_VERSION,at:Date.now()}));}
+  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);el.resultTime.innerHTML=formatScore(score)+'<span style="font-size:22px;">秒</span>';el.resultOperations.textContent=String(state.operations)+'回';setPhase('result');loadRankings(false);refreshHomeRecords();}
   function retire(){if(state.phase!=='playing'||state.cleared||state.inputLocked||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();returnHome();}
 
-  function getSubmitScoreUrl(){const base=(RANKING_CONFIG.supabaseUrl||'').trim().replace(/\/+$/,'');return base?base+'/rest/v1/rpc/submit_score':'';}
-  function isRankingConfigured(){return Boolean(getSubmitScoreUrl()&&(RANKING_CONFIG.publishableKey||'').trim());}
+  function getRpcUrl(name){const base=(RANKING_CONFIG.supabaseUrl||'').trim().replace(/\/+$/,'');return base?base+'/rest/v1/rpc/'+name:'';}
+  function isRankingConfigured(){return Boolean(getRpcUrl('submit_score')&&(RANKING_CONFIG.publishableKey||'').trim());}
+  function postRpc(name,payload,timeoutMs){return new Promise(function(resolve,reject){if(!isRankingConfigured()){reject(new Error('ranking unconfigured'));return;}const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),timeoutMs);fetch(getRpcUrl(name),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal}).then(async function(res){clearTimeout(timeoutId);const text=await res.text();let data=null;if(text){try{data=JSON.parse(text);}catch(e){throw new Error('invalid json');}}if(!res.ok)throw new Error('http '+res.status);resolve(data);}).catch(function(error){clearTimeout(timeoutId);reject(error);});});}
   function updateRankingStatus(status){el.rankNote.classList.toggle('err',status==='failed');if(status==='submitting')el.rankNote.textContent='ランキング送信中…';else if(status==='success')el.rankNote.textContent='ランキングへ登録しました';else if(status==='failed')el.rankNote.textContent='ランキング送信に失敗しました';else if(status==='unconfigured')el.rankNote.textContent='ランキングは未設定です';else el.rankNote.textContent='';}
-  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(state.submitted)return;state.submitted=true;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');});}
-  function submitScore(playerName,elapsedMs){return new Promise(function(resolve){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured()){resolve({status:'unconfigured'});return;}if(!isValidScore(score)){resolve({status:'failed'});return;}const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),SCORE_SUBMIT_TIMEOUT_MS),payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:CLIENT_VERSION};fetch(getSubmitScoreUrl(),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal}).then(function(res){clearTimeout(timeoutId);resolve({status:res.ok?'success':'failed',httpStatus:res.status});}).catch(function(){clearTimeout(timeoutId);resolve({status:'failed'});});});}
+  function resetNameRecord(){el.recordNameDisplay.textContent='--';el.firstScoreDisplay.textContent='--.--秒';el.bestScoreDisplay.textContent='--.--秒';el.namePlayCountDisplay.textContent='--回';el.nameRecordStatus.textContent='';el.nameRecordStatus.classList.remove('err');el.bestBadge.textContent='';el.bestBadge.style.display='none';}
+  function setNameRecordPending(playerName){resetNameRecord();el.recordNameDisplay.textContent=playerName;el.nameRecordStatus.textContent='この名前の記録を取得中…';}
+  function setNameRecordFailure(){el.nameRecordStatus.textContent='この名前の記録を取得できませんでした。';el.nameRecordStatus.classList.add('err');}
+  function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;el.firstScoreDisplay.textContent=formatScore(Number(record.result_first_score))+'秒';el.bestScoreDisplay.textContent=formatScore(Number(record.result_best_score))+'秒';el.namePlayCountDisplay.textContent=String(Number(record.result_play_count)||0)+'回';el.nameRecordStatus.textContent='Supabaseに保存された、この名前の記録です。';el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='この名前の初回記録';else if(record.is_new_best)badge='この名前のベスト更新！';el.bestBadge.textContent=badge;el.bestBadge.style.display=badge?'inline-block':'none';}
+  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
+  function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:CLIENT_VERSION};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
+
+  function setRankingState(status,message){['home','result'].forEach(function(name){const statusEl=name==='home'?el.homeRankingStatus:el.resultRankingStatus;const scrollEl=name==='home'?el.homeRankingScroll:el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');statusEl.textContent=message||'';statusEl.hidden=status==='ready';scrollEl.hidden=status!=='ready';});}
+  function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';rank.textContent=String(row.rankNo)+'位';const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent='秒';score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
+  function normalizeRankingRows(data){if(!Array.isArray(data))return [];return data.slice(0,RANKING_LIMIT).map(function(row,index){return {rankNo:Number.isFinite(Number(row.rank_no))?Number(row.rank_no):index+1,displayName:String(row.display_name||'--'),bestScore:Number(row.best_score)};}).filter(row=>isValidScore(row.bestScore));}
+  function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.homeRankingList,rows);renderRankingList(el.resultRankingList,rows);if(rows.length===0)setRankingState('empty','まだランキング記録がありません。');else setRankingState('ready','');}
+  function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
   function showToast(name,message,isError){const target=name==='result'?el.resultToast:el.homeToast;clearToast(name);target.textContent=message;target.classList.toggle('err',Boolean(isError));const timerId=setTimeout(function(){if(state.toastTimerIds[name]!==timerId)return;clearToast(name);},1800);state.toastTimerIds[name]=timerId;}
   function copyWithClipboardApi(text){if(!(navigator.clipboard&&navigator.clipboard.writeText))return Promise.reject(new Error('clipboard unavailable'));return navigator.clipboard.writeText(text);}
@@ -424,7 +551,7 @@
   function copyText(text){return copyWithClipboardApi(text).catch(function(){return copyWithTemporaryTextarea(text);});}
   function shareText(text,toastName){function copyAndNotify(){copyText(text).then(()=>showToast(toastName,'シェア文をコピーしました',false)).catch(()=>showToast(toastName,'コピーできませんでした',true));}if(navigator.share){navigator.share({title:'イロナラベ',text:text}).catch(function(err){if(err&&err.name==='AbortError')return;copyAndNotify();});return;}copyAndNotify();}
   function shareHome(){shareText('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n'+GAME_URL,'home');}
-  function shareResult(){shareText('イロナラベ\n公式チャレンジを'+formatElapsedMs(state.elapsedMs)+'秒・'+state.moves+'回でクリア！\n'+GAME_URL,'result');}
+  function shareResult(){shareText('イロナラベ\n公式チャレンジを'+formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回でクリア！\n'+GAME_URL,'result');}
   function buildLogoChips(){[OFFICIAL_CHALLENGE.topLeft,OFFICIAL_CHALLENGE.topRight,OFFICIAL_CHALLENGE.bottomRight,OFFICIAL_CHALLENGE.bottomLeft].forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
 
   el.startBtn.addEventListener('click',openNameConfirm);
@@ -446,7 +573,9 @@
   buildLogoChips();
   migrateOldStorage();
   refreshHomeRecords();
+  resetNameRecord();
   setPhase('home');
+  loadRankings(true);
 }());
 </script>
 </body>
