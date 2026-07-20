@@ -83,6 +83,7 @@ if (errors.length === 0) {
   check(/returnHome\(\)\{[^}]*clearPendingTimers\(\)/.test(html) || /returnHome\(\)\{[^}]*clearSwapTimer\(\)/.test(html), "returnHome does not clear pending timers");
   check(/pagehide[\s\S]*clearSwapTimer\(\)/.test(html), "pagehide cleanup does not clear swap timer");
   check(/onClear\(\)[\s\S]*stopTimer\(\)[\s\S]*state\.elapsedMs=Math\.round\(performance\.now\(\)-state\.startTime\)/.test(html), "clear does not freeze time immediately");
+  check(/state\.operations\+=1;[\s\S]*?if\(checkCleared\(\)\)\{onClear\(\);return;\}[\s\S]*?const aEl=el\.board\.children\[a\]/.test(html), "solving operation does not clear before swap animation");
 }
 
 if (errors.length > 0) {
