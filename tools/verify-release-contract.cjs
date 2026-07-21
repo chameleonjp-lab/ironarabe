@@ -12,7 +12,8 @@ const files = {
   readme: path.join(root, "README.md"),
   status: path.join(root, "RELEASE_STATUS_v3.md"),
   spec: path.join(root, "SPEC_v4.md"),
-  checklist: path.join(root, "REVIEW_CHECKLIST_v4.md")
+  checklist: path.join(root, "REVIEW_CHECKLIST_v4.md"),
+  resultOnlyVerifier: path.join(root, "tools", "verify-result-only-v14.cjs")
 };
 
 const errors = [];
@@ -37,6 +38,7 @@ const readme = read(files.readme, "README.md");
 const status = read(files.status, "RELEASE_STATUS_v3.md");
 const spec = read(files.spec, "SPEC_v4.md");
 const checklist = read(files.checklist, "REVIEW_CHECKLIST_v4.md");
+const resultOnlyVerifier = read(files.resultOnlyVerifier, "result-only verifier");
 const manifest = parseJson(manifestText, "registration manifest");
 const preflight = parseJson(preflightText, "Supabase preflight result");
 
@@ -70,7 +72,7 @@ if (manifest) {
 
   requireTrue(index.includes("const GAME_SLUG='ironarabe'"), "index GAME_SLUG mismatch");
   requireTrue(index.includes("const GAME_URL='https://chameleonjp.codeberg.page/ironarabe/'"), "index GAME_URL mismatch");
-  requireTrue(index.includes("CLIENT_VERSION='ironarabe-web-1.4.0-stagepack001-v2'"), "index CLIENT_VERSION mismatch");
+  requireTrue(index.includes("CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2'"), "index CLIENT_VERSION mismatch");
   requireTrue(index.includes("const STAGES=buildStages()"), "index stage-pack contract missing");
   requireTrue(index.includes("p_client_version:currentClientVersion()"), "stage-aware p_client_version missing");
   requireTrue(index.includes("const SCORE_SCALE=100, SCORE_DECIMALS=2"), "index score scale or decimals mismatch");
@@ -79,12 +81,21 @@ if (manifest) {
   requireTrue(index.includes("p_display_name"), "p_display_name missing");
   requireTrue(index.includes("p_game_slug"), "p_game_slug missing");
   requireTrue(index.includes("p_score"), "p_score missing");
+  requireTrue(index.includes("登録名のベスト記録"), "registered-name best record missing");
+  requireTrue(index.includes("id=\"resultRankingList\""), "result ranking missing");
+  requireTrue(!index.includes("id=\"homeRankingList\""), "home ranking must be removed");
+  requireTrue(!index.includes("id=\"homeBest\""), "home device best must be removed");
+  requireTrue(index.includes("const LS={playerName:'ironarabe.v2.playerName',oldPlayerName:'ironarabe.playerName'}"), "name-only storage contract mismatch");
+  requireTrue(index.includes("clearStorageNamespace(localStorage)"), "replay localStorage cleanup missing");
+  requireTrue(index.includes("clearStorageNamespace(sessionStorage)"), "replay sessionStorage cleanup missing");
   requireTrue(!/Authorization\s*[:=]/.test(index), "Authorization header must not be used");
 
   requireTrue(status.includes("is_active: true"), "release status must state active registration");
   requireTrue(status.includes("release_date: 2026-07-20"), "release status date mismatch");
   requireTrue(status.includes("score_runs: 1件"), "release status must record the verified production score run");
-  requireTrue(status.includes("ironarabe-web-1.4.0-stagepack001-v2"), "release status stage-pack version mismatch");
+  requireTrue(status.includes("ironarabe-web-1.4.1-stagepack001-v2"), "release status version mismatch");
+  requireTrue(status.includes("ホーム画面のランキング領域を削除"), "release status must record home ranking removal");
+  requireTrue(status.includes("保存名以外のアプリキャッシュを消去"), "release status must record replay cache cleanup");
   requireTrue(status.includes("release/ironarabe-game-registration.json") || readme.includes("release/ironarabe-game-registration.json"), "registration manifest must be referenced");
   requireTrue(!/sb_publishable_|service_role key value/i.test(status), "release status must not contain credentials");
 }
@@ -116,11 +127,19 @@ requireTrue(readme.includes("SPEC_v4.md"), "README must link to SPEC_v4.md");
 requireTrue(readme.includes("REVIEW_CHECKLIST_v4.md"), "README must link to REVIEW_CHECKLIST_v4.md");
 requireTrue(readme.includes("RELEASE_STATUS_v3.md"), "README must link to current release status");
 requireTrue(readme.includes("tools/verify-stage-pack-v13.cjs"), "README must list the stage-pack verifier");
+requireTrue(readme.includes("tools/verify-result-only-v14.cjs"), "README must list the result-only verifier");
+requireTrue(readme.includes("ホーム画面にはランキングと端末ローカルベストを表示しません"), "README must describe the network-free home screen");
+requireTrue(readme.includes("保存済みのプレイヤー名だけを残し"), "README must describe name-only replay cache retention");
 requireTrue(readme.includes("release/ironarabe-game-registration.json"), "README must link to registration manifest");
 requireTrue(readme.includes("release/supabase-preflight-v1.json"), "README must link to Supabase preflight result");
 requireTrue(spec.includes("ステージ数は8"), "SPEC_v4 must define eight stages");
 requireTrue(spec.includes("交換構造は同一"), "SPEC_v4 must state ranking compatibility rationale");
+requireTrue(spec.includes("ページ初期化時とホーム復帰時には、ランキング取得RPCを実行しない"), "SPEC_v4 must forbid home ranking I/O");
+requireTrue(spec.includes("永続保存するゲーム情報はプレイヤー名だけ"), "SPEC_v4 must define name-only persistence");
+requireTrue(checklist.includes("ホーム画面にランキング領域がない"), "checklist must verify home ranking removal");
+requireTrue(checklist.includes("名前以外のアプリキャッシュ" ) || checklist.includes("名前以外削除"), "checklist must verify replay cache cleanup");
 requireTrue(checklist.includes("iPhone 17 Pro"), "REVIEW_CHECKLIST_v4 must include primary-device checks");
+requireTrue(resultOnlyVerifier.includes("home is network-free"), "result-only verifier completion message mismatch");
 
 if (errors.length) {
   console.error(`NG: ${errors.length} release contract issue(s)`);
@@ -128,4 +147,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("OK: ironarabe eight-stage release contract and historical preflight verified");
+console.log("OK: ironarabe result-only release contract and historical preflight verified");
