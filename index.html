@@ -104,6 +104,13 @@
   .btn.ghost { background:transparent; color:var(--muted); border:1px solid var(--border); font-weight:600; padding:12px; font-size:15px; }
   .btn-row { display:flex; gap:10px; margin-top:0; }
   .btn-row .btn { margin-top:10px; }
+  .home-actions { display:grid; gap:8px; margin:2px 0 12px; }
+  .home-actions .btn { margin-top:0; padding:13px 14px; }
+  .home-share-btn { margin-top:0; padding:13px 14px; }
+  .stage-note { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px 9px; margin:-6px 0 12px; color:var(--muted); font-size:12px; }
+  .stage-note strong { color:var(--text); font-size:12px; letter-spacing:.04em; }
+  .stage-dots { display:flex; gap:3px; }
+  .stage-dots i { display:block; width:9px; height:9px; border-radius:3px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.18); }
   .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:14px; }
   .card h3 { margin:0 0 8px; font-size:13px; color:var(--accent); letter-spacing:.06em; }
   .card p, .card li { font-size:13px; color:var(--muted); line-height:1.7; margin:0; }
@@ -114,10 +121,12 @@
   .record-line { padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); }
   .record-line:last-child { border-bottom:0; }
   .record-line .label { color:var(--muted); font-size:13px; }
+  .record-line .val.stage-value { max-width:58%; overflow:hidden; text-overflow:ellipsis; font-size:14px; }
   .record-status { min-height:18px; margin-top:8px; color:var(--muted); font-size:11px; line-height:1.5; }
   .record-status.err { color:var(--danger); }
   .countdown-screen { align-items:center; justify-content:center; text-align:center; min-height:70dvh; }
   .countdown-value { font-size:72px; font-weight:900; letter-spacing:.08em; color:var(--accent); text-shadow:0 0 22px rgba(127,215,196,.18); }
+  .countdown-stage { margin-top:12px; color:var(--muted); font-size:13px; font-weight:700; letter-spacing:.08em; }
 
   .hud { display:flex; gap:8px; margin-bottom:7px; }
   .hud .stat {
@@ -130,6 +139,8 @@
   }
   .hud .stat .k { font-size:10px; color:var(--muted); letter-spacing:.12em; line-height:1.2; }
   .hud .stat .v { font-size:20px; line-height:1.15; font-weight:700; font-variant-numeric:tabular-nums; }
+  .hud .stat.stage-stat { flex:.72; }
+  .hud .stat.stage-stat .v { font-size:14px; line-height:1.32; letter-spacing:.02em; }
   .board-wrap { display:flex; justify-content:center; flex:1; min-height:0; align-items:center; position:relative; }
   .board {
     width:min(calc(100vw - 24px), calc((100vh - 190px) * 7 / 9), 460px);
@@ -252,6 +263,8 @@
     .board { width:min(calc(100vw - 20px), calc((100dvh - 185px) * 7 / 9), 460px); }
     .record-line .val { font-size:18px; }
     .record-line .label { font-size:12px; }
+    .hud .stat.stage-stat { flex:.6; }
+    .hud .stat.stage-stat .v { font-size:12px; }
     .ranking-row { grid-template-columns:36px minmax(0,1fr) auto; padding-left:10px; padding-right:10px; }
   }
   @media (max-height:620px) {
@@ -279,8 +292,11 @@
     <h1 class="logo">イロナラベ</h1>
     <div class="logo-chips" id="logoChips"></div>
     <p class="lead">色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。</p>
-    <button class="btn" id="startBtn">ゲームを始める</button>
-    <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel">遊び方</button>
+    <div class="stage-note"><span class="stage-dots" id="stagePackDots" aria-hidden="true"></span><strong>全8ステージ</strong><span>毎回ランダム</span></div>
+    <div class="home-actions">
+      <button class="btn" id="startBtn">ゲームを始める</button>
+      <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel">遊び方</button>
+    </div>
     <div class="card" id="howToPanel" hidden>
       <h3>遊び方</h3>
       <ol>
@@ -289,6 +305,7 @@
         <li>印のあるタイルは固定で動かせない</li>
         <li>全体を正しい色の流れへ戻すとクリア</li>
         <li>タイム計測はカウントダウン後に始まる</li>
+        <li>全8ステージから毎回1つが選ばれる</li>
       </ol>
     </div>
     <div class="card best-line">
@@ -298,7 +315,7 @@
       </div>
       <div class="val"><span id="homeBest">--.--</span>秒</div>
     </div>
-    <button class="btn secondary" id="homeShareBtn">ゲームをシェア</button>
+    <button class="btn secondary home-share-btn" id="homeShareBtn">ゲームをシェア</button>
     <a class="panel-link" id="homeLabLink" href="https://chameleonjp.codeberg.page/chameleonjp_lab/">カメレオンJPの実験場へ</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
     <div class="card ranking-card" aria-label="ベストタイムランキング30位まで">
@@ -323,12 +340,14 @@
 
   <section id="screen-countdown" class="screen countdown-screen">
     <div class="countdown-value" id="countdownValue" aria-live="assertive">3</div>
+    <div class="countdown-stage" id="countdownStage">STAGE 1 / 8</div>
   </section>
 
   <section id="screen-playing" class="screen">
     <div class="hud">
       <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.00</div></div>
       <div class="stat"><div class="k">操作回数</div><div class="v" id="operationDisplay">0</div></div>
+      <div class="stat stage-stat"><div class="k">STAGE</div><div class="v" id="stageDisplay">1 / 8</div></div>
     </div>
     <div class="board-wrap">
       <div class="board" id="board"></div>
@@ -353,6 +372,7 @@
       <div class="record-line"><span class="label">この名前の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
       <div class="record-line"><span class="label">この名前のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
       <div class="record-line"><span class="label">この名前のプレイ回数</span><span class="val" id="namePlayCountDisplay">--回</span></div>
+      <div class="record-line"><span class="label">ステージ</span><span class="val stage-value" id="resultStage">--</span></div>
       <div class="record-line"><span class="label">操作回数</span><span class="val" id="resultOperations">0回</span></div>
       <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
     </div>
@@ -377,12 +397,17 @@
 "use strict";
 (function () {
   const COLS=7, ROWS=9, TOTAL=COLS*ROWS;
-  const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.3.0-official001-v2';
+  const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.4.0-stagepack001-v2';
   const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000, RANKING_FETCH_TIMEOUT_MS=10000;
   const COUNTDOWN_STEP_MS=700, COUNTDOWN_START_MS=300, SWAP_ANIMATION_MS=140, CLEAR_BOARD_DISPLAY_MS=4000, RANKING_LIMIT=30;
   const GAME_URL='https://chameleonjp.codeberg.page/ironarabe/';
   const LAB_URL='https://chameleonjp.codeberg.page/chameleonjp_lab/';
-  const OFFICIAL_CHALLENGE={id:CHALLENGE_ID,topLeft:'#f36b6b',topRight:'#f0c46a',bottomLeft:'#7b6ff0',bottomRight:'#5fd0b5'};
+  const STAGE_ROTATION_NAMES=['0°','90°','180°','270°'];
+  const STAGE_PALETTES=[
+    {id:'sunset',name:'夕映え',corners:['#f36b6b','#f0c46a','#5fd0b5','#7b6ff0']},
+    {id:'aurora',name:'極光',corners:['#6bf3f3','#6a96f0','#d05f7a','#e4f06f']}
+  ];
+  const STAGES=buildStages();
   const SHUFFLE_SEED='ironarabe-official-001-v1';
   const FIXED_COORDS=[[0,0],[3,0],[6,0],[0,4],[6,4],[0,8],[3,8],[6,8]];
   const RANKING_CONFIG={supabaseUrl:'https://mlpnjgezrnhdxsxolyzj.supabase.co',publishableKey:'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM'};
@@ -390,7 +415,7 @@
   const COUNTDOWN_STEPS=['3','2','1','START'];
 
   const state={
-    phase:'home', inputLocked:false, playerName:'', tiles:[], solution:[], board:[], fixedSet:new Set(),
+    phase:'home', inputLocked:false, playerName:'', stage:null, stageBag:[], lastStageIndex:null, tiles:[], solution:[], board:[], fixedSet:new Set(),
     selectedIndex:null, operations:0, startTime:null, elapsedMs:0, cleared:false, playId:0,
     clearPlayId:null, rafId:null, countdownToken:0, countdownTimerIds:[], resultShownPlayId:null,
     playCountIncrementedPlayId:null, clearTimerId:null, swapTimerId:null, submittedPlayId:null,
@@ -405,7 +430,7 @@
       playing:document.getElementById('screen-playing'),
       result:document.getElementById('screen-result')
     },
-    logoChips:document.getElementById('logoChips'), startBtn:document.getElementById('startBtn'),
+    logoChips:document.getElementById('logoChips'), stagePackDots:document.getElementById('stagePackDots'), startBtn:document.getElementById('startBtn'),
     howToBtn:document.getElementById('howToBtn'), howToPanel:document.getElementById('howToPanel'),
     homeBest:document.getElementById('homeBest'), homeShareBtn:document.getElementById('homeShareBtn'),
     homeToast:document.getElementById('homeToast'), homeLabLink:document.getElementById('homeLabLink'),
@@ -413,11 +438,11 @@
     homeRankingList:document.getElementById('homeRankingList'), playerNameInput:document.getElementById('playerNameInput'),
     savedNameLabel:document.getElementById('savedNameLabel'), nameError:document.getElementById('nameError'),
     confirmNameBtn:document.getElementById('confirmNameBtn'), nameBackBtn:document.getElementById('nameBackBtn'),
-    countdownValue:document.getElementById('countdownValue'), board:document.getElementById('board'),
-    timeDisplay:document.getElementById('timeDisplay'), operationDisplay:document.getElementById('operationDisplay'),
+    countdownValue:document.getElementById('countdownValue'), countdownStage:document.getElementById('countdownStage'), board:document.getElementById('board'),
+    timeDisplay:document.getElementById('timeDisplay'), operationDisplay:document.getElementById('operationDisplay'), stageDisplay:document.getElementById('stageDisplay'),
     completionBanner:document.getElementById('completionBanner'), completionSummary:document.getElementById('completionSummary'),
     retireBtn:document.getElementById('retireBtn'), resultTime:document.getElementById('resultTime'),
-    resultOperations:document.getElementById('resultOperations'), bestBadge:document.getElementById('bestBadge'),
+    resultOperations:document.getElementById('resultOperations'), resultStage:document.getElementById('resultStage'), bestBadge:document.getElementById('bestBadge'),
     recordNameDisplay:document.getElementById('recordNameDisplay'), firstScoreDisplay:document.getElementById('firstScoreDisplay'),
     bestScoreDisplay:document.getElementById('bestScoreDisplay'), namePlayCountDisplay:document.getElementById('namePlayCountDisplay'),
     nameRecordStatus:document.getElementById('nameRecordStatus'), rankNote:document.getElementById('rankNote'),
@@ -437,6 +462,15 @@
   function countGraphemes(value){if(window.Intl&&Intl.Segmenter){return Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(value)).length;}return Array.from(value).length;}
   function normalizeName(value){return String(value||'').trim();}
   function validateName(value){const name=normalizeName(value),len=countGraphemes(name);if(len<1)return {ok:false,message:'プレイヤー名を1文字以上入力してください。'};if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'};return {ok:true,name:name};}
+  function rotateCornersClockwise(corners,steps){const normalized=((steps%4)+4)%4;return corners.map(function(_,index){return corners[(index-normalized+4)%4];});}
+  function buildStages(){const stages=[];STAGE_PALETTES.forEach(function(palette){for(let rotation=0;rotation<4;rotation++){const corners=rotateCornersClockwise(palette.corners,rotation),number=stages.length+1,id=palette.id+'-r'+rotation;stages.push({id:id,number:number,paletteId:palette.id,paletteName:palette.name,rotation:rotation,rotationLabel:STAGE_ROTATION_NAMES[rotation],challenge:{id:CHALLENGE_ID+'-'+id,topLeft:corners[0],topRight:corners[1],bottomRight:corners[2],bottomLeft:corners[3]}});}});return stages;}
+  function randomInt(max){if(max<=1)return 0;if(globalThis.crypto&&typeof globalThis.crypto.getRandomValues==='function'){const values=new Uint32Array(1);globalThis.crypto.getRandomValues(values);return values[0]%max;}return Math.floor(Math.random()*max);}
+  function refillStageBag(){const bag=STAGES.map(function(_,index){return index;});for(let i=bag.length-1;i>0;i--){const j=randomInt(i+1),tmp=bag[i];bag[i]=bag[j];bag[j]=tmp;}if(bag.length>1&&state.lastStageIndex!==null&&bag[0]===state.lastStageIndex){const tmp=bag[0];bag[0]=bag[1];bag[1]=tmp;}state.stageBag=bag;}
+  function stageShortLabel(stage){return stage?stage.number+' / '+STAGES.length:'-- / '+STAGES.length;}
+  function stageLongLabel(stage){return stage?stage.paletteName+' '+stage.rotationLabel:'--';}
+  function currentClientVersion(){return CLIENT_VERSION+'-'+(state.stage?state.stage.id:'unknown');}
+  function updateStageUi(){const shortLabel=stageShortLabel(state.stage),longLabel=stageLongLabel(state.stage);el.stageDisplay.textContent=shortLabel;el.stageDisplay.title=longLabel;el.countdownStage.textContent='STAGE '+shortLabel+'・'+longLabel;el.resultStage.textContent=longLabel+' ('+shortLabel+')';}
+  function chooseNextStage(){if(state.stageBag.length===0)refillStageBag();const index=state.stageBag.shift();state.stage=STAGES[index];state.lastStageIndex=index;updateStageUi();return state.stage;}
   function migrateOldStorage(){if(!safeStorageGet(LS.playerName)){const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok)safeStorageSet(LS.playerName,old.name);}if(!safeStorageGet(LS.bestScore)){const oldMs=parsePositiveInt(safeStorageGet(LS.oldBestTimeMs));if(oldMs)safeStorageSet(LS.bestScore,String(elapsedMsToScore(oldMs)));}}
   function loadLocalRecords(){return {playerName:safeStorageGet(LS.playerName)||'',firstScore:parsePositiveInt(safeStorageGet(LS.firstScore)),bestScore:parsePositiveInt(safeStorageGet(LS.bestScore)),playCount:parsePositiveInt(safeStorageGet(LS.playCount))||0};}
   function refreshHomeRecords(){const r=loadLocalRecords();state.playerName=r.playerName;el.homeBest.textContent=formatScore(r.bestScore);}
@@ -466,7 +500,7 @@
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
-  function preparePlay(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();state.tiles=buildTiles(OFFICIAL_CHALLENGE);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent='0';el.timeDisplay.textContent='0.00';resetNameRecord();updateRankingStatus('idle');return state.playId;}
+  function preparePlay(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent='0';el.timeDisplay.textContent='0.00';resetNameRecord();updateRankingStatus('idle');return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;incrementPlayCountOnce(playId);state.rafId=requestAnimationFrame(tick);});}
   function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');el.countdownValue.textContent=COUNTDOWN_STEPS[0];COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;el.countdownValue.textContent=step;},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
   function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const r=loadLocalRecords();el.playerNameInput.value=r.playerName;el.savedNameLabel.textContent=r.playerName||'--';el.nameError.textContent='';el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
@@ -510,7 +544,7 @@
     state.elapsedMs=Math.round(performance.now()-state.startTime);
     el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);
     el.board.classList.add('cleared');
-    el.completionSummary.textContent=formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回';
+    el.completionSummary.textContent='STAGE '+stageShortLabel(state.stage)+'・'+formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回';
     el.completionBanner.hidden=false;
     state.clearPlayId=state.playId;
     const playId=state.clearPlayId;
@@ -524,8 +558,8 @@
     },CLEAR_BOARD_DISPLAY_MS);
   }
   function onBoardTap(e){const target=e.target.closest('.tile');if(!target)return;const pos=parseInt(target.dataset.pos,10);if(!Number.isNaN(pos))selectTile(pos);}
-  function updateLocalResult(playerName,elapsedMs,operations){const score=elapsedMsToScore(elapsedMs),r=loadLocalRecords();if(!r.firstScore)safeStorageSet(LS.firstScore,String(score));if(!r.bestScore||score<r.bestScore)safeStorageSet(LS.bestScore,String(score));safeStorageSet(LS.lastResult,JSON.stringify({playerName,elapsedMs,score,operations,challengeId:CHALLENGE_ID,boardVersion:BOARD_VERSION,clientVersion:CLIENT_VERSION,at:Date.now()}));}
-  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);el.resultTime.innerHTML=formatScore(score)+'<span style="font-size:22px;">秒</span>';el.resultOperations.textContent=String(state.operations)+'回';setPhase('result');loadRankings(false);refreshHomeRecords();}
+  function updateLocalResult(playerName,elapsedMs,operations){const score=elapsedMsToScore(elapsedMs),r=loadLocalRecords();if(!r.firstScore)safeStorageSet(LS.firstScore,String(score));if(!r.bestScore||score<r.bestScore)safeStorageSet(LS.bestScore,String(score));safeStorageSet(LS.lastResult,JSON.stringify({playerName,elapsedMs,score,operations,challengeId:CHALLENGE_ID,boardVersion:BOARD_VERSION,stageId:state.stage?state.stage.id:null,stageLabel:stageLongLabel(state.stage),clientVersion:currentClientVersion(),at:Date.now()}));}
+  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);el.resultTime.innerHTML=formatScore(score)+'<span style="font-size:22px;">秒</span>';el.resultOperations.textContent=String(state.operations)+'回';updateStageUi();setPhase('result');loadRankings(false);refreshHomeRecords();}
   function retire(){if(state.phase!=='playing'||state.cleared||state.inputLocked||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();returnHome();}
 
   function getRpcUrl(name){const base=(RANKING_CONFIG.supabaseUrl||'').trim().replace(/\/+$/,'');return base?base+'/rest/v1/rpc/'+name:'';}
@@ -537,7 +571,7 @@
   function setNameRecordFailure(){el.nameRecordStatus.textContent='この名前の記録を取得できませんでした。';el.nameRecordStatus.classList.add('err');}
   function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;el.firstScoreDisplay.textContent=formatScore(Number(record.result_first_score))+'秒';el.bestScoreDisplay.textContent=formatScore(Number(record.result_best_score))+'秒';el.namePlayCountDisplay.textContent=String(Number(record.result_play_count)||0)+'回';el.nameRecordStatus.textContent='Supabaseに保存された、この名前の記録です。';el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='この名前の初回記録';else if(record.is_new_best)badge='この名前のベスト更新！';el.bestBadge.textContent=badge;el.bestBadge.style.display=badge?'inline-block':'none';}
   function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
-  function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:CLIENT_VERSION};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
+  function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:currentClientVersion()};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
 
   function setRankingState(status,message){['home','result'].forEach(function(name){const statusEl=name==='home'?el.homeRankingStatus:el.resultRankingStatus;const scrollEl=name==='home'?el.homeRankingScroll:el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');statusEl.textContent=message||'';statusEl.hidden=status==='ready';scrollEl.hidden=status!=='ready';});}
   function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';rank.textContent=String(row.rankNo)+'位';const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent='秒';score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
@@ -550,9 +584,10 @@
   function copyWithTemporaryTextarea(text){return new Promise(function(resolve,reject){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';ta.style.left='-1000px';ta.style.opacity='0';document.body.appendChild(ta);try{ta.focus();ta.select();if(ta.setSelectionRange)ta.setSelectionRange(0,text.length);document.execCommand('copy')?resolve():reject(new Error('copy failed'));}catch(e){reject(e);}finally{document.body.removeChild(ta);}});}
   function copyText(text){return copyWithClipboardApi(text).catch(function(){return copyWithTemporaryTextarea(text);});}
   function shareText(text,toastName){function copyAndNotify(){copyText(text).then(()=>showToast(toastName,'シェア文をコピーしました',false)).catch(()=>showToast(toastName,'コピーできませんでした',true));}if(navigator.share){navigator.share({title:'イロナラベ',text:text}).catch(function(err){if(err&&err.name==='AbortError')return;copyAndNotify();});return;}copyAndNotify();}
-  function shareHome(){shareText('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n'+GAME_URL,'home');}
-  function shareResult(){shareText('イロナラベ\n公式チャレンジを'+formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回でクリア！\n'+GAME_URL,'result');}
-  function buildLogoChips(){[OFFICIAL_CHALLENGE.topLeft,OFFICIAL_CHALLENGE.topRight,OFFICIAL_CHALLENGE.bottomRight,OFFICIAL_CHALLENGE.bottomLeft].forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
+  function shareHome(){shareText('イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n'+GAME_URL,'home');}
+  function shareResult(){shareText('イロナラベ\nSTAGE '+stageShortLabel(state.stage)+'「'+stageLongLabel(state.stage)+'」を'+formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回でクリア！\n'+GAME_URL,'result');}
+  function buildLogoChips(){STAGE_PALETTES.flatMap(function(palette){return palette.corners;}).forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
+  function buildStagePackDots(){STAGE_PALETTES.flatMap(function(palette){return palette.corners;}).forEach(function(hex){const dot=document.createElement('i');dot.style.background=hex;el.stagePackDots.appendChild(dot);});}
 
   el.startBtn.addEventListener('click',openNameConfirm);
   el.howToBtn.addEventListener('click',function(){const open=el.howToPanel.hidden;el.howToPanel.hidden=!open;el.howToBtn.setAttribute('aria-expanded',String(open));});
@@ -571,6 +606,7 @@
   window.addEventListener('pagehide',function(){stopTimer();clearCountdownTimers();clearClearTimer();clearSwapTimer();});
 
   buildLogoChips();
+  buildStagePackDots();
   migrateOldStorage();
   refreshHomeRecords();
   resetNameRecord();
