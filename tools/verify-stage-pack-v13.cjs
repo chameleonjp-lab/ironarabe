@@ -103,7 +103,7 @@ const boardHash = crypto.createHash("sha256").update(JSON.stringify(officialBoar
 check(boardHash === "cb6e637f2e901a5c831b135efbdd36926d14c76f0260d3893d4241d2033681e2", "official tile permutation changed");
 
 const required = [
-  ["CLIENT_VERSION='ironarabe-web-1.4.0-stagepack001-v2'", "stage-pack client version missing"],
+  ["CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2'", "stage-pack client version missing"],
   ["STAGE_ROTATION_NAMES=['0°','90°','180°','270°']", "rotation names mismatch"],
   ["{id:'sunset',name:'夕映え',corners:['#f36b6b','#f0c46a','#5fd0b5','#7b6ff0']}", "sunset palette mismatch"],
   ["{id:'aurora',name:'極光',corners:['#6bf3f3','#6a96f0','#d05f7a','#e4f06f']}", "aurora palette mismatch"],
@@ -117,7 +117,6 @@ const required = [
   ["SHUFFLE_SEED='ironarabe-official-001-v1'", "official shuffle seed changed"],
   ["FIXED_COORDS=[[0,0],[3,0],[6,0],[0,4],[6,4],[0,8],[3,8],[6,8]]", "fixed coordinates changed"],
   ["p_client_version:currentClientVersion()", "stage ID must be included in submitted client version"],
-  ["stageId:state.stage?state.stage.id:null", "stage ID missing from local result"],
   ["id=\"stagePackDots\"", "home stage pack indicator missing"],
   ["id=\"countdownStage\"", "countdown stage label missing"],
   ["id=\"stageDisplay\"", "playing stage label missing"],
@@ -129,6 +128,7 @@ const required = [
 for (const [value, message] of required) requireText(html, value, message);
 
 check(!html.includes("OFFICIAL_CHALLENGE"), "single-stage OFFICIAL_CHALLENGE must be removed");
+check(!html.includes("stageId:state.stage?state.stage.id:null"), "stage data must not be stored in local result cache");
 check((html.match(/id="stagePackDots"/g) || []).length === 1, "stagePackDots ID must be unique");
 check((html.match(/id="countdownStage"/g) || []).length === 1, "countdownStage ID must be unique");
 check((html.match(/id="stageDisplay"/g) || []).length === 1, "stageDisplay ID must be unique");
@@ -142,4 +142,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("OK: eight-stage pack, fixed colors, shuffle fairness, and home spacing verified");
+console.log("OK: eight-stage pack, fixed colors, shuffle fairness, and result-only cache contract verified");
