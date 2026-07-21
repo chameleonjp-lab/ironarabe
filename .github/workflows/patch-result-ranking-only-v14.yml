@@ -1,0 +1,247 @@
+name: Patch result-only ranking v14
+
+on:
+  pull_request:
+    branches:
+      - claude/ironarabe-new-game-wlys30
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/patch-result-ranking-only-v14.yml'
+      - 'index.html'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: patch-result-ranking-only-v14
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    if: ${{ github.head_ref == 'agent/ironarabe-result-ranking-only-v14' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/ironarabe-result-ranking-only-v14
+          fetch-depth: 0
+
+      - name: Remove home ranking and local record cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old, new, label):
+              global text
+              if new and new in text and old not in text:
+                  print(f'already patched: {label}')
+                  return
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 occurrence, found {count}')
+              text = text.replace(old, new, 1)
+              print(f'patched: {label}')
+
+          replace_once(
+              "  .best-line, .record-line { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }\n",
+              "  .record-line { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }\n",
+              'local best line CSS')
+          replace_once(
+              "  .best-line .val, .record-line .val { font-size:22px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }\n",
+              "  .record-line .val { font-size:22px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }\n",
+              'local best value CSS')
+
+          replace_once(
+              """    <div class="card best-line">
+                <div>
+                  <h3 style="margin-bottom:2px;">この端末のベスト記録</h3>
+                  <p style="font-size:11px;">この端末に保存されたローカル記録です。サーバーランキングではありません。</p>
+                </div>
+                <div class="val"><span id="homeBest">--.--</span>秒</div>
+              </div>
+          """,
+              "",
+              'home local best card')
+
+          replace_once(
+              """    <div class="card ranking-card" aria-label="ベストタイムランキング30位まで">
+                <div class="ranking-title"><h3>ベストタイムランキング</h3><span>30位まで</span></div>
+                <div class="ranking-status" id="homeRankingStatus" aria-live="polite">読み込み中…</div>
+                <div class="ranking-scroll" id="homeRankingScroll" hidden><div id="homeRankingList" role="list"></div></div>
+              </div>
+          """,
+              "",
+              'home ranking DOM')
+
+          replace_once("<h3 id=\"nameRecordTitle\">この名前の記録</h3>", "<h3 id=\"nameRecordTitle\">登録名の記録</h3>", 'result record heading')
+          replace_once("<span class=\"label\">この名前の初回記録</span>", "<span class=\"label\">登録名の初回記録</span>", 'registered first label')
+          replace_once("<span class=\"label\">この名前のベスト記録</span>", "<span class=\"label\">登録名のベスト記録</span>", 'registered best label')
+          replace_once("<span class=\"label\">この名前のプレイ回数</span>", "<span class=\"label\">登録名のプレイ回数</span>", 'registered play count label')
+
+          old_ls = "  const LS={playerName:'ironarabe.v2.playerName',firstScore:'ironarabe.v2.official001.firstScore',bestScore:'ironarabe.v2.official001.bestScore',playCount:'ironarabe.v2.official001.playCount',lastResult:'ironarabe.v2.official001.lastResult',oldPlayerName:'ironarabe.playerName',oldBestTimeMs:'ironarabe.bestTimeMs',oldLastResult:'ironarabe.lastResult'};\n"
+          new_ls = "  const LOCAL_CACHE_PREFIX='ironarabe.';\n  const LS={playerName:'ironarabe.v2.playerName',oldPlayerName:'ironarabe.playerName'};\n"
+          replace_once(old_ls, new_ls, 'local storage contract')
+
+          replace_once(
+              "    playCountIncrementedPlayId:null, clearTimerId:null, swapTimerId:null, submittedPlayId:null,\n",
+              "    clearTimerId:null, swapTimerId:null, submittedPlayId:null,\n",
+              'local play count state')
+
+          replace_once(
+              """    homeBest:document.getElementById('homeBest'), homeShareBtn:document.getElementById('homeShareBtn'),
+              homeToast:document.getElementById('homeToast'), homeLabLink:document.getElementById('homeLabLink'),
+              homeRankingStatus:document.getElementById('homeRankingStatus'), homeRankingScroll:document.getElementById('homeRankingScroll'),
+              homeRankingList:document.getElementById('homeRankingList'), playerNameInput:document.getElementById('playerNameInput'),
+          """,
+              """    homeShareBtn:document.getElementById('homeShareBtn'), homeToast:document.getElementById('homeToast'),
+              homeLabLink:document.getElementById('homeLabLink'), playerNameInput:document.getElementById('playerNameInput'),
+          """,
+              'home record and ranking elements')
+
+          old_local_functions = """  function parsePositiveInt(raw){if(raw===null)return null;const n=Number(raw);return Number.isFinite(n)&&Number.isInteger(n)&&n>0?n:null;}
+            function elapsedMsToScore(ms){return Math.round(ms/10);}
+            function isValidScore(score){return Number.isFinite(score)&&Number.isInteger(score)&&score>0;}
+            function formatScore(score){return isValidScore(score)?(score/SCORE_SCALE).toFixed(SCORE_DECIMALS):'--.--';}
+            function formatElapsedMs(ms){const score=elapsedMsToScore(ms);return isValidScore(score)?formatScore(score):(0).toFixed(SCORE_DECIMALS);}
+            function countGraphemes(value){if(window.Intl&&Intl.Segmenter){return Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(value)).length;}return Array.from(value).length;}
+            function normalizeName(value){return String(value||'').trim();}
+            function validateName(value){const name=normalizeName(value),len=countGraphemes(name);if(len<1)return {ok:false,message:'プレイヤー名を1文字以上入力してください。'};if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'};return {ok:true,name:name};}
+          """
+          new_local_functions = """  function elapsedMsToScore(ms){return Math.round(ms/10);}
+            function isValidScore(score){return Number.isFinite(score)&&Number.isInteger(score)&&score>0;}
+            function formatScore(score){return isValidScore(score)?(score/SCORE_SCALE).toFixed(SCORE_DECIMALS):'--.--';}
+            function formatElapsedMs(ms){const score=elapsedMsToScore(ms);return isValidScore(score)?formatScore(score):(0).toFixed(SCORE_DECIMALS);}
+            function countGraphemes(value){if(window.Intl&&Intl.Segmenter){return Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(value)).length;}return Array.from(value).length;}
+            function normalizeName(value){return String(value||'').trim();}
+            function validateName(value){const name=normalizeName(value),len=countGraphemes(name);if(len<1)return {ok:false,message:'プレイヤー名を1文字以上入力してください。'};if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'};return {ok:true,name:name};}
+          """
+          replace_once(old_local_functions, new_local_functions, 'unused positive integer parser')
+
+          old_record_functions = """  function migrateOldStorage(){if(!safeStorageGet(LS.playerName)){const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok)safeStorageSet(LS.playerName,old.name);}if(!safeStorageGet(LS.bestScore)){const oldMs=parsePositiveInt(safeStorageGet(LS.oldBestTimeMs));if(oldMs)safeStorageSet(LS.bestScore,String(elapsedMsToScore(oldMs)));}}
+            function loadLocalRecords(){return {playerName:safeStorageGet(LS.playerName)||'',firstScore:parsePositiveInt(safeStorageGet(LS.firstScore)),bestScore:parsePositiveInt(safeStorageGet(LS.bestScore)),playCount:parsePositiveInt(safeStorageGet(LS.playCount))||0};}
+            function refreshHomeRecords(){const r=loadLocalRecords();state.playerName=r.playerName;el.homeBest.textContent=formatScore(r.bestScore);}
+          """
+          new_record_functions = """  function migrateOldPlayerName(){if(safeStorageGet(LS.playerName))return;const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok)safeStorageSet(LS.playerName,old.name);}
+            function getSavedPlayerName(){return safeStorageGet(LS.playerName)||'';}
+            function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName)keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
+            function clearReplayCachePreserveName(){const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();clearStorageNamespace(localStorage);clearStorageNamespace(sessionStorage);if(savedName)safeStorageSet(LS.playerName,savedName);state.tiles=[];state.solution=[];state.board=[];state.selectedIndex=null;state.startTime=null;state.elapsedMs=0;state.cleared=false;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
+            function replay(){clearReplayCachePreserveName();openNameConfirm();}
+          """
+          replace_once(old_record_functions, new_record_functions, 'name-only cache functions')
+
+          replace_once(
+              "function returnHome(){stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';setPhase('home');refreshHomeRecords();loadRankings(false);}",
+              "function returnHome(){stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';setPhase('home');}",
+              'home without ranking or record refresh')
+
+          replace_once(
+              "function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;incrementPlayCountOnce(playId);state.rafId=requestAnimationFrame(tick);});}",
+              "function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);});}",
+              'local play count increment')
+
+          replace_once(
+              "function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const r=loadLocalRecords();el.playerNameInput.value=r.playerName;el.savedNameLabel.textContent=r.playerName||'--';",
+              "function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const savedName=getSavedPlayerName();el.playerNameInput.value=savedName;el.savedNameLabel.textContent=savedName||'--';",
+              'saved-name only confirmation')
+
+          increment_function = "  function incrementPlayCountOnce(playId){if(state.playCountIncrementedPlayId===playId)return;state.playCountIncrementedPlayId=playId;const current=parsePositiveInt(safeStorageGet(LS.playCount))||0;safeStorageSet(LS.playCount,String(current+1));}\n"
+          replace_once(increment_function, "", 'local play count function')
+
+          replace_once("    updateLocalResult(state.playerName,state.elapsedMs,state.operations);\n", "", 'local result write')
+          local_result_function = "  function updateLocalResult(playerName,elapsedMs,operations){const score=elapsedMsToScore(elapsedMs),r=loadLocalRecords();if(!r.firstScore)safeStorageSet(LS.firstScore,String(score));if(!r.bestScore||score<r.bestScore)safeStorageSet(LS.bestScore,String(score));safeStorageSet(LS.lastResult,JSON.stringify({playerName,elapsedMs,score,operations,challengeId:CHALLENGE_ID,boardVersion:BOARD_VERSION,stageId:state.stage?state.stage.id:null,stageLabel:stageLongLabel(state.stage),clientVersion:currentClientVersion(),at:Date.now()}));}\n"
+          replace_once(local_result_function, "", 'local result function')
+
+          old_ranking_state = "  function setRankingState(status,message){['home','result'].forEach(function(name){const statusEl=name==='home'?el.homeRankingStatus:el.resultRankingStatus;const scrollEl=name==='home'?el.homeRankingScroll:el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');statusEl.textContent=message||'';statusEl.hidden=status==='ready';scrollEl.hidden=status!=='ready';});}\n"
+          new_ranking_state = "  function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');statusEl.textContent=message||'';statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}\n"
+          replace_once(old_ranking_state, new_ranking_state, 'result-only ranking state')
+
+          replace_once(
+              "function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.homeRankingList,rows);renderRankingList(el.resultRankingList,rows);",
+              "function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows);",
+              'result-only ranking render')
+
+          replace_once("el.nameRecordStatus.textContent='この名前の記録を取得中…';", "el.nameRecordStatus.textContent='登録名の記録を取得中…';", 'registered record pending')
+          replace_once("el.nameRecordStatus.textContent='この名前の記録を取得できませんでした。';", "el.nameRecordStatus.textContent='登録名の記録を取得できませんでした。';", 'registered record failure')
+          replace_once("el.nameRecordStatus.textContent='Supabaseに保存された、この名前の記録です。';", "el.nameRecordStatus.textContent='Supabaseに保存された登録名の記録です。';", 'registered record status')
+          replace_once("badge='この名前の初回記録'", "badge='登録名の初回記録'", 'registered first badge')
+          replace_once("badge='この名前のベスト更新！'", "badge='登録名のベスト更新！'", 'registered best badge')
+
+          replace_once("el.againBtn.addEventListener('click',openNameConfirm);", "el.againBtn.addEventListener('click',replay);", 'replay cache clear event')
+
+          old_boot = """  buildLogoChips();
+            buildStagePackDots();
+            migrateOldStorage();
+            refreshHomeRecords();
+            resetNameRecord();
+            setPhase('home');
+            loadRankings(true);
+          """
+          new_boot = """  buildLogoChips();
+            buildStagePackDots();
+            migrateOldPlayerName();
+            state.playerName=getSavedPlayerName();
+            resetNameRecord();
+            setRankingState('idle','');
+            setPhase('home');
+          """
+          replace_once(old_boot, new_boot, 'startup without ranking request')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Verify result-only ranking and name-only cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('index.html','utf8');
+          const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+          if(scripts.length!==1) throw new Error('expected one inline script');
+          new Function(scripts[0][1]);
+          const required=[
+            '登録名のベスト記録',
+            'id="resultRankingList"',
+            "function replay(){clearReplayCachePreserveName();openNameConfirm();}",
+            "key!==LS.playerName",
+            'clearStorageNamespace(localStorage)',
+            'clearStorageNamespace(sessionStorage)',
+            "el.againBtn.addEventListener('click',replay)",
+            "function setRankingState(status,message){const statusEl=el.resultRankingStatus"
+          ];
+          for(const value of required){if(!html.includes(value))throw new Error('missing '+value);}
+          const forbidden=[
+            'id="homeRankingList"',
+            'id="homeRankingStatus"',
+            'id="homeBest"',
+            'この端末のベスト記録',
+            'この端末に保存されたローカル記録',
+            'loadRankings(true);',
+            'refreshHomeRecords',
+            'loadLocalRecords',
+            'updateLocalResult',
+            'incrementPlayCountOnce',
+            'playCountIncrementedPlayId'
+          ];
+          for(const value of forbidden){if(html.includes(value))throw new Error('forbidden '+value);}
+          NODE
+
+      - name: Commit patched game
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- index.html; then
+            echo 'Result-only ranking already patched.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'perf: defer ranking to result and clear replay cache'
+          git push origin HEAD:agent/ironarabe-result-ranking-only-v14
