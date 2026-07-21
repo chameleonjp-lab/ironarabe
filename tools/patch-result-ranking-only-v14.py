@@ -50,9 +50,9 @@ replace_regex(
 )
 
 replace_once('<h3 id="nameRecordTitle">この名前の記録</h3>', '<h3 id="nameRecordTitle">登録名の記録</h3>', "record heading")
-replace_once('この名前の初回記録', '登録名の初回記録', "first record label")
-replace_once('この名前のベスト記録', '登録名のベスト記録', "best record label")
-replace_once('この名前のプレイ回数', '登録名のプレイ回数', "play count label")
+replace_once('<span class="label">この名前の初回記録</span>', '<span class="label">登録名の初回記録</span>', "first record label")
+replace_once('<span class="label">この名前のベスト記録</span>', '<span class="label">登録名のベスト記録</span>', "best record label")
+replace_once('<span class="label">この名前のプレイ回数</span>', '<span class="label">登録名のプレイ回数</span>', "play count label")
 
 replace_once(
     "CLIENT_VERSION='ironarabe-web-1.4.0-stagepack001-v2'",
