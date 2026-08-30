@@ -17,7 +17,7 @@
 - `BOARD_VERSION`: `2`
 - `CLIENT_VERSION`: `ironarabe-web-1.2.0-official001-v2`
 - `GAME_URL`: `https://chameleonjp.codeberg.page/ironarabe/`（公開予定URL）
-- `LAB_URL`: `https://chameleonjp.codeberg.page/chameleonjp_lab/`
+- `LAB_URL`: `https://chameleonjp-lab.github.io/chameleonjp_lab/`
 
 `OFFICIAL_CHALLENGE.id` は `CHALLENGE_ID` を参照し、値がずれない構造にする。
 
