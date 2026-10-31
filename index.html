@@ -13,7 +13,7 @@
 <meta name="description" content="色の流れを並べ直す40問のタイムアタックパズル。15言語・効果音に対応。">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:url" content="https://chameleonjp-lab.github.io/ironarabe/">
-<meta name="ironarabe-ui-release" content="ironarabe-web-1.6.0-stagepack40">
+<meta name="ironarabe-ui-release" content="ironarabe-web-1.6.1-home-name">
 <style>
   :root {
     --bg:#12131c;
@@ -115,6 +115,9 @@
   .btn-row .btn { margin-top:10px; }
   .home-actions { display:grid; gap:8px; margin:2px 0 12px; }
   .home-actions .btn { margin-top:0; padding:13px 14px; }
+  .home-start-panel { display:grid; gap:8px; }
+  .home-name { min-width:0; margin-bottom:0; }
+  .name-hint { color:var(--muted); font-size:12px; line-height:1.6; margin:7px 0 0; overflow-wrap:anywhere; }
   .home-share-btn { margin-top:0; padding:13px 14px; }
   .stage-note { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px 9px; margin:-6px 0 12px; color:var(--muted); font-size:12px; }
   .stage-note strong { color:var(--text); font-size:12px; letter-spacing:.04em; }
@@ -285,6 +288,13 @@
     .game-footer .btn { margin-top:4px; padding:8px; font-size:13px; }
     .board { width:min(calc(100vw - 20px), calc((100dvh - 112px) * 7 / 9), 460px); }
   }
+  @media (min-width:600px) and (max-height:620px) {
+    body[data-phase="home"] .app { max-width:760px; }
+    #screen-home .logo { margin-top:6px; }
+    #screen-home .logo-chips { margin-bottom:8px; }
+    #screen-home .lead { max-width:660px; margin-bottom:12px; }
+    .home-start-panel { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; align-items:start; }
+  }
   @media (prefers-reduced-motion:reduce) {
     *, *::before, *::after {
       scroll-behavior:auto !important;
@@ -296,7 +306,7 @@
   .preferences { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
   .language-picker { display:flex; align-items:center; gap:8px; min-width:0; color:var(--muted); font-size:13px; }
   select, .sound-toggle { font:inherit; min-height:44px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; color:var(--text); background:var(--panel); }
-  select { max-width:190px; }
+  select { max-width:190px; color-scheme:dark; }
   .sound-toggle { font-size:13px; overflow-wrap:anywhere; }
   .result-sound { align-self:flex-end; }
   .btn, .lead, .card, .game-hint, .ranking-title { overflow-wrap:anywhere; }
@@ -326,9 +336,18 @@
     <div class="logo-chips" id="logoChips"></div>
     <p class="lead" data-i18n="色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。">色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。</p>
     <div class="stage-note"><span class="stage-dots" id="stagePackDots" aria-hidden="true"></span><strong id="stageCountLabel" data-i18n="全{0}ステージ">全40ステージ</strong><span data-i18n="毎回ランダム">毎回ランダム</span></div>
-    <div class="home-actions">
-      <button class="btn" id="startBtn" data-i18n="ゲームを始める">ゲームを始める</button>
-      <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel" data-i18n="遊び方">遊び方</button>
+    <div class="home-start-panel">
+      <div class="field home-name">
+        <label for="playerNameInput" data-i18n="プレイヤー名（任意）">プレイヤー名（任意）</label>
+        <input type="text" id="playerNameInput" autocomplete="nickname" enterkeyhint="go" aria-describedby="nameHint nameError" placeholder="なまえを入力" data-i18n-attrs="placeholder">
+        <p class="name-hint" id="nameHint" data-i18n="ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。">ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。</p>
+        <p class="error" id="nameError" aria-live="polite"></p>
+      </div>
+      <div class="home-actions">
+        <button class="btn" id="startBtn" data-i18n="ゲームを始める">ゲームを始める</button>
+        <button class="btn secondary" id="guestStartBtn" data-i18n="名前なしで遊ぶ">名前なしで遊ぶ</button>
+        <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel" data-i18n="遊び方">遊び方</button>
+      </div>
     </div>
     <div class="card" id="howToPanel" hidden>
       <h3 data-i18n="遊び方">遊び方</h3>
@@ -344,20 +363,6 @@
     <button class="btn secondary home-share-btn" id="homeShareBtn" data-i18n="ゲームをシェア">ゲームをシェア</button>
     <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
-  </section>
-
-  <section id="screen-nameConfirm" class="screen">
-    <h2 data-i18n="プレイヤー名（任意）">プレイヤー名（任意）</h2>
-    <p class="lead" data-i18n="ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。">ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。</p>
-    <div class="card"><p><span data-i18n="現在の保存名:">現在の保存名:</span> <strong id="savedNameLabel">--</strong></p></div>
-    <div class="field">
-      <label for="playerNameInput" data-i18n="プレイヤー名">プレイヤー名</label>
-      <input type="text" id="playerNameInput" autocomplete="nickname" enterkeyhint="done" placeholder="なまえを入力" data-i18n-attrs="placeholder">
-    </div>
-    <p class="error" id="nameError" aria-live="polite"></p>
-    <button class="btn" id="confirmNameBtn" data-i18n="ゲームを始める">ゲームを始める</button>
-    <button class="btn secondary" id="guestStartBtn" data-i18n="名前なしで遊ぶ">名前なしで遊ぶ</button>
-    <button class="btn secondary" id="nameBackBtn" data-i18n="戻る">戻る</button>
   </section>
 
   <section id="screen-countdown" class="screen countdown-screen">
@@ -460,7 +465,6 @@
   const el={
     screens:{
       home:document.getElementById('screen-home'),
-      nameConfirm:document.getElementById('screen-nameConfirm'),
       countdown:document.getElementById('screen-countdown'),
       playing:document.getElementById('screen-playing'),
       result:document.getElementById('screen-result')
@@ -470,9 +474,8 @@
     howToBtn:document.getElementById('howToBtn'), howToPanel:document.getElementById('howToPanel'),
     homeShareBtn:document.getElementById('homeShareBtn'), homeToast:document.getElementById('homeToast'),
     homeLabLink:document.getElementById('homeLabLink'), playerNameInput:document.getElementById('playerNameInput'),
-    savedNameLabel:document.getElementById('savedNameLabel'), nameError:document.getElementById('nameError'),
+    nameError:document.getElementById('nameError'),
     guestStartBtn:document.getElementById('guestStartBtn'), nameRecordTitle:document.getElementById('nameRecordTitle'), registeredOnly:Array.from(document.querySelectorAll('.registered-only')),
-    confirmNameBtn:document.getElementById('confirmNameBtn'), nameBackBtn:document.getElementById('nameBackBtn'),
     countdownValue:document.getElementById('countdownValue'), countdownStage:document.getElementById('countdownStage'), board:document.getElementById('board'),
     timeDisplay:document.getElementById('timeDisplay'), operationDisplay:document.getElementById('operationDisplay'), stageDisplay:document.getElementById('stageDisplay'),
     completionBanner:document.getElementById('completionBanner'), completionSummary:document.getElementById('completionSummary'),
@@ -509,16 +512,16 @@
   function getSavedPlayerName(){return safeStorageGet(LS.playerName)||state.savedName||'';}
   function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName&&!PREFERENCE_KEYS.has(key)&&!key.startsWith(IronarabeGuests.GUEST_PENDING_PREFIX))keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
   function clearReplayCachePreserveName(){sound.stop();const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();try{clearStorageNamespace(localStorage);}catch(e){}try{clearStorageNamespace(sessionStorage);}catch(e){}if(savedName)safeStorageSet(LS.playerName,savedName);state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
-  function replay(){clearReplayCachePreserveName();openNameConfirm();}
+  function replay(){clearReplayCachePreserveName();returnHome();}
   function setPhase(nextPhase){state.phase=nextPhase;document.body.dataset.phase=nextPhase;Object.keys(el.screens).forEach(k=>el.screens[k].classList.toggle('active',k===nextPhase));window.scrollTo(0,0);}
-  function clearCountdownTimers(){state.countdownTimerIds.forEach(id=>clearTimeout(id));state.countdownTimerIds=[];state.countdownToken+=1;el.confirmNameBtn.disabled=false;}
+  function clearCountdownTimers(){state.countdownTimerIds.forEach(id=>clearTimeout(id));state.countdownTimerIds=[];state.countdownToken+=1;el.startBtn.disabled=false;el.guestStartBtn.disabled=false;}
   function clearClearTimer(){if(state.clearTimerId!==null){clearTimeout(state.clearTimerId);state.clearTimerId=null;}}
   function clearSwapTimer(){if(state.swapTimerId!==null){clearTimeout(state.swapTimerId);state.swapTimerId=null;}Array.from(el.board.children).forEach(tile=>tile.classList.remove('swapping'));}
   function clearToast(name){const target=name==='result'?el.resultToast:el.homeToast;if(state.toastTimerIds[name]!==null){clearTimeout(state.toastTimerIds[name]);state.toastTimerIds[name]=null;}setMessage(target,'');target.classList.remove('err');}
   function clearAllToasts(){clearToast('home');clearToast('result');}
   function hideCompletion(){el.completionBanner.hidden=true;setMessage(el.completionSummary,'');}
   function clearPendingTimers(){clearCountdownTimers();clearClearTimer();clearSwapTimer();clearAllToasts();}
-  function returnHome(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';setPhase('home');}
+  function returnHome(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
 
   function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -538,9 +541,8 @@
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
   function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);if(!state.playerName)state.guestStartId=guestCounter.record(currentClientVersion());if(!state.playerName&&!state.guestStartId)state.guestCountStatus='failed';});}
-  function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
-  function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const savedName=getSavedPlayerName();el.playerNameInput.value=savedName;el.savedNameLabel.textContent=savedName||'--';setMessage(el.nameError,'');el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
-  function confirmPlayerName(anonymous=false){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);return;}state.playerName=v.name;if(v.name){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
+  function startCountdown(playId){if(state.phase!=='home')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.startBtn.disabled=true;el.guestStartBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
+  function startGame(anonymous=false){if(state.phase!=='home'||el.startBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);el.playerNameInput.focus();return;}setMessage(el.nameError,'');state.playerName=v.name;if(v.name){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
   function selectTile(pos){
     if(state.phase!=='playing'||state.inputLocked||state.cleared)return;
     if(!Number.isInteger(pos)||pos<0||pos>=TOTAL||state.fixedSet.has(pos))return;
@@ -650,12 +652,10 @@
   // These calls run in the gesture stack, including iPhone Safari touch and keyboard activation.
   document.addEventListener('pointerdown',function(){sound.unlock();},{capture:true,passive:true});
   document.addEventListener('keydown',function(){sound.unlock();},{capture:true});
-  el.startBtn.addEventListener('click',openNameConfirm);
+  el.startBtn.addEventListener('click',function(){startGame();});
   el.howToBtn.addEventListener('click',function(){const open=el.howToPanel.hidden;el.howToPanel.hidden=!open;el.howToBtn.setAttribute('aria-expanded',String(open));});
-  el.confirmNameBtn.addEventListener('click',function(){confirmPlayerName();});
-  el.guestStartBtn.addEventListener('click',function(){confirmPlayerName(true);});
-  el.nameBackBtn.addEventListener('click',returnHome);
-  el.playerNameInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.isComposing){e.preventDefault();confirmPlayerName();}});
+  el.guestStartBtn.addEventListener('click',function(){startGame(true);});
+  el.playerNameInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();startGame();}});
   el.retireBtn.addEventListener('click',retire);
   el.board.addEventListener('click',onBoardTap);
   el.board.addEventListener('contextmenu',function(e){e.preventDefault();});
@@ -672,6 +672,7 @@
   migrateOldPlayerName();
   state.savedName=getSavedPlayerName();
   state.playerName=state.savedName;
+  el.playerNameInput.value=state.savedName;
   resetNameRecord();
   setRankingState('idle','');
   refreshLanguage();

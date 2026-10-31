@@ -54,9 +54,9 @@ async function acceptance(engine,viewport,failAudio=false){
   await page.selectOption('#languageSelect','en');
   await page.tap('#homeSoundBtn');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'false');
   await page.tap('#homeSoundBtn');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');
-  await page.tap('#startBtn');await page.fill('#playerNameInput','x'.repeat(21));await page.tap('#confirmNameBtn');assert.ok((await page.locator('#nameError').innerText()).length);
+  await page.fill('#playerNameInput','x'.repeat(21));await page.tap('#startBtn');assert.ok((await page.locator('#nameError').innerText()).length);
   await switchLanguage(page,'de');assert.match(await page.locator('#nameError').innerText(),/Spieler/);
-  await page.fill('#playerNameInput','Alice 日本語');await page.tap('#confirmNameBtn');
+  await page.fill('#playerNameInput','Alice 日本語');await page.tap('#startBtn');
   await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');
   assert.equal(await page.locator('.tile').count(),63);assert.equal(await page.locator('.tile.fixed').count(),8);
   await page.tap('.tile[data-pos="0"]');assert.equal(await page.locator('.selected').count(),0);
@@ -91,7 +91,7 @@ async function acceptance(engine,viewport,failAudio=false){
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.old.cache')),null);assert.equal(await page.evaluate(()=>sessionStorage.getItem('ironarabe.old.cache')),null);
   const before=calls.length;await page.reload();assert.equal(await page.locator('html').getAttribute('lang'),'de');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');assert.equal(calls.length,before);
   await page.click('#homeShareBtn');assert.ok((await page.evaluate(()=>__shared.at(-1).text)).includes('https://chameleonjp-lab.github.io/ironarabe/'));
-  if(failAudio){await page.evaluate(()=>{Object.defineProperty(window,'sessionStorage',{get(){throw new DOMException('blocked','SecurityError')},configurable:true});document.querySelector('#againBtn').click();});assert.equal(await page.locator('body').getAttribute('data-phase'),'nameConfirm','replay survives storage denial');}
+  if(failAudio){await page.evaluate(()=>{Object.defineProperty(window,'sessionStorage',{get(){throw new DOMException('blocked','SecurityError')},configurable:true});document.querySelector('#againBtn').click();});assert.equal(await page.locator('body').getAttribute('data-phase'),'home','replay survives storage denial');}
   assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} ${viewport.width}x${viewport.height} audioFailure=${failAudio}: 15 locales, full game, timing, ranking, replay, shares`);
  }finally{if(releaseSubmit)releaseSubmit();await context.close();await browser.close();}
 }
@@ -105,18 +105,18 @@ async function failureAcceptance(engine){
   else{await new Promise(resolve=>{releaseRanking=resolve});await route.fulfill({json:[{rank_no:1,display_name:'Late stale name',first_score:12345,best_score:3456,play_count:9,updated_at:'2026-10-31T00:00:00Z'}]});}
  });
  async function solve(){
-  await page.fill('#playerNameInput','Alice');await page.tap('#confirmNameBtn');await page.clock.runFor(3200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  await page.fill('#playerNameInput','Alice');await page.tap('#startBtn');await page.clock.runFor(3200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
   const board=boardFixture.slice();for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);await page.locator(`.tile[data-pos="${i}"]`).dispatchEvent('click');await page.locator(`.tile[data-pos="${j}"]`).dispatchEvent('click');[board[i],board[j]]=[board[j],board[i]];}
   await page.clock.runFor(4001);
  }
  try{
-  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.tap('#startBtn');await solve();
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await solve();
   await page.waitForFunction(()=>document.querySelector('#rankNote').classList.contains('err')&&document.querySelector('#resultRankingStatus').classList.contains('err'));
   const catalog=require('../js/translations.js');for(const language of languages){await switchLanguage(page,language);assert.equal(await page.locator('#rankNote').innerText(),catalog[language]['ランキング送信に失敗しました']);assert.equal(await page.locator('#nameRecordStatus').innerText(),catalog[language]['登録名の記録を取得できませんでした。']);assert.equal(await page.locator('#resultRankingStatus').innerText(),catalog[language]['ランキングを読み込めませんでした。']);}
   assert.equal(calls.filter(method=>method==='submit_score').length,1);await page.tap('#againBtn');round=2;await solve();
   assert.equal(await page.locator('body').getAttribute('data-phase'),'result');await page.waitForFunction(()=>document.querySelector('#resultRankingStatus').getAttribute('data-i18n')==='ランキングを読み込み中…');
   assert.ok(releaseSubmit&&releaseRanking);await page.tap('#againBtn');const count=calls.length;releaseSubmit();releaseRanking();
-  await page.waitForTimeout(100);assert.equal(await page.locator('body').getAttribute('data-phase'),'nameConfirm');assert.equal(await page.locator('#recordNameDisplay').innerText(),'--');assert.equal(await page.locator('#resultRankingList').innerText(),'');assert.equal(calls.length,count,'stale submit does not start another ranking request');assert.equal(await page.inputValue('#playerNameInput'),'Alice');assert.deepEqual(errors,[]);
+  await page.waitForTimeout(100);assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.equal(await page.locator('#recordNameDisplay').innerText(),'--');assert.equal(await page.locator('#resultRankingList').innerText(),'');assert.equal(calls.length,count,'stale submit does not start another ranking request');assert.equal(await page.inputValue('#playerNameInput'),'Alice');assert.deepEqual(errors,[]);
   console.log(`PASS ${engine.name()} communication failure: 15 locales, retry-free submit, stale async response isolation`);
  }finally{releaseSubmit?.();releaseRanking?.();await context.close();await browser.close();}
 }
@@ -133,7 +133,7 @@ async function guestAcceptance(engine,viewport){
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);assert.equal(await page.locator('#guestStartBtn').count(),1,'explicit unnamed play choice');
   const details='https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe';assert.equal(await page.locator('#homeLabLink').getAttribute('href'),details);
-  await page.tap('#startBtn');assert.equal(await page.inputValue('#playerNameInput'),'');await page.tap('#confirmNameBtn');await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing','empty name starts normally');
+  assert.equal(await page.inputValue('#playerNameInput'),'');await page.tap('#startBtn');await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing','empty name starts normally');
   assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,1);const first=calls[0].payload;assert.equal(first.p_game_slug,'ironarabe');assert.ok(!('p_display_name' in first)&&!('p_score' in first));
   await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));const board=boardFixture.slice();for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);await page.locator(`.tile[data-pos="${i}"]`).dispatchEvent('click');await page.locator(`.tile[data-pos="${j}"]`).dispatchEvent('click');[board[i],board[j]]=[board[j],board[i]];}
   await page.clock.runFor(4001);assert.equal(await page.locator('body').getAttribute('data-phase'),'result','guest count response never blocks results');await page.locator('.ranking-row').nth(29).waitFor();assert.equal(await page.locator('.ranking-row').count(),30);
@@ -142,7 +142,7 @@ async function guestAcceptance(engine,viewport){
   assert.equal(await page.locator('#resultLabLink').getAttribute('href'),details);await page.locator('.ranking-row').nth(29).scrollIntoViewIfNeeded();assert.equal(await page.locator('.ranking-name').nth(29).innerText(),'Existing 30 <&>');
   const scroll=await page.locator('#resultRankingScroll').evaluate(n=>({scroll:n.scrollTop,max:n.scrollHeight-n.clientHeight}));assert.ok(scroll.scroll>0&&scroll.max>0,'all 30 entries are reachable inside the ranking scroll');
   await page.evaluate(()=>localStorage.setItem('ironarabe.v2.playerName','Saved Alice'));await page.tap('#againBtn');assert.equal(await page.inputValue('#playerNameInput'),'Saved Alice');assert.ok(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.'))),'replay retains the unacknowledged count');
-  releaseGuest();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));assert.equal(await page.locator('body').getAttribute('data-phase'),'nameConfirm');
+  releaseGuest();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));assert.equal(await page.locator('body').getAttribute('data-phase'),'home');
   await page.tap('#guestStartBtn');await page.clock.runFor(3200);await page.waitForFunction(()=>document.body.dataset.phase==='playing');assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,2);assert.notEqual(calls.at(-1).payload.p_start_id,first.p_start_id);assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'Saved Alice');releaseGuest();await page.tap('#retireBtn');
   assert.equal(calls.filter(c=>c.method==='submit_score').length,0);assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} guest ${viewport.width}x${viewport.height}: optional name, count once/start, no score, 30 ranks, saved name and pending replay`);
  }finally{releaseGuest?.();await context.close();await browser.close();}
@@ -156,7 +156,7 @@ async function guestRecoveryAcceptance(engine){
   else if(mode==='fail')await route.fulfill({status:503,json:{message:'offline'}});
   else await route.fulfill({json:{accepted:true,duplicate:true,start_id:payload.p_start_id,play_id:'00000000-0000-4000-8000-000000000001',game_slug:'ironarabe',client_version:payload.p_client_version}});
  });
- async function start(){await page.tap('#startBtn');await page.tap('#confirmNameBtn');await page.clock.runFor(3200);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');}
+ async function start(){await page.tap('#startBtn');await page.clock.runFor(3200);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');}
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await start();assert.equal(calls.length,1);assert.ok(releaseFirst);
   await page.evaluate(()=>window.dispatchEvent(new Event('online')));mode='ack';releaseFirst();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));
@@ -178,10 +178,10 @@ async function stagePackAcceptance(engine){
   else throw Error('Unexpected stage audit RPC '+method);
  });
  try{
-  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.click('#startBtn');await page.fill('#playerNameInput','Stage Audit');
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.fill('#playerNameInput','Stage Audit');
   for(let play=0;play<40;play++){
    const language=languages[play%languages.length];await switchLanguage(page,language);
-   await page.locator('#confirmNameBtn').dispatchEvent('click');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+   await page.locator('#startBtn').dispatchEvent('click');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
    assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');assert.equal(await page.locator('.tile').count(),63);assert.equal(await page.locator('.tile.fixed').count(),8);
    for(const viewport of [{width:402,height:874},{width:874,height:402}]){await page.setViewportSize(viewport);await bounds(page);}
    const response=page.waitForResponse(r=>r.url().endsWith('/submit_score'));
@@ -202,11 +202,42 @@ async function stagePackAcceptance(engine){
   assert.equal(seen.size,40);assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} all 40 stages: 63 colors, 8 anchors, 49 swaps, portrait/landscape, translated names, results, compatible mock scores`);
  }finally{await context.close();await browser.close();}
 }
+async function homeStartAcceptance(engine){
+ const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
+ const calls=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.addInitScript(()=>{localStorage.setItem('ironarabe.v2.playerName','Saved Alice');localStorage.setItem('ironarabe.sound.v1','false');});
+ await page.route('https://*.supabase.co/**',async route=>{
+  const request=route.request(),method=new URL(request.url()).pathname.split('/').pop(),payload=request.postDataJSON();assert.equal(method,'start_ironarabe_guest_play_v1','starting or retiring never submits a named score');calls.push(payload);
+  await route.fulfill({json:{accepted:true,duplicate:false,start_id:payload.p_start_id,play_id:'00000000-0000-4000-8000-000000000001',game_slug:'ironarabe',client_version:payload.p_client_version}});
+ });
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
+  assert.equal(await page.locator('#playerNameInput').isVisible(),true,'the optional name is editable on the initial home screen');assert.equal(await page.inputValue('#playerNameInput'),'Saved Alice');
+  assert.notEqual(await page.evaluate(()=>document.activeElement.id),'playerNameInput','home does not open the keyboard automatically');
+  for(const viewport of [{width:402,height:874},{width:874,height:402}]){
+   await page.setViewportSize(viewport);
+   for(const language of languages){await switchLanguage(page,language);await page.evaluate(()=>scrollTo(0,0));const box=await page.locator('#startBtn').boundingBox();assert.ok(box.y>=0&&box.y+box.height<=viewport.height,`${language}: start is on the initial ${viewport.width}x${viewport.height} viewport`);}
+   await switchLanguage(page,'ja');fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${viewport.width}x${viewport.height}-home-name.png`),fullPage:true});
+  }
+  await page.fill('#playerNameInput','x'.repeat(21));await page.tap('#startBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.ok((await page.locator('#nameError').innerText()).length);assert.equal(calls.length,0);
+  await page.fill('#playerNameInput','  Alice 日本語  ');await page.locator('#playerNameInput').dispatchEvent('keydown',{key:'Enter',isComposing:true});assert.equal(await page.locator('body').getAttribute('data-phase'),'home','IME confirmation does not start a game');
+  await page.locator('#playerNameInput').dispatchEvent('keydown',{key:'Enter',keyCode:229,isComposing:false});assert.equal(await page.locator('body').getAttribute('data-phase'),'home','Safari IME confirmation with keyCode 229 does not start a game');
+  await page.locator('#playerNameInput').dispatchEvent('keydown',{key:'Enter',isComposing:false});assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','Enter starts directly from home');await page.locator('#startBtn').dispatchEvent('click');
+  assert.notEqual(await page.evaluate(()=>document.activeElement.id),'playerNameInput','starting closes the input keyboard');await page.clock.runFor(3200);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');assert.equal(calls.length,0);assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'Alice 日本語');
+  await page.tap('#retireBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.equal(await page.inputValue('#playerNameInput'),'Alice 日本語');
+  await page.fill('#playerNameInput','');await page.tap('#startBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','one start tap with an empty name enters countdown');await page.locator('#startBtn').dispatchEvent('click');await page.locator('#guestStartBtn').dispatchEvent('click');assert.equal(calls.length,0,'counting waits for actual play');
+  await page.clock.runFor(3200);assert.equal(calls.length,1,'repeated start controls count one actual play');assert.equal(calls[0].p_game_slug,'ironarabe');assert.ok(!('p_score' in calls[0])&&!('p_display_name' in calls[0]));await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));await page.tap('#retireBtn');assert.equal(await page.inputValue('#playerNameInput'),'Alice 日本語');
+  await page.tap('#guestStartBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','saved names still allow an explicit immediate guest start');await page.clock.runFor(3200);assert.equal(calls.length,2);assert.notEqual(calls[0].p_start_id,calls[1].p_start_id);await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));await page.tap('#retireBtn');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'Alice 日本語');
+  assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} home name: direct start, optional/saved names, validation, IME, repeat taps, 15 languages and portrait/landscape`);
+ }finally{await context.close();await browser.close();}
+}
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{
  const engines=process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit],suite=process.env.BROWSER_SUITE;
+ if(suite==='home-start'){for(const engine of engines)await homeStartAcceptance(engine);return;}
  if(suite!=='guest'&&suite!=='stage-pack')for(const engine of engines)for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
  if(suite!=='guest'&&suite!=='stage-pack')for(const engine of engines)await failureAcceptance(engine);
  if(suite!=='stage-pack')for(const engine of engines)for(const viewport of [{width:402,height:874},{width:874,height:402}])await guestAcceptance(engine,viewport);
  if(suite!=='stage-pack')for(const engine of engines)await guestRecoveryAcceptance(engine);
  if(suite!=='guest')for(const engine of engines)await stagePackAcceptance(engine);
+ if(!suite)for(const engine of engines)await homeStartAcceptance(engine);
 }finally{server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
