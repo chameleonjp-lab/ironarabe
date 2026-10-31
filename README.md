@@ -86,7 +86,7 @@ Web Audio APIで選択・キャンセル・交換・完成・結果発表の5音
 https://chameleonjp-lab.github.io/ironarabe/
 ```
 
-2026-10-31、上記の正式URLで既定ブランチのマージSHA `5a24e28`（8問版）の配信を確認しました。15言語、音設定、開始から結果、既存ランキングの読取をChromium/WebKitで受入済みです。今回の40問版はPRマージ待ちです。
+2026-10-31、40問版の初回マージSHA `43b6c01` を上記の正式URLから配信しました。GitHub Actionsのbuild/deploy/公開hash検証が成功し、15言語、音設定、開始から結果、既存ランキングの読取をChromium/WebKitで受入済みです。既存8問を含む40問が利用できます。
 
 現在稼働中の旧公開先は `https://chameleonjp.codeberg.page/ironarabe/` です。今回停止・削除しません。
 
@@ -147,6 +147,6 @@ node tools/verify-result-only-v14.cjs
 
 名前ありは従来どおりクリア時に既存ランキングへ送信します。名前なしは実際にプレイ画面へ進んだ時点で専用RPCへ開始回数だけを送信し、名前・スコア・参加者・順位を作りません。回数の未送信記録は端末に保存し、reload/online/次回開始で同じUUIDを再送するため、通信断からの再送で二重計上されません。
 
-この追加機能には実験場の `docs/chameleonjp-lab/sql/ironarabe-guest-play-count.sql` 適用が必要です。40問への拡張後は [40問用DB手順](https://github.com/chameleonjp-lab/chameleonjp_lab/blob/main/docs/chameleonjp-lab/16_ironarabe_stage_pack_40.md) に従い、初回用と旧8問適用済み用の経路を選びます。匿名開始SQLは現時点で本番未適用で、匿名回数の本番計測を確認済みとは扱いません。管理者が40問対応SQLを適用してから40問版を公開します。登録URL2列の切替は先行8問版の公開後受入を経て完了しています。
+この追加機能は実験場の `docs/chameleonjp-lab/sql/ironarabe-guest-play-count.sql` にある専用RPCを使用します。[40問用DB手順・適用記録](https://github.com/chameleonjp-lab/chameleonjp_lab/blob/main/docs/chameleonjp-lab/16_ironarabe_stage_pack_40.md) に初回用と旧8問適用済み用の経路、確認したDB状態と検証範囲を記録します。登録URL2列の切替は先行8問版の公開後受入を経て完了しています。
 
-初回PR #16、任意名の [PR #17](https://github.com/chameleonjp-lab/ironarabe/pull/17)、匿名回数SQLの [PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) はマージ済みで、Pagesの設定と公開は完了しています。匿名開始回数のSQLは本番未適用です。
+初回PR #16、任意名の [PR #17](https://github.com/chameleonjp-lab/ironarabe/pull/17)、匿名回数SQLの [PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38)、40問の [PR #18](https://github.com/chameleonjp-lab/ironarabe/pull/18) はマージ済みです。今後も既定ブランチへのPRマージ後に同じActionsで自動公開します。
