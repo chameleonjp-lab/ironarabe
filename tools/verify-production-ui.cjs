@@ -21,8 +21,8 @@ if (errors.length === 0) {
 
   check(inlineScripts.length === 1, "index.html must contain exactly one inline game script");
   const scriptPaths = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
-  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js'];
-  check(JSON.stringify(scriptPaths) === JSON.stringify(localScripts), "production scripts must be the four reviewed same-origin runtime files, in dependency order");
+  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js','js/guest-plays.js'];
+  check(JSON.stringify(scriptPaths) === JSON.stringify(localScripts), "production scripts must be the five reviewed same-origin runtime files, in dependency order");
   for (const file of localScripts) {
     try { new Function(fs.readFileSync(path.join(root, file), 'utf8')); }
     catch (error) { errors.push(`${file} missing or invalid: ${error.message}`); }

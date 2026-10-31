@@ -312,6 +312,7 @@
   .countdown-value { max-width:100%; overflow-wrap:anywhere; font-size:clamp(32px,12vw,72px); }
   .completion-banner { min-width:0; width:max-content; max-width:96%; border-radius:16px; }
   .completion-banner strong { overflow-wrap:anywhere; font-size:20px; letter-spacing:.02em; }
+  [hidden] { display:none !important; }
 </style>
 </head>
 <body>
@@ -341,20 +342,21 @@
       </ol>
     </div>
     <button class="btn secondary home-share-btn" id="homeShareBtn" data-i18n="ゲームをシェア">ゲームをシェア</button>
-    <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" data-i18n="カメレオンJPの実験場へ">カメレオンJPの実験場へ</a>
+    <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
 
   <section id="screen-nameConfirm" class="screen">
-    <h2 data-i18n="プレイヤー名を確認">プレイヤー名を確認</h2>
-    <p class="lead" data-i18n="ランキング送信と結果表示に使う名前を確認してください。">ランキング送信と結果表示に使う名前を確認してください。</p>
+    <h2 data-i18n="プレイヤー名（任意）">プレイヤー名（任意）</h2>
+    <p class="lead" data-i18n="ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。">ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。</p>
     <div class="card"><p><span data-i18n="現在の保存名:">現在の保存名:</span> <strong id="savedNameLabel">--</strong></p></div>
     <div class="field">
       <label for="playerNameInput" data-i18n="プレイヤー名">プレイヤー名</label>
       <input type="text" id="playerNameInput" autocomplete="nickname" enterkeyhint="done" placeholder="なまえを入力" data-i18n-attrs="placeholder">
     </div>
     <p class="error" id="nameError" aria-live="polite"></p>
-    <button class="btn" id="confirmNameBtn" data-i18n="この名前で始める">この名前で始める</button>
+    <button class="btn" id="confirmNameBtn" data-i18n="ゲームを始める">ゲームを始める</button>
+    <button class="btn secondary" id="guestStartBtn" data-i18n="名前なしで遊ぶ">名前なしで遊ぶ</button>
     <button class="btn secondary" id="nameBackBtn" data-i18n="戻る">戻る</button>
   </section>
 
@@ -390,9 +392,9 @@
     <div class="card">
       <h3 id="nameRecordTitle" data-i18n="登録名の記録">登録名の記録</h3>
       <div class="record-line"><span class="label" data-i18n="プレイヤー名">プレイヤー名</span><span class="val" id="recordNameDisplay">--</span></div>
-      <div class="record-line"><span class="label" data-i18n="登録名の初回記録">登録名の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
-      <div class="record-line"><span class="label" data-i18n="登録名のベスト記録">登録名のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
-      <div class="record-line"><span class="label" data-i18n="登録名のプレイ回数">登録名のプレイ回数</span><span class="val" id="namePlayCountDisplay">--回</span></div>
+      <div class="record-line registered-only"><span class="label" data-i18n="登録名の初回記録">登録名の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
+      <div class="record-line registered-only"><span class="label" data-i18n="登録名のベスト記録">登録名のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
+      <div class="record-line registered-only"><span class="label" data-i18n="登録名のプレイ回数">登録名のプレイ回数</span><span class="val" id="namePlayCountDisplay">--回</span></div>
       <div class="record-line"><span class="label" data-i18n="ステージ">ステージ</span><span class="val stage-value" id="resultStage">--</span></div>
       <div class="record-line"><span class="label" data-i18n="操作回数">操作回数</span><span class="val" id="resultOperations">0回</span></div>
       <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
@@ -410,7 +412,7 @@
       <button class="btn secondary" id="resultShareBtn" data-i18n="結果をシェア">結果をシェア</button>
       <button class="btn secondary" id="homeBtn" data-i18n="ホームへ戻る">ホームへ戻る</button>
     </div>
-    <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" data-i18n="カメレオンJPの実験場へ">カメレオンJPの実験場へ</a>
+    <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
   </section>
 </div>
 
@@ -418,6 +420,7 @@
 <script src="js/translations.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/sound-effects.js"></script>
+<script src="js/guest-plays.js"></script>
 <script>
 "use strict";
 (function () {
@@ -430,7 +433,7 @@
   const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000, RANKING_FETCH_TIMEOUT_MS=10000;
   const COUNTDOWN_STEP_MS=700, COUNTDOWN_START_MS=300, SWAP_ANIMATION_MS=140, CLEAR_BOARD_DISPLAY_MS=4000, RANKING_LIMIT=30;
   const GAME_URL='https://chameleonjp-lab.github.io/ironarabe/';
-  const LAB_URL='https://chameleonjp-lab.github.io/chameleonjp_lab/';
+  const LAB_URL='https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe';
   const STAGE_ROTATION_NAMES=['0°','90°','180°','270°'];
   const STAGE_PALETTES=[
     {id:'sunset',name:'夕映え',corners:['#f36b6b','#f0c46a','#5fd0b5','#7b6ff0']},
@@ -445,7 +448,7 @@
   const COUNTDOWN_STEPS=['3','2','1','START'];
 
   const state={
-    phase:'home', inputLocked:false, playerName:'', stage:null, stageBag:[], lastStageIndex:null, tiles:[], solution:[], board:[], fixedSet:new Set(),
+    phase:'home', inputLocked:false, playerName:'', savedName:'', guestStartId:null, guestCountStatus:'pending', stage:null, stageBag:[], lastStageIndex:null, tiles:[], solution:[], board:[], fixedSet:new Set(),
     selectedIndex:null, operations:0, startTime:null, elapsedMs:0, cleared:false, playId:0,
     clearPlayId:null, rafId:null, countdownToken:0, countdownTimerIds:[], resultShownPlayId:null,
     clearTimerId:null, swapTimerId:null, submittedPlayId:null,
@@ -466,6 +469,7 @@
     homeShareBtn:document.getElementById('homeShareBtn'), homeToast:document.getElementById('homeToast'),
     homeLabLink:document.getElementById('homeLabLink'), playerNameInput:document.getElementById('playerNameInput'),
     savedNameLabel:document.getElementById('savedNameLabel'), nameError:document.getElementById('nameError'),
+    guestStartBtn:document.getElementById('guestStartBtn'), nameRecordTitle:document.getElementById('nameRecordTitle'), registeredOnly:Array.from(document.querySelectorAll('.registered-only')),
     confirmNameBtn:document.getElementById('confirmNameBtn'), nameBackBtn:document.getElementById('nameBackBtn'),
     countdownValue:document.getElementById('countdownValue'), countdownStage:document.getElementById('countdownStage'), board:document.getElementById('board'),
     timeDisplay:document.getElementById('timeDisplay'), operationDisplay:document.getElementById('operationDisplay'), stageDisplay:document.getElementById('stageDisplay'),
@@ -489,7 +493,7 @@
   function formatElapsedMs(ms){const score=elapsedMsToScore(ms);return isValidScore(score)?formatScore(score):formatNumber(0,SCORE_DECIMALS);}
   function countGraphemes(value){if(window.Intl&&Intl.Segmenter){return Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(value)).length;}return Array.from(value).length;}
   function normalizeName(value){return String(value||'').trim();}
-  function validateName(value){const name=normalizeName(value),len=countGraphemes(name);if(len<1)return {ok:false,message:'プレイヤー名を1文字以上入力してください。'};if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'};return {ok:true,name:name};}
+  function validateName(value){const name=normalizeName(value),len=countGraphemes(name);if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'};return {ok:true,name:name};}
   function rotateCornersClockwise(corners,steps){const normalized=((steps%4)+4)%4;return corners.map(function(_,index){return corners[(index-normalized+4)%4];});}
   function buildStages(){const stages=[];STAGE_PALETTES.forEach(function(palette){for(let rotation=0;rotation<4;rotation++){const corners=rotateCornersClockwise(palette.corners,rotation),number=stages.length+1,id=palette.id+'-r'+rotation;stages.push({id:id,number:number,paletteId:palette.id,paletteName:palette.name,rotation:rotation,rotationLabel:STAGE_ROTATION_NAMES[rotation],challenge:{id:CHALLENGE_ID+'-'+id,topLeft:corners[0],topRight:corners[1],bottomRight:corners[2],bottomLeft:corners[3]}});}});return stages;}
   function randomInt(max){if(max<=1)return 0;if(globalThis.crypto&&typeof globalThis.crypto.getRandomValues==='function'){const values=new Uint32Array(1);globalThis.crypto.getRandomValues(values);return values[0]%max;}return Math.floor(Math.random()*max);}
@@ -499,10 +503,10 @@
   function currentClientVersion(){return CLIENT_VERSION+'-'+(state.stage?state.stage.id:'unknown');}
   function updateStageUi(){const shortLabel=stageShortLabel(state.stage),longLabel=stageLongLabel(state.stage);el.stageDisplay.textContent=shortLabel;el.stageDisplay.title=longLabel;setMessage(el.countdownStage,'STAGE {0}・{1}',()=>[stageShortLabel(state.stage),stageLongLabel(state.stage)]);el.resultStage.textContent=longLabel+' ('+shortLabel+')';}
   function chooseNextStage(){if(state.stageBag.length===0)refillStageBag();const index=state.stageBag.shift();state.stage=STAGES[index];state.lastStageIndex=index;updateStageUi();return state.stage;}
-  function migrateOldPlayerName(){if(safeStorageGet(LS.playerName))return;const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok)safeStorageSet(LS.playerName,old.name);}
-  function getSavedPlayerName(){return safeStorageGet(LS.playerName)||state.playerName||'';}
-  function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName&&!PREFERENCE_KEYS.has(key))keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
-  function clearReplayCachePreserveName(){sound.stop();const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();try{clearStorageNamespace(localStorage);}catch(e){}try{clearStorageNamespace(sessionStorage);}catch(e){}if(savedName)safeStorageSet(LS.playerName,savedName);state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
+  function migrateOldPlayerName(){if(safeStorageGet(LS.playerName))return;const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok&&old.name)safeStorageSet(LS.playerName,old.name);}
+  function getSavedPlayerName(){return safeStorageGet(LS.playerName)||state.savedName||'';}
+  function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName&&!PREFERENCE_KEYS.has(key)&&!key.startsWith(IronarabeGuests.GUEST_PENDING_PREFIX))keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
+  function clearReplayCachePreserveName(){sound.stop();const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();try{clearStorageNamespace(localStorage);}catch(e){}try{clearStorageNamespace(sessionStorage);}catch(e){}if(savedName)safeStorageSet(LS.playerName,savedName);state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
   function replay(){clearReplayCachePreserveName();openNameConfirm();}
   function setPhase(nextPhase){state.phase=nextPhase;document.body.dataset.phase=nextPhase;Object.keys(el.screens).forEach(k=>el.screens[k].classList.toggle('active',k===nextPhase));window.scrollTo(0,0);}
   function clearCountdownTimers(){state.countdownTimerIds.forEach(id=>clearTimeout(id));state.countdownTimerIds=[];state.countdownToken+=1;el.confirmNameBtn.disabled=false;}
@@ -530,11 +534,11 @@
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
-  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');return state.playId;}
-  function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);});}
+  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');return state.playId;}
+  function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);if(!state.playerName)state.guestStartId=guestCounter.record(currentClientVersion());if(!state.playerName&&!state.guestStartId)state.guestCountStatus='failed';});}
   function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
   function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const savedName=getSavedPlayerName();el.playerNameInput.value=savedName;el.savedNameLabel.textContent=savedName||'--';setMessage(el.nameError,'');el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
-  function confirmPlayerName(){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return;const v=validateName(el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);return;}state.playerName=v.name;safeStorageSet(LS.playerName,v.name);el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
+  function confirmPlayerName(anonymous=false){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);return;}state.playerName=v.name;if(v.name){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
   function selectTile(pos){
     if(state.phase!=='playing'||state.inputLocked||state.cleared)return;
     if(!Number.isInteger(pos)||pos<0||pos>=TOTAL||state.fixedSet.has(pos))return;
@@ -580,8 +584,7 @@
     el.completionBanner.hidden=false;
     state.clearPlayId=state.playId;
     const playId=state.clearPlayId;
-    setNameRecordPending(state.playerName);
-    submitScoreForCurrentPlay(playId,state.playerName,state.elapsedMs);
+    if(state.playerName){setNameRecordPending(state.playerName);submitScoreForCurrentPlay(playId,state.playerName,state.elapsedMs);}else setGuestRecord();
     state.clearTimerId=setTimeout(function(){
       state.clearTimerId=null;
       if(playId!==state.playId||state.resultShownPlayId===playId)return;
@@ -592,15 +595,32 @@
   function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);setMessage(el.resultTime,'{0}秒',()=>[formatScore(score)]);setMessage(el.resultOperations,'{0}回操作',()=>[formatNumber(state.operations)]);updateStageUi();setPhase('result');sound.play('result');loadRankings(false);}
   function retire(){if(state.phase!=='playing'||state.cleared||state.inputLocked||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();returnHome();}
 
+  const guestCounter=IronarabeGuests.createGuestPlayCounter({
+    send:function(payload){return postRpc('start_ironarabe_guest_play_v1',payload,SCORE_SUBMIT_TIMEOUT_MS);},
+    onChange:function(startId,status){if(startId!==state.guestStartId||state.playerName)return;state.guestCountStatus=status;if(state.cleared)updateGuestCountStatus();}
+  });
+  function updateGuestCountStatus(){const status=state.guestCountStatus;setMessage(el.rankNote,status==='success'?'プレイ回数を記録しました':status==='failed'?'プレイ回数を送信できませんでした。接続後に再送します。':'プレイ回数を送信中…');el.rankNote.classList.toggle('err',status==='failed');}
+  function setGuestRecord(){resetNameRecord();setMessage(el.nameRecordTitle,'今回の記録');setMessage(el.recordNameDisplay,'名前なし（ランキング対象外）');el.registeredOnly.forEach(row=>row.hidden=true);setMessage(el.nameRecordStatus,'名前なしのためランキングには登録しません。');updateGuestCountStatus();}
+
   function getRpcUrl(name){const base=(RANKING_CONFIG.supabaseUrl||'').trim().replace(/\/+$/,'');return base?base+'/rest/v1/rpc/'+name:'';}
   function isRankingConfigured(){return Boolean(getRpcUrl('submit_score')&&(RANKING_CONFIG.publishableKey||'').trim());}
-  function postRpc(name,payload,timeoutMs){return new Promise(function(resolve,reject){if(!isRankingConfigured()){reject(new Error('ranking unconfigured'));return;}const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),timeoutMs);fetch(getRpcUrl(name),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal}).then(async function(res){clearTimeout(timeoutId);const text=await res.text();let data=null;if(text){try{data=JSON.parse(text);}catch(e){throw new Error('invalid json');}}if(!res.ok)throw new Error('http '+res.status);resolve(data);}).catch(function(error){clearTimeout(timeoutId);reject(error);});});}
+  async function postRpc(name,payload,timeoutMs){
+    if(!isRankingConfigured())throw new Error('ranking unconfigured');
+    const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const res=await fetch(getRpcUrl(name),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal});
+      const text=await res.text();let data=null;
+      if(text){try{data=JSON.parse(text);}catch(e){throw new Error('invalid json');}}
+      if(!res.ok)throw new Error('http '+res.status);
+      return data;
+    }finally{clearTimeout(timeoutId);}
+  }
   function updateRankingStatus(status){el.rankNote.classList.toggle('err',status==='failed');if(status==='submitting')setMessage(el.rankNote,'ランキング送信中…');else if(status==='success')setMessage(el.rankNote,'ランキングへ登録しました');else if(status==='failed')setMessage(el.rankNote,'ランキング送信に失敗しました');else if(status==='unconfigured')setMessage(el.rankNote,'ランキングは未設定です');else setMessage(el.rankNote,'');}
-  function resetNameRecord(){el.recordNameDisplay.textContent='--';setMessage(el.firstScoreDisplay,'{0}秒',['--.--']);setMessage(el.bestScoreDisplay,'{0}秒',['--.--']);setMessage(el.namePlayCountDisplay,'{0}回プレイ',['--']);setMessage(el.nameRecordStatus,'');el.nameRecordStatus.classList.remove('err');setMessage(el.bestBadge,'');el.bestBadge.style.display='none';}
+  function resetNameRecord(){setMessage(el.nameRecordTitle,'登録名の記録');el.registeredOnly.forEach(row=>row.hidden=false);el.recordNameDisplay.removeAttribute('data-i18n');el.recordNameDisplay.textContent='--';setMessage(el.firstScoreDisplay,'{0}秒',['--.--']);setMessage(el.bestScoreDisplay,'{0}秒',['--.--']);setMessage(el.namePlayCountDisplay,'{0}回プレイ',['--']);setMessage(el.nameRecordStatus,'');el.nameRecordStatus.classList.remove('err');setMessage(el.bestBadge,'');el.bestBadge.style.display='none';}
   function setNameRecordPending(playerName){resetNameRecord();el.recordNameDisplay.textContent=playerName;setMessage(el.nameRecordStatus,'登録名の記録を取得中…');}
   function setNameRecordFailure(){setMessage(el.nameRecordStatus,'登録名の記録を取得できませんでした。');el.nameRecordStatus.classList.add('err');}
   function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;setMessage(el.firstScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_first_score))]);setMessage(el.bestScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_best_score))]);setMessage(el.namePlayCountDisplay,'{0}回プレイ',()=>[formatNumber(Number(record.result_play_count)||0)]);setMessage(el.nameRecordStatus,'Supabaseに保存された登録名の記録です。');el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='登録名の初回記録';else if(record.is_new_best)badge='登録名のベスト更新！';setMessage(el.bestBadge,badge);el.bestBadge.style.display=badge?'inline-block':'none';}
-  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
+  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(!playerName)return;if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
   function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:currentClientVersion()};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
 
   function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');setMessage(statusEl,message||'');statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}
@@ -630,7 +650,8 @@
   document.addEventListener('keydown',function(){sound.unlock();},{capture:true});
   el.startBtn.addEventListener('click',openNameConfirm);
   el.howToBtn.addEventListener('click',function(){const open=el.howToPanel.hidden;el.howToPanel.hidden=!open;el.howToBtn.setAttribute('aria-expanded',String(open));});
-  el.confirmNameBtn.addEventListener('click',confirmPlayerName);
+  el.confirmNameBtn.addEventListener('click',function(){confirmPlayerName();});
+  el.guestStartBtn.addEventListener('click',function(){confirmPlayerName(true);});
   el.nameBackBtn.addEventListener('click',returnHome);
   el.playerNameInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.isComposing){e.preventDefault();confirmPlayerName();}});
   el.retireBtn.addEventListener('click',retire);
@@ -647,11 +668,14 @@
   buildLogoChips();
   buildStagePackDots();
   migrateOldPlayerName();
-  state.playerName=getSavedPlayerName();
+  state.savedName=getSavedPlayerName();
+  state.playerName=state.savedName;
   resetNameRecord();
   setRankingState('idle','');
   refreshLanguage();
   setPhase('home');
+  void guestCounter.retry();
+  window.addEventListener('online',function(){void guestCounter.retry({recover:true});});
 }());
 </script>
 </body>

@@ -12,9 +12,9 @@
 
 ## 追加仕様
 
-4つの同一オリジンJSだけを追加。外部音声・翻訳サービス・有料サービスは使用しない。
+5つの同一オリジンJSだけを追加。外部音声・翻訳サービス・有料サービスは使用しない。
 
-- 全15言語でホームから結果、ランキング、通知、共有まで72メッセージを翻訳する。
+- 全15言語でホームから結果、ランキング、通知、共有まで81メッセージを翻訳する。
 - 初回の優先言語、保存値、未対応言語時はSainome同様の判定。`ironarabe.language.v1`に手動選択を保存。
 - `Intl.NumberFormat`は表示だけに適用。入力名・内部ID・ランキング計算・整数送信値はそのまま。
 - `ironarabe.sound.v1`は初期ON。Web Audioの生成/resumeはユーザー操作中のみ。選択、選択取消、交換、完成、結果発表の5音。
@@ -39,7 +39,7 @@ CLIENT_VERSION = ironarabe-web-1.4.1-stagepack001-v2
 
 `sunset-r0`～`sunset-r3`、`aurora-r0`～`aurora-r3`を従来どおりclient_versionのsuffixとして送る。UI公開版だけ別途 `ironarabe-web-1.5.0-i18n-sound-pages` で識別する。
 
-RPC `submit_score(p_display_name,p_game_slug,p_score,p_client_version)` と `get_best_score_ranking(p_game_slug,p_limit)`、引数、結果、10秒timeoutを維持。送信1プレイ1回のガードと再プレイの旧応答無効化を維持し、自動再送を追加しない。共通規約の新RPC移行・開始カウント方式への変更は、今回の「既存方式を完全維持」という利用者指示に従い行わない。既存 `release/ironarabe-game-registration.json` に切替予定URLを記録し、新RPC向けschemaに実態と異なる冪等性を記載したmanifestは作らない。
+RPC `submit_score(p_display_name,p_game_slug,p_score,p_client_version)` と `get_best_score_ranking(p_game_slug,p_limit)`、引数、結果、10秒timeoutを維持。送信1プレイ1回のガードと再プレイの旧応答無効化を維持し、自動再送を追加しない。名前ありの新RPC移行は行わない。追加依頼により、名前なし開始回数のみ専用の冪等RPCを追加する。既存 `release/ironarabe-game-registration.json` に切替予定URLを記録し、新RPC向けschemaに実態と異なる冪等性を記載したmanifestは作らない。
 
 DBへはSELECTのみ。初回・ベスト・名前・回数・日時・履歴は更新しない。本番試験スコアも送信しない。登録URLの許可対象は `public.games` の `game_slug='ironarabe'` 1件の `game_url` と `share_text` のURL部分だけ。
 
@@ -56,8 +56,10 @@ DBへはSELECTのみ。初回・ベスト・名前・回数・日時・履歴は
 
 ## 公開順序とマージ後受入
 
-1. **PR-Aだけ**を利用者が現在の既定ブランチへマージする。PR段階のCIはテスト/buildのみで配備しない。
-2. `GitHub Pages` workflowの成功と、`github-pages` environmentのdeployment URLを確認する。成果物は `index.html`、4つのruntime JS、SHAとhashを含む `release.json` だけ。内部資料・テスト・設定・DB文書は公開しない。
+名前なし回数の追加SQL（PR-Bの `ironarabe-guest-play-count.sql`、現時点で未適用）は、本体公開前に管理者が適用する。URL切替SQLとは別であり、スコア・名前・履歴の変更や登録URLの先行切替は行わない。
+
+1. **本体追補PR #17**を利用者が現在の既定ブランチへマージする。PR段階のCIはテスト/buildのみで配備しない。
+2. `GitHub Pages` workflowの成功と、`github-pages` environmentのdeployment URLを確認する。成果物は `index.html`、5つのruntime JS、SHAとhashを含む `release.json` だけ。内部資料・テスト・設定・DB文書は公開しない。
 3. `release.json` のsource SHAがマージcommitに一致し、各ファイルhashが一致することを公開検証ツールで確認する。HTTP200だけで新版成功としない。
 4. 新URLで15言語切替、音設定、開始→完成4秒→結果、既存ランキングの読み取りを確認する。試験プレイの `submit_score` はブラウザの通信mockで遮断する。本番へ試験スコアを送信しない。
 5. iPhone 17 Pro Safari縦横の実機で文字欠け、操作、音の聞こえ方、ミュート、背景からの復帰を確認する。実機未確認のまま確認済みとしない。
@@ -92,3 +94,23 @@ Codeberg Pagesは既存静的HTMLにcanonical、新URLへのリンク、必要�
 - DB再読取: `game_scores` 29件 digest `440f2cfaee093e2b24d0a51c953251c1`、`score_runs` 567件 digest `e82361709acd36e75fcf012533e944fe`。調査開始時と一致（全列JSONの順序固定MD5）。登録URLは旧URL1件のまま、asc/100/2も維持。DB書込みなし。
 
 以上はローカル試験と読取証拠であり、新URLでの公開後受入ではない。公開成功・本番送信成功・実機Safari成功を主張しない。
+
+
+## 追加依頼: 名前任意・匿名回数・詳細リンク
+
+- 名前欄は空でも開始でき、保存名がある場合の「名前なしで遊ぶ」も可能。保存名は保持する。
+- 名前ありのスコア/プレイ回数は既存のクリア送信方式を維持。匿名は開始時に専用private表へ1件として数え、偽の「名無し」参加者やスコアは作らない。
+- `start_ironarabe_guest_play_v1` の開始UUIDを永続queueへ保存。ACKが照合できた場合だけqueueから削除し、reload/online/次回開始では同じIDで再送する。replay cleanupはこの未送信queueを残す。通信失敗でもゲームは進行する。
+- 共通 `get_game_play_stats` のイロナラベ合計だけに匿名件数を加算し、名前別順位/初回/ベスト/参加人数は維持する。既存タッケウの匿名合計も維持。
+- ホームと結果の実験場リンクは `https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe`。文言も15言語で当ゲームの詳細ランキングへ変更。
+- 結果は名前の有無に関係なく上位30名。名前なしでは登録名の初回/ベスト/回数を表示せず、順位対象外と回数送信状態を案内する。
+- 追加SQLはPR-Bで用意し本番未適用。ローカルDBとmockで検証し、本番スコアを使った試験は行わない。追加SQLの適用が本体公開の前提、登録URL切替は従来どおり新サイト確認後。
+
+
+### 名前任意の追記後の検証
+本体は既存7検証＋Node86テスト成功。Chromium/WebKitの縦横・匿名/名前あり・上位30名・回数再送・online競合・reloadを含む12シナリオに成功。独立レビューで見つかった本文受信timeout、接続復帰の取りこぼし、待機rowの失敗表示を再現テストで修正した。匿名DB追加は隔離PGliteの15テストで検証し、本番へは適用していない。既存29名/567履歴は全列hashが再度一致した。
+
+
+### 作業中のマージと追補PR
+初回 #16 は2026-10-31 02:26:04 UTCに `50cc78d`、実験場 #37 は02:26:28に `80143a9` としてマージされたことを再取得した。今回の任意名追記はそのマージに含まれていないため、最新の既定ブランチから本体 [#17](https://github.com/chameleonjp-lab/ironarabe/pull/17) / DB [#38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) を作成した。既存branch/historyを強制変更していない。
+初回マージ後の公開run41159990774はbuild/upload成功、configure-pagesの設定取得404でdeploy失敗。新URLも404のまま。管理者のPages設定と追加匿名SQL適用が必要で、追補2PRはDraftとする。本書の今後のPR-A/PR-B手順はこの追補版を指す。URL2列切替は引き続き新サイト受入後のみ。
