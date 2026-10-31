@@ -86,8 +86,8 @@ if (manifest) {
   requireTrue(!index.includes("id=\"homeRankingList\""), "home ranking must be removed");
   requireTrue(!index.includes("id=\"homeBest\""), "home device best must be removed");
   requireTrue(index.includes("const LS={playerName:'ironarabe.v2.playerName',oldPlayerName:'ironarabe.playerName'}"), "name-only storage contract mismatch");
-  requireTrue(index.includes("clearStorageNamespace(localStorage)"), "replay localStorage cleanup missing");
-  requireTrue(index.includes("clearStorageNamespace(sessionStorage)"), "replay sessionStorage cleanup missing");
+  requireTrue(!index.includes("clearStorageNamespace(localStorage)"), "replay must preserve stored records");
+  requireTrue(!index.includes("clearStorageNamespace(sessionStorage)"), "replay must preserve pending session state");
   requireTrue(!/Authorization\s*[:=]/.test(index), "Authorization header must not be used");
 
   requireTrue(status.includes("is_active: true"), "release status must state active registration");

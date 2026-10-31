@@ -2,6 +2,7 @@
   "use strict";
 
   const SOUND_STORAGE_KEY = "ironarabe.sound.v1";
+  const VOLUME_STORAGE_KEY = "ironarabe.volume.v1";
   const MAX_VOICES = 6;
   const INTERACTION_SPACING = { select: 0.035, cancel: 0.04, swap: 0.065 };
   // Each note is [offset, frequency, duration, gain, oscillator type].
@@ -25,6 +26,8 @@
     if (storage === undefined) storage = attempt(() => windowObject.localStorage);
 
     let enabled = attempt(() => storage.getItem(SOUND_STORAGE_KEY)) !== "false";
+    const savedVolume = attempt(() => storage.getItem(VOLUME_STORAGE_KEY));
+    let volumeLevel = savedVolume != null && savedVolume !== '' && Number.isFinite(Number(savedVolume)) && Number(savedVolume) >= 0 && Number(savedVolume) <= 1 ? Number(savedVolume) : 1;
     let context = null;
     let resumePending = false;
     let lastInteractionAt = -Infinity;
@@ -59,6 +62,13 @@
       lastPlayed = {};
     }
 
+    function setVolume(value) {
+      if (!Number.isFinite(value) || value < 0 || value > 1) return;
+      volumeLevel = value;
+      attempt(() => storage.setItem(VOLUME_STORAGE_KEY, String(value)));
+      stop();
+    }
+
     function setEnabled(value) {
       enabled = Boolean(value);
       attempt(() => storage.setItem(SOUND_STORAGE_KEY, String(enabled)));
@@ -69,7 +79,7 @@
     // Main calls this directly in its pointer/keyboard/click handler. In
     // particular, do not move resume() behind a promise, timeout or await.
     function unlock() {
-      if (!enabled || isHidden()) return false;
+      if (!enabled || volumeLevel === 0 || isHidden()) return false;
       try {
         if (context && context.state === "closed") {
           stop();
@@ -100,7 +110,7 @@
     function play(kind) {
       const addedVoices = [];
       try {
-        if (!Object.prototype.hasOwnProperty.call(SOUNDS, kind) || !enabled || !context || context.state !== "running" || isHidden()) return false;
+        if (!Object.prototype.hasOwnProperty.call(SOUNDS, kind) || !enabled || volumeLevel === 0 || !context || context.state !== "running" || isHidden()) return false;
         const now = context.currentTime;
         if (!Number.isFinite(now) || now < 0) return false;
         const spacing = INTERACTION_SPACING[kind];
@@ -126,7 +136,7 @@
           voice.oscillator.type = type;
           voice.oscillator.frequency.setValueAtTime(frequency, start);
           voice.gain.gain.setValueAtTime(0, start);
-          voice.gain.gain.linearRampToValueAtTime(volume, start + 0.004);
+          voice.gain.gain.linearRampToValueAtTime(volume * volumeLevel, start + 0.004);
           voice.gain.gain.exponentialRampToValueAtTime(0.0001, end - 0.003);
           voice.gain.gain.linearRampToValueAtTime(0, end);
           voice.oscillator.connect(voice.gain);
@@ -150,10 +160,10 @@
     attempt(() => documentObject.addEventListener("visibilitychange", () => { if (isHidden()) stop(); }));
     attempt(() => windowObject.addEventListener("pagehide", stop));
 
-    return { isEnabled: () => enabled, setEnabled, unlock, play, stop };
+    return { getVolume: () => volumeLevel, setVolume, isEnabled: () => enabled, setEnabled, unlock, play, stop };
   }
 
-  const api = { createSoundEffects, SOUND_STORAGE_KEY };
+  const api = { createSoundEffects, SOUND_STORAGE_KEY, VOLUME_STORAGE_KEY };
   if (typeof module === "object" && module.exports) module.exports = api;
   root.IronarabeSound = api;
 }(typeof globalThis === "object" ? globalThis : this));

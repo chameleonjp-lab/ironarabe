@@ -34,8 +34,6 @@ const required = [
   ["const LOCAL_CACHE_PREFIX='ironarabe.'", "application cache namespace missing"],
   ["const LS={playerName:'ironarabe.v2.playerName',oldPlayerName:'ironarabe.playerName'}", "only current and legacy player-name keys may remain"],
   ["key!==LS.playerName", "current player name must be preserved"],
-  ["clearStorageNamespace(localStorage)", "localStorage cleanup missing"],
-  ["clearStorageNamespace(sessionStorage)", "sessionStorage cleanup missing"],
   ["state.playId+=1", "replay must invalidate prior play callbacks"],
   ["state.rankingRequestId+=1", "replay must invalidate prior ranking callbacks"],
   ["state.rankingRows=[]", "ranking memory cache must be cleared"],

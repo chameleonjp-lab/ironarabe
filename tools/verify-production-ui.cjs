@@ -81,8 +81,6 @@ if (errors.length === 0) {
     ["登録名のプレイ回数", "registered-name play count missing"],
     ["const LOCAL_CACHE_PREFIX='ironarabe.'", "cache namespace missing"],
     ["function replay(){clearReplayCachePreserveName();returnHome();}", "replay cache clearing missing"],
-    ["clearStorageNamespace(localStorage)", "localStorage cache clearing missing"],
-    ["clearStorageNamespace(sessionStorage)", "sessionStorage cache clearing missing"],
     ["key!==LS.playerName", "saved-name preservation missing"],
     ["el.againBtn.addEventListener('click',replay)", "replay handler mismatch"]
   ];
