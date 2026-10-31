@@ -29,7 +29,7 @@ const required = [
   ["p_limit:RANKING_LIMIT", "ranking limit payload missing"],
   ["function setRankingState(status,message){const statusEl=el.resultRankingStatus", "ranking state must target result only"],
   ["function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows)", "ranking renderer must target result only"],
-  ["function replay(){clearReplayCachePreserveName();openNameConfirm();}", "replay entry point missing"],
+  ["function replay(){clearReplayCachePreserveName();returnHome();}", "replay entry point missing"],
   ["el.againBtn.addEventListener('click',replay)", "replay button must use cache-clearing path"],
   ["const LOCAL_CACHE_PREFIX='ironarabe.'", "application cache namespace missing"],
   ["const LS={playerName:'ironarabe.v2.playerName',oldPlayerName:'ironarabe.playerName'}", "only current and legacy player-name keys may remain"],
