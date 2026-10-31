@@ -74,13 +74,13 @@ if (manifest) {
   requireTrue(index.includes("const GAME_URL='https://chameleonjp-lab.github.io/ironarabe/'"), "index GAME_URL mismatch");
   requireTrue(index.includes("CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2'"), "index CLIENT_VERSION mismatch");
   requireTrue(index.includes("const STAGES=buildStages()"), "index stage-pack contract missing");
-  requireTrue(index.includes("p_client_version:currentClientVersion()"), "stage-aware p_client_version missing");
+  requireTrue(index.includes("scoreQueue.capture(state.playerName,currentClientVersion())"), "stage-aware p_client_version missing");
   requireTrue(index.includes("const SCORE_SCALE=100, SCORE_DECIMALS=2"), "index score scale or decimals mismatch");
-  requireTrue(index.includes("postRpc('submit_score'"), "shared submit_score RPC missing");
+  requireTrue(index.includes("postRpc('submit_score_once_shared_v1'"), "shared submit_score RPC missing");
   requireTrue(index.includes("postRpc('get_best_score_ranking'"), "best ranking RPC missing");
   requireTrue(index.includes("p_display_name"), "p_display_name missing");
   requireTrue(index.includes("p_game_slug"), "p_game_slug missing");
-  requireTrue(index.includes("p_score"), "p_score missing");
+  requireTrue(index.includes("scoreQueue.enqueue(state.scorePlay,score"), "p_score missing");
   requireTrue(index.includes("登録名のベスト記録"), "registered-name best record missing");
   requireTrue(index.includes("id=\"resultRankingList\""), "result ranking missing");
   requireTrue(!index.includes("id=\"homeRankingList\""), "home ranking must be removed");

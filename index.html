@@ -410,7 +410,7 @@
       <div class="record-line"><span class="label" data-i18n="操作回数">操作回数</span><span class="val" id="resultOperations">0回</span></div>
       <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
     </div>
-    <div class="rank-note" id="rankNote" aria-live="polite"></div>
+    <div class="rank-note" id="rankNote" aria-live="polite"></div><button id="retryScore" type="button" data-i18n="再試行" hidden>再試行</button>
     <div class="card ranking-card" aria-label="ベストタイムランキング30位まで" data-i18n-attrs="aria-label">
       <div class="ranking-title"><h3 data-i18n="ベストタイムランキング">ベストタイムランキング</h3><span data-i18n="30位まで">30位まで</span></div>
       <div class="ranking-status" id="resultRankingStatus" aria-live="polite" data-i18n="読み込み中…">読み込み中…</div>
@@ -435,6 +435,7 @@
 <script src="js/sound-effects.js"></script>
 <script src="js/stage-pack.js"></script>
 <script src="js/guest-plays.js"></script>
+<script src="js/score-queue.js"></script>
 <script>
 "use strict";
 (function () {
@@ -498,6 +499,11 @@
     homeBtn:document.getElementById('homeBtn'), resultLabLink:document.getElementById('resultLabLink')
   };
 
+  const scoreQueue=CommonScoreQueue.createScoreQueue({gameSlug:GAME_SLUG,
+    storage:(()=>{try{return localStorage;}catch{return null;}})(),
+    send:payload=>postRpc('submit_score_once_shared_v1',payload,SCORE_SUBMIT_TIMEOUT_MS),
+    onChange:onScoreQueueChange});
+
   function safeStorageGet(key){try{return localStorage.getItem(key);}catch(e){return null;}}
   function safeStorageSet(key,value){try{localStorage.setItem(key,value);return true;}catch(e){return false;}}
   function elapsedMsToScore(ms){return Math.round(ms/10);}
@@ -529,7 +535,7 @@
   function clearAllToasts(){clearToast('home');clearToast('result');}
   function hideCompletion(){el.completionBanner.hidden=true;setMessage(el.completionSummary,'');}
   function clearPendingTimers(){clearCountdownTimers();clearClearTimer();clearSwapTimer();clearAllToasts();}
-  function returnHome(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
+  function returnHome(){state.scorePlay=null;sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
 
   function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -547,7 +553,7 @@
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
-  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');return state.playId;}
+  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');state.scorePlay=scoreQueue.capture(state.playerName,currentClientVersion());document.getElementById('retryScore').hidden=true;return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);if(!state.playerName)state.guestStartId=guestCounter.record(currentClientVersion());if(!state.playerName&&!state.guestStartId)state.guestCountStatus='failed';});}
   function startCountdown(playId){if(state.phase!=='home')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.startBtn.disabled=true;el.guestStartBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
   function startGame(anonymous=false){if(state.phase!=='home'||el.startBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);el.playerNameInput.focus();return;}setMessage(el.nameError,'');state.playerName=v.name;if(!anonymous){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
@@ -623,7 +629,7 @@
       const res=await fetch(getRpcUrl(name),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal});
       const text=await res.text();let data=null;
       if(text){try{data=JSON.parse(text);}catch(e){throw new Error('invalid json');}}
-      if(!res.ok)throw new Error('http '+res.status);
+      if(!res.ok){const error=new Error('http '+res.status);error.code=data?.code;throw error;}
       return data;
     }finally{clearTimeout(timeoutId);}
   }
@@ -632,8 +638,21 @@
   function setNameRecordPending(playerName){resetNameRecord();el.recordNameDisplay.textContent=playerName;setMessage(el.nameRecordStatus,'登録名の記録を取得中…');}
   function setNameRecordFailure(){setMessage(el.nameRecordStatus,'登録名の記録を取得できませんでした。');el.nameRecordStatus.classList.add('err');}
   function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;setMessage(el.firstScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_first_score))]);setMessage(el.bestScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_best_score))]);setMessage(el.namePlayCountDisplay,'{0}回プレイ',()=>[formatNumber(Number(record.result_play_count)||0)]);setMessage(el.nameRecordStatus,'Supabaseに保存された登録名の記録です。');el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='登録名の初回記録';else if(record.is_new_best)badge='登録名のベスト更新！';setMessage(el.bestBadge,badge);el.bestBadge.style.display=badge?'inline-block':'none';}
-  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(!playerName)return;if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
-  function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:currentClientVersion()};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
+  function onScoreQueueChange(item,receipt){
+    if(item.id!==state.scorePlay?.id)return;
+    document.getElementById('retryScore').hidden=item.state!=='pending';
+    if(item.state==='sending')updateRankingStatus('submitting');
+    else if(item.state==='submitted'){updateRankingStatus('success');applyNameRecord(receipt);loadRankings(true);}
+    else{updateRankingStatus('failed');setNameRecordFailure();}
+  }
+  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){
+    if(!playerName||state.submittedPlayId===playId)return;
+    state.submittedPlayId=playId;
+    const score=elapsedMsToScore(elapsedMs);
+    if(!isRankingConfigured()||!isValidScore(score)||!state.scorePlay){updateRankingStatus('failed');return;}
+    scoreQueue.enqueue(state.scorePlay,score,{elapsedMs,operations:state.operations,stageId:state.stage.id});
+    void scoreQueue.drain();
+  }
 
   function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');setMessage(statusEl,message||'');statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}
   function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';setMessage(rank,'{0}位',()=>[formatNumber(row.rankNo)]);const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent=t('秒');score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
@@ -669,6 +688,8 @@
   el.board.addEventListener('contextmenu',function(e){e.preventDefault();});
   el.againBtn.addEventListener('click',replay);
   el.homeBtn.addEventListener('click',returnHome);
+  el.playerNameInput.addEventListener('input',()=>{const value=validateName(el.playerNameInput.value);if(value.ok){state.savedName=value.name;safeStorageSet(LS.playerName,value.name);}});
+  document.getElementById('retryScore').addEventListener('click',()=>{void scoreQueue.drain();});
   document.getElementById('reloadRanking').addEventListener('click',()=>loadRankings(true));
   el.homeLabLink.href=LAB_URL;
   el.resultLabLink.href=LAB_URL;
@@ -686,6 +707,17 @@
   setPhase('home');
   void guestCounter.retry();
   window.addEventListener('online',function(){void guestCounter.retry({recover:true});});
+  const restoredScore=scoreQueue.list().at(-1);
+  if(restoredScore?.presentation&&Number.isFinite(restoredScore.presentation.elapsedMs)){
+    const stage=STAGES.find(value=>value.id===restoredScore.presentation.stageId);
+    if(stage){state.stage=stage;state.scorePlay={id:restoredScore.id,name:restoredScore.payload.p_display_name,clientVersion:restoredScore.payload.p_client_version};
+      state.playerName=state.scorePlay.name;state.elapsedMs=restoredScore.presentation.elapsedMs;state.operations=restoredScore.presentation.operations;
+      state.cleared=true;state.playId+=1;state.clearPlayId=state.playId;state.submittedPlayId=state.playId;
+      setNameRecordPending(state.playerName);showResult(state.playId);onScoreQueueChange(restoredScore,null);
+    }
+  }
+  window.addEventListener('online',()=>{void scoreQueue.drain();});
+  void scoreQueue.drain();
 }());
 </script>
 </body>

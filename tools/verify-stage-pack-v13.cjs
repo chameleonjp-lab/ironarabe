@@ -116,7 +116,7 @@ const required = [
   ["chooseNextStage();state.tiles=buildTiles(state.stage.challenge)", "stage must be selected before tile generation"],
   ["SHUFFLE_SEED='ironarabe-official-001-v1'", "official shuffle seed changed"],
   ["FIXED_COORDS=[[0,0],[3,0],[6,0],[0,4],[6,4],[0,8],[3,8],[6,8]]", "fixed coordinates changed"],
-  ["p_client_version:currentClientVersion()", "stage ID must be included in submitted client version"],
+  ["scoreQueue.capture(state.playerName,currentClientVersion())", "stage ID must be included in submitted client version"],
   ["id=\"stagePackDots\"", "home stage pack indicator missing"],
   ["id=\"countdownStage\"", "countdown stage label missing"],
   ["id=\"stageDisplay\"", "playing stage label missing"],

@@ -71,7 +71,7 @@ for (const [needle, message] of forbidden) check(!html.includes(needle), message
 const returnHome = (html.match(/function returnHome\(\)\{[^\n]+/) || [""])[0];
 const showResult = (html.match(/function showResult\(playId\)\{[^\n]+/) || [""])[0];
 const startup = html.slice(html.lastIndexOf("buildLogoChips();"));
-const submitFlow = (html.match(/function submitScoreForCurrentPlay\([^\n]+/) || [""])[0];
+const submitFlow = html.slice(html.indexOf("function onScoreQueueChange("),html.indexOf("function submitScoreForCurrentPlay("));
 
 check(returnHome.length > 0, "returnHome function missing");
 check(!returnHome.includes("loadRankings("), "home return still performs ranking I/O");
