@@ -1,0 +1,97 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - claude/ironarabe-new-game-wlys30
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages-${{ github.event_name == 'push' && github.ref || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify the checked out commit
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Test game and release contracts
+        run: npm test
+      - name: Install test browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Test the game in Chromium and WebKit
+        run: npm run test:browser
+      - name: Build the public allowlist from this commit
+        run: node tools/prepare-github-pages.cjs --sha "$GITHUB_SHA" --require-clean
+      - name: Verify artifact contents and build SHA
+        run: node tools/verify-github-pages.cjs --dir _site --sha "$GITHUB_SHA"
+      - name: Upload Pages artifact
+        if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Read the existing Pages configuration
+        uses: actions/configure-pages@v5
+        with:
+          enablement: false
+      - name: Deploy the verified artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify-publication:
+    if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the deployed commit for the verifier
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Rebuild expected public hashes from the deployed commit
+        run: node tools/prepare-github-pages.cjs --sha "$GITHUB_SHA" --require-clean
+      - name: Verify public build SHA and runtime integrity
+        env:
+          PAGES_URL: ${{ needs.deploy.outputs.page_url }}
+        run: node tools/verify-github-pages.cjs --url "$PAGES_URL" --sha "$GITHUB_SHA" --expected-release _site/release.json

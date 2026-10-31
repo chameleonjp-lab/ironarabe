@@ -1,0 +1,12 @@
+{
+  "name": "ironarabe",
+  "private": true,
+  "version": "1.5.0",
+  "scripts": {
+    "test": "node tools/verify-all.cjs && node --test --test-isolation=none test/*.test.cjs",
+    "test:browser": "node test/browser.cjs",
+    "build": "node tools/prepare-github-pages.cjs"
+  },
+  "devDependencies": { "playwright": "1.62.1" },
+  "engines": { "node": ">=24" }
+}

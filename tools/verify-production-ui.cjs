@@ -20,7 +20,13 @@ if (errors.length === 0) {
   const externalScripts = [...html.matchAll(/<script\s+src=/g)];
 
   check(inlineScripts.length === 1, "index.html must contain exactly one inline game script");
-  check(externalScripts.length === 0, "production index.html must not require external scripts");
+  const scriptPaths = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
+  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js'];
+  check(JSON.stringify(scriptPaths) === JSON.stringify(localScripts), "production scripts must be the four reviewed same-origin runtime files, in dependency order");
+  for (const file of localScripts) {
+    try { new Function(fs.readFileSync(path.join(root, file), 'utf8')); }
+    catch (error) { errors.push(`${file} missing or invalid: ${error.message}`); }
+  }
 
   if (inlineScripts.length === 1) {
     try {
@@ -131,4 +137,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log("OK: production result-only ranking and name-only cache contract verified");
+console.log("OK: production result-only ranking and persistent preferences contract verified");
