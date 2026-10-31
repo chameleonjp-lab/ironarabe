@@ -73,7 +73,7 @@ test("release metadata identifies the UI release without changing ranking compat
   const release = checkBuild(f);
   assert.equal(release.build_sha, sha);
   assert.equal(release.source_sha, sha);
-  assert.equal(release.ui_release, "ironarabe-web-1.6.1-home-name");
+  assert.equal(release.ui_release, "ironarabe-web-1.6.2-x-share");
   assert.equal(release.client_version, "ironarabe-web-1.4.1-stagepack001-v2");
   assert.equal(release.game_slug, "ironarabe");
   assert.equal(release.challenge_id, "ironarabe-official-001");

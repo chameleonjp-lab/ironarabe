@@ -20,7 +20,7 @@ const RELEASE_CONTRACT = Object.freeze({
   builder: "ironarabe-github-pages",
   game_slug: "ironarabe",
   client_version: "ironarabe-web-1.4.1-stagepack001-v2",
-  ui_release: "ironarabe-web-1.6.1-home-name",
+  ui_release: "ironarabe-web-1.6.2-x-share",
   challenge_id: "ironarabe-official-001",
   board_version: 2,
   shuffle_seed: "ironarabe-official-001-v1"
