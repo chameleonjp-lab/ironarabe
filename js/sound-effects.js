@@ -27,7 +27,7 @@
 
     let enabled = attempt(() => storage.getItem(SOUND_STORAGE_KEY)) !== "false";
     const savedVolume = attempt(() => storage.getItem(VOLUME_STORAGE_KEY));
-    let volumeLevel = savedVolume != null && savedVolume !== '' && Number.isFinite(Number(savedVolume)) && Number(savedVolume) >= 0 && Number(savedVolume) <= 1 ? Number(savedVolume) : 1;
+    let volumeLevel = savedVolume != null && String(savedVolume).trim() !== '' && Number.isFinite(Number(savedVolume)) && Number(savedVolume) >= 0 && Number(savedVolume) <= 1 ? Number(savedVolume) : 1;
     let context = null;
     let resumePending = false;
     let lastInteractionAt = -Infinity;
