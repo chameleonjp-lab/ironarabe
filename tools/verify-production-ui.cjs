@@ -21,8 +21,8 @@ if (errors.length === 0) {
 
   check(inlineScripts.length === 1, "index.html must contain exactly one inline game script");
   const scriptPaths = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
-  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js','js/guest-plays.js'];
-  check(JSON.stringify(scriptPaths) === JSON.stringify(localScripts), "production scripts must be the five reviewed same-origin runtime files, in dependency order");
+  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js','js/stage-pack.js','js/guest-plays.js'];
+  check(JSON.stringify(scriptPaths) === JSON.stringify(localScripts), "production scripts must be the six reviewed same-origin runtime files, in dependency order");
   for (const file of localScripts) {
     try { new Function(fs.readFileSync(path.join(root, file), 'utf8')); }
     catch (error) { errors.push(`${file} missing or invalid: ${error.message}`); }
@@ -48,7 +48,7 @@ if (errors.length === 0) {
     ["STAGE_ROTATION_NAMES=['0°','90°','180°','270°']", "stage rotation contract missing"],
     ["{id:'sunset',name:'夕映え',corners:['#f36b6b','#f0c46a','#5fd0b5','#7b6ff0']}", "sunset palette changed"],
     ["{id:'aurora',name:'極光',corners:['#6bf3f3','#6a96f0','#d05f7a','#e4f06f']}", "aurora palette changed"],
-    ["const STAGES=buildStages()", "eight-stage generation missing"],
+    ["const STAGES=buildStages()", "stage generation missing"],
     ["SHUFFLE_SEED='ironarabe-official-001-v1'", "official seed changed"],
     ["FIXED_COORDS=[[0,0],[3,0],[6,0],[0,4],[6,4],[0,8],[3,8],[6,8]]", "fixed coordinates changed"],
     ["chooseNextStage();state.tiles=buildTiles(state.stage.challenge)", "stage selection is not wired into play preparation"],

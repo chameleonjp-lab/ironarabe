@@ -8,7 +8,7 @@
 
   const GUEST_PENDING_PREFIX = 'ironarabe.guestPlay.v1.';
   const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const VERSION_PATTERN = /^ironarabe-web-1\.4\.1-stagepack001-v2-(sunset|aurora)-r[0-3]$/;
+  const VERSION_PATTERN = /^ironarabe-web-1\.4\.1-stagepack001-v2-(sunset|aurora|ocean|leaf|amber|wisteria|coral|nebula|breeze|autumn)-r[0-3]$/;
 
   function attempt(operation) {
     try { return operation(); }

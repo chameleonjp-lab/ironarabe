@@ -5,26 +5,29 @@
 ## 遊び方
 
 1. ホームの「ゲームを始める」から、任意でプレイヤー名を入力します。ランキングに登録する場合だけ名前が必要です。
-2. 全8ステージから1つが選ばれます。
+2. 全40ステージから1つが選ばれます。
 3. `3 → 2 → 1 → START`の後に盤面と計測が始まります。
 4. 動かせるタイルを2枚選ぶと交換され、操作回数が1増えます。
 5. 右上に印のある8枚は固定タイルで動かせません。
 6. 全タイルを正しい位置へ戻すと、その操作時点でタイムが止まります。
 7. 完成盤面を4秒表示した後、結果画面へ進みます。
 
-## 8ステージ
+## 40ステージ
 
 - `夕映え`: 0°・90°・180°・270°
 - `極光`: 0°・90°・180°・270°
+- `青海`・`若葉`・`琥珀`・`藤霞`・`珊瑚`・`星雲`・`潮風`・`紅葉`: それぞれ0°・90°・180°・270°
 
-8ステージをシャッフルバッグ方式で選び、同じバッグ内では重複しません。固定座標、タイルID、動かせるタイルの初期並び、公式シャッフルseedは全ステージで共通です。
+既存8問に、新しい基準8色と配置による32問を追加しました。40ステージをシャッフルバッグ方式で選び、同じバッグ内では重複しません。固定座標、タイルID、動かせるタイルの初期並び、公式シャッフルseedは全ステージで共通です。既存8問の色・番号・IDは維持しています。
+
+完成図と配色方式は [STAGE_PACK_40.md](./STAGE_PACK_40.md) を参照してください。
 
 ## ホーム画面
 
 ホームはゲーム開始を優先します。
 
 - 開始・遊び方・シェア
-- 全8ステージ表示
+- 全40ステージ表示
 - イロナラベの詳細ランキングへの導線
 
 ホーム画面にはランキングと端末ローカルベストを表示しません。ページ初期化時とホーム復帰時にはランキング取得RPCを実行しません。
@@ -77,19 +80,19 @@ Supabaseのスコア履歴は削除しません。未送信の匿名開始回数
 
 Web Audio APIで選択・キャンセル・交換・完成・結果発表の5音を生成します。初期値はONで、ホームと結果画面から変更できます。利用者操作で音声を有効化し、設定は再プレイ後も維持します。音声が使えなくてもプレイできます。
 
-## 公開状況（切替準備・未公開）
+## 公開状況
 
 ```text
 https://chameleonjp-lab.github.io/ironarabe/
 ```
 
-上記は移行先の正式URLです。2026-10-31の作業時点ではHTTP 404で、稼働確認は未完了です。PR-Aマージ後の公開確認を経て実験場・Supabaseを切り替えます。
+2026-10-31、上記の正式URLで既定ブランチのマージSHA `5a24e28`（8問版）の配信を確認しました。15言語、音設定、開始から結果、既存ランキングの読取をChromium/WebKitで受入済みです。今回の40問版はPRマージ待ちです。
 
 現在稼働中の旧公開先は `https://chameleonjp.codeberg.page/ironarabe/` です。今回停止・削除しません。
 
 GitHub Pagesは `.github/workflows/github-pages.yml` で、既定ブランチ `claude/ironarabe-new-game-wlys30` へのマージ後に自動配備します。PRでは検証のみ実行し、本番配備しません。公開設定と順序は [GITHUB_PAGES_MIGRATION.md](./GITHUB_PAGES_MIGRATION.md) を参照してください。
 
-Supabase登録は有効なまま維持します。登録URLは公開確認後まで旧URLのままです。
+Supabase登録は有効なまま維持しています。公開確認後、対象1件の `game_url` と `share_text` 内のURLだけを新URLへ変更しました。既存スコア・履歴・他ゲームの登録は変更していません。
 
 ```text
 is_active: true
@@ -125,13 +128,14 @@ node tools/verify-result-only-v14.cjs
 
 ## ドキュメント
 
-- 今回の追加仕様・公開手順: [GITHUB_PAGES_MIGRATION.md](./GITHUB_PAGES_MIGRATION.md)
-- ゲームの基本仕様: [SPEC_v4.md](./SPEC_v4.md)
-- 現在の確認項目: [REVIEW_CHECKLIST_v4.md](./REVIEW_CHECKLIST_v4.md)
+- 40問の配色・互換性・検証: [STAGE_PACK_40.md](./STAGE_PACK_40.md)
+- 公開移行手順: [GITHUB_PAGES_MIGRATION.md](./GITHUB_PAGES_MIGRATION.md)
+- 既存8問時点の基本仕様: [SPEC_v4.md](./SPEC_v4.md)
+- 既存8問時点の確認項目: [REVIEW_CHECKLIST_v4.md](./REVIEW_CHECKLIST_v4.md)
 - 旧Codeberg版の確認記録: [RELEASE_STATUS_v3.md](./RELEASE_STATUS_v3.md)
 - 旧Codeberg公開設定（履歴）: [CODEBERG_PUBLISH_SETUP_v1.md](./CODEBERG_PUBLISH_SETUP_v1.md)
 - 旧Codeberg公開確認（履歴）: [PUBLICATION_VERIFICATION_v1.md](./PUBLICATION_VERIFICATION_v1.md)
-- Supabase登録の切替予定値（DB未適用）: [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)
+- Supabase登録のURL切替時に使った予定値の記録: [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)
 - Supabaseプリフライト結果: [release/supabase-preflight-v1.json](./release/supabase-preflight-v1.json)
 - 難易度比較: [DIFFICULTY_STUDY_v1.md](./DIFFICULTY_STUDY_v1.md)
 - 旧仕様: [SPEC_v3.md](./SPEC_v3.md)、[REVIEW_CHECKLIST_v3.md](./REVIEW_CHECKLIST_v3.md)、[RELEASE_STATUS_v2.md](./RELEASE_STATUS_v2.md)
@@ -143,6 +147,6 @@ node tools/verify-result-only-v14.cjs
 
 名前ありは従来どおりクリア時に既存ランキングへ送信します。名前なしは実際にプレイ画面へ進んだ時点で専用RPCへ開始回数だけを送信し、名前・スコア・参加者・順位を作りません。回数の未送信記録は端末に保存し、reload/online/次回開始で同じUUIDを再送するため、通信断からの再送で二重計上されません。
 
-この追加機能には [DB追補PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) の `ironarabe-guest-play-count.sql` 適用が必要です。追加SQLは現時点で本番未適用で、匿名回数の本番計測を確認済みとは扱いません。追加SQLを管理者が適用してから本体を公開し、URL2列切替SQLは新サイトの公開後受入が済んでから適用します。
+この追加機能には実験場の `docs/chameleonjp-lab/sql/ironarabe-guest-play-count.sql` 適用が必要です。40問への拡張後は [40問用DB手順](https://github.com/chameleonjp-lab/chameleonjp_lab/blob/main/docs/chameleonjp-lab/16_ironarabe_stage_pack_40.md) に従い、初回用と旧8問適用済み用の経路を選びます。匿名開始SQLは現時点で本番未適用で、匿名回数の本番計測を確認済みとは扱いません。管理者が40問対応SQLを適用してから40問版を公開します。登録URL2列の切替は先行8問版の公開後受入を経て完了しています。
 
-初回PR #16はマージ済みですがPages未設定で公開は未完了です。任意名の追補は [PR #17](https://github.com/chameleonjp-lab/ironarabe/pull/17)、匿名回数SQLは [PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) を参照してください。
+初回PR #16、任意名の [PR #17](https://github.com/chameleonjp-lab/ironarabe/pull/17)、匿名回数SQLの [PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) はマージ済みで、Pagesの設定と公開は完了しています。匿名開始回数のSQLは本番未適用です。

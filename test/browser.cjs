@@ -73,7 +73,7 @@ async function acceptance(engine,viewport,failAudio=false){
   assert.equal(calls.filter(c=>c.method==='submit_score').length,1);
   const sent=calls.find(c=>c.method==='submit_score').payload;
   assert.equal(sent.p_game_slug,'ironarabe');assert.equal(sent.p_display_name,'Alice 日本語');assert.ok(Number.isInteger(sent.p_score)&&sent.p_score>0);
-  assert.match(sent.p_client_version,/^ironarabe-web-1\.4\.1-stagepack001-v2-(sunset|aurora)-r[0-3]$/);
+  assert.match(sent.p_client_version,/^ironarabe-web-1\.4\.1-stagepack001-v2-(sunset|aurora|ocean|leaf|amber|wisteria|coral|nebula|breeze|autumn)-r[0-3]$/);
   assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='complete').length),1);assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='result').length),1);
   assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='swap').length),moves);
   releaseSubmit();await page.waitForFunction(()=>document.querySelector('#namePlayCountDisplay').textContent.includes('8'));
@@ -166,9 +166,47 @@ async function guestRecoveryAcceptance(engine){
   console.log(`PASS ${engine.name()} guest recovery: online during failed request and reload preserve exact start IDs`);
  }finally{releaseFirst?.();await context.close();await browser.close();}
 }
+async function stagePackAcceptance(engine){
+ const {loadGameStages}=require('../tools/game-stage-contract.cjs'),game=loadGameStages(),catalog=require('../js/translations.js');
+ const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
+ const calls=[],errors=[],seen=new Set();page.on('pageerror',error=>errors.push(error.message));
+ await page.addInitScript(()=>localStorage.setItem('ironarabe.sound.v1','false'));
+ await page.route('https://*.supabase.co/**',async route=>{
+  const request=route.request(),method=new URL(request.url()).pathname.split('/').pop(),payload=request.postDataJSON();calls.push({method,payload});
+  if(method==='submit_score')await route.fulfill({json:[{accepted:true,result_display_name:'Stage Audit',result_first_score:100,result_best_score:100,result_play_count:calls.filter(c=>c.method==='submit_score').length,is_first_play:false,is_new_best:false}]});
+  else if(method==='get_best_score_ranking'){assert.equal(payload.p_limit,30);await route.fulfill({json:[{rank_no:1,display_name:'Existing record',best_score:100}]});}
+  else throw Error('Unexpected stage audit RPC '+method);
+ });
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.click('#startBtn');await page.fill('#playerNameInput','Stage Audit');
+  for(let play=0;play<40;play++){
+   const language=languages[play%languages.length];await switchLanguage(page,language);
+   await page.locator('#confirmNameBtn').dispatchEvent('click');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+   assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');assert.equal(await page.locator('.tile').count(),63);assert.equal(await page.locator('.tile.fixed').count(),8);
+   for(const viewport of [{width:402,height:874},{width:874,height:402}]){await page.setViewportSize(viewport);await bounds(page);}
+   const response=page.waitForResponse(r=>r.url().endsWith('/submit_score'));
+   const moves=await page.evaluate(board=>{
+    let moves=0;for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);document.querySelector(`.tile[data-pos="${i}"]`).click();document.querySelector(`.tile[data-pos="${j}"]`).click();[board[i],board[j]]=[board[j],board[i]];moves++;}return moves;
+   },boardFixture.slice());
+   assert.equal(moves,49);assert.equal(await page.locator('#completionBanner').isVisible(),true);await response;
+   const submitted=calls.filter(c=>c.method==='submit_score');assert.equal(submitted.length,play+1,'one score submission per clear');
+   const payload=submitted.at(-1).payload;assert.equal(payload.p_game_slug,'ironarabe');assert.equal(payload.p_display_name,'Stage Audit');assert.ok(Number.isInteger(payload.p_score)&&payload.p_score>0);
+   const stage=game.STAGES.find(s=>game.CLIENT_VERSION+'-'+s.id===payload.p_client_version);assert.ok(stage,'a real stage ID is sent using the unchanged version prefix');assert.ok(!seen.has(stage.id),'no repeated problem in the forty-stage bag');seen.add(stage.id);
+   const colors=await page.locator('.tile').evaluateAll(tiles=>tiles.map(tile=>tile.style.background.replace(/\s/g,'')));
+   assert.deepEqual(colors,Array.from(game.buildTiles(stage.challenge),tile=>tile.color.replace(/\s/g,'')),stage.id+' actual browser colors match the complete board');
+   const nf=new Intl.NumberFormat(language);assert.equal(await page.locator('#stageDisplay').innerText(),nf.format(stage.number)+' / '+nf.format(40));assert.equal(await page.locator('#stageDisplay').getAttribute('title'),catalog[language][stage.paletteName]+' '+nf.format(stage.rotation*90)+'°');
+   await page.clock.runFor(4001);assert.equal(await page.locator('body').getAttribute('data-phase'),'result');await page.locator('.ranking-row').waitFor();await bounds(page);
+   assert.equal(await page.locator('#resultStage').innerText(),catalog[language][stage.paletteName]+' '+nf.format(stage.rotation*90)+'° ('+nf.format(stage.number)+' / '+nf.format(40)+')');
+   if(play<39){await page.locator('#againBtn').dispatchEvent('click');assert.equal(await page.inputValue('#playerNameInput'),'Stage Audit');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'false');}
+  }
+  assert.equal(seen.size,40);assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} all 40 stages: 63 colors, 8 anchors, 49 swaps, portrait/landscape, translated names, results, compatible mock scores`);
+ }finally{await context.close();await browser.close();}
+}
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{
- if(process.env.BROWSER_SUITE!=='guest')for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
- if(process.env.BROWSER_SUITE!=='guest')for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))await failureAcceptance(engine);
- for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))for(const viewport of [{width:402,height:874},{width:874,height:402}])await guestAcceptance(engine,viewport);
- for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))await guestRecoveryAcceptance(engine);
+ const engines=process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit],suite=process.env.BROWSER_SUITE;
+ if(suite!=='guest'&&suite!=='stage-pack')for(const engine of engines)for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
+ if(suite!=='guest'&&suite!=='stage-pack')for(const engine of engines)await failureAcceptance(engine);
+ if(suite!=='stage-pack')for(const engine of engines)for(const viewport of [{width:402,height:874},{width:874,height:402}])await guestAcceptance(engine,viewport);
+ if(suite!=='stage-pack')for(const engine of engines)await guestRecoveryAcceptance(engine);
+ if(suite!=='guest')for(const engine of engines)await stagePackAcceptance(engine);
 }finally{server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

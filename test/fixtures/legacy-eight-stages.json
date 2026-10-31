@@ -1,0 +1,53 @@
+{
+  "sourceCommit": "5a24e28",
+  "stages": [
+    {
+      "id": "sunset-r0",
+      "number": 1,
+      "challengeId": "ironarabe-official-001-sunset-r0",
+      "colorHash": "12e6c64fe28d6f03ec35781c54914bc61c78eab53bc97da141343ddbe3a3016b"
+    },
+    {
+      "id": "sunset-r1",
+      "number": 2,
+      "challengeId": "ironarabe-official-001-sunset-r1",
+      "colorHash": "56a88dde7dd6fc1a978f32f76dc1af42d3e2b1bef206a403e431a4295636b71d"
+    },
+    {
+      "id": "sunset-r2",
+      "number": 3,
+      "challengeId": "ironarabe-official-001-sunset-r2",
+      "colorHash": "b244f656cec832bbbe527c87f3f1c61054bfd5118f2e25e5075ceb1e8e5511e3"
+    },
+    {
+      "id": "sunset-r3",
+      "number": 4,
+      "challengeId": "ironarabe-official-001-sunset-r3",
+      "colorHash": "9223be258e929748f4baa9e1ccc73cd359fa360ca8df2c567f563e72b3daad3f"
+    },
+    {
+      "id": "aurora-r0",
+      "number": 5,
+      "challengeId": "ironarabe-official-001-aurora-r0",
+      "colorHash": "13c745dd620eabf9416f7be1a8ce283abcb6d4fdf1a372790d231455757286db"
+    },
+    {
+      "id": "aurora-r1",
+      "number": 6,
+      "challengeId": "ironarabe-official-001-aurora-r1",
+      "colorHash": "b5a334345897d5de739b105f26ef4d174882cff1399fbc176f38ae90202b7f20"
+    },
+    {
+      "id": "aurora-r2",
+      "number": 7,
+      "challengeId": "ironarabe-official-001-aurora-r2",
+      "colorHash": "707f56d67b51166cf83a5d8d16c82b9a36a62b0b4daba7d7ef01cbf3f6d92ee3"
+    },
+    {
+      "id": "aurora-r3",
+      "number": 8,
+      "challengeId": "ironarabe-official-001-aurora-r3",
+      "colorHash": "42efe1dcffb7b3e0de3947bf8a682e5fb6dd78cf9ec75053cf7d7c61075418d3"
+    }
+  ]
+}
