@@ -80,7 +80,16 @@
     "シェア文をコピーしました": "シェア文をコピーしました",
     "コピーできませんでした": "コピーできませんでした",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}",
+    "プレイヤー名（任意）": "プレイヤー名（任意）",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。",
+    "名前なしで遊ぶ": "名前なしで遊ぶ",
+    "名前なし（ランキング対象外）": "名前なし（ランキング対象外）",
+    "名前なしのためランキングには登録しません。": "名前なしのためランキングには登録しません。",
+    "プレイ回数を送信中…": "プレイ回数を送信中…",
+    "プレイ回数を記録しました": "プレイ回数を記録しました",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "プレイ回数を送信できませんでした。接続後に再送します。",
+    "イロナラベの詳細ランキングへ": "イロナラベの詳細ランキングへ"
   },
   "en": {
     "イロナラベ": "Ironarabe",
@@ -154,7 +163,16 @@
     "シェア文をコピーしました": "Share text copied",
     "コピーできませんでした": "Could not copy",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nA random stage from 8 each time. Follow the color gradients and arrange the 7×9 tiles in their correct positions.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nCleared STAGE {0} “{1}” in {2} seconds with {3} moves!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nCleared STAGE {0} “{1}” in {2} seconds with {3} moves!\n{4}",
+    "プレイヤー名（任意）": "Player name (optional)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Enter a name only if you want to join the leaderboard. Plays are counted even without a name.",
+    "名前なしで遊ぶ": "Play without a name",
+    "名前なし（ランキング対象外）": "No name (unranked)",
+    "名前なしのためランキングには登録しません。": "This result will not be added to the leaderboard because no name was entered.",
+    "プレイ回数を送信中…": "Sending play count…",
+    "プレイ回数を記録しました": "Play count recorded",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Could not send the play count. It will be retried when you are online.",
+    "イロナラベの詳細ランキングへ": "Ironarabe ranking details"
   },
   "es": {
     "イロナラベ": "Ironarabe",
@@ -228,7 +246,16 @@
     "シェア文をコピーしました": "Texto para compartir copiado",
     "コピーできませんでした": "No se pudo copiar",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nUn nivel aleatorio entre 8 en cada partida. Sigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n¡He superado el NIVEL {0} «{1}» en {2} segundos y {3} movimientos!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n¡He superado el NIVEL {0} «{1}» en {2} segundos y {3} movimientos!\n{4}",
+    "プレイヤー名（任意）": "Nombre de jugador (opcional)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Introduce un nombre solo si quieres aparecer en la clasificación. Las partidas también se cuentan si juegas sin nombre.",
+    "名前なしで遊ぶ": "Jugar sin nombre",
+    "名前なし（ランキング対象外）": "Sin nombre (fuera de la clasificación)",
+    "名前なしのためランキングには登録しません。": "Este resultado no se añadirá a la clasificación porque no se ha introducido un nombre.",
+    "プレイ回数を送信中…": "Enviando el número de partidas…",
+    "プレイ回数を記録しました": "Número de partidas registrado",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "No se ha podido enviar el número de partidas. Se volverá a intentar cuando tengas conexión.",
+    "イロナラベの詳細ランキングへ": "Detalles de la clasificación de Ironarabe"
   },
   "pt-BR": {
     "イロナラベ": "Ironarabe",
@@ -302,7 +329,16 @@
     "シェア文をコピーしました": "Texto para compartilhar copiado",
     "コピーできませんでした": "Não foi possível copiar",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nUma fase aleatória entre 8 a cada partida. Siga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nConcluí a FASE {0} “{1}” em {2} segundos e {3} movimentos!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nConcluí a FASE {0} “{1}” em {2} segundos e {3} movimentos!\n{4}",
+    "プレイヤー名（任意）": "Nome de jogador (opcional)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Digite um nome apenas se quiser entrar no ranking. As partidas também são contadas sem um nome.",
+    "名前なしで遊ぶ": "Jogar sem nome",
+    "名前なし（ランキング対象外）": "Sem nome (fora do ranking)",
+    "名前なしのためランキングには登録しません。": "Este resultado não será incluído no ranking porque nenhum nome foi informado.",
+    "プレイ回数を送信中…": "Enviando a contagem de partidas…",
+    "プレイ回数を記録しました": "Contagem de partidas registrada",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Não foi possível enviar a contagem de partidas. O envio será tentado novamente quando houver conexão.",
+    "イロナラベの詳細ランキングへ": "Detalhes do ranking de Ironarabe"
   },
   "zh-Hans": {
     "イロナラベ": "Ironarabe",
@@ -376,7 +412,16 @@
     "シェア文をコピーしました": "分享文字已复制",
     "コピーできませんでした": "无法复制",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n每次从8个关卡中随机选择一个。观察色彩渐变，将7×9的方块排列到正确位置。\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n以{2}秒、{3}次移动通过了关卡{0}「{1}」！\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n以{2}秒、{3}次移动通过了关卡{0}「{1}」！\n{4}",
+    "プレイヤー名（任意）": "玩家名称（可选）",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "仅在想要上榜时输入名称。不填名称也会记录游玩次数。",
+    "名前なしで遊ぶ": "不填名称开始游戏",
+    "名前なし（ランキング対象外）": "未填写名称（不参与排名）",
+    "名前なしのためランキングには登録しません。": "由于未填写名称，本次成绩不会提交至排行榜。",
+    "プレイ回数を送信中…": "正在发送游玩次数…",
+    "プレイ回数を記録しました": "已记录游玩次数",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "无法发送游玩次数。恢复网络连接后会重新发送。",
+    "イロナラベの詳細ランキングへ": "查看 Ironarabe 详细排行榜"
   },
   "fr": {
     "イロナラベ": "Ironarabe",
@@ -450,7 +495,16 @@
     "シェア文をコピーしました": "Texte de partage copié",
     "コピーできませんでした": "Impossible de copier",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nUn niveau choisi au hasard parmi 8 à chaque partie. Suivez les dégradés de couleurs et replacez les tuiles de la grille de 7×9 au bon endroit.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nJ'ai terminé le NIVEAU {0} « {1} » en {2} secondes et {3} déplacements !\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nJ'ai terminé le NIVEAU {0} « {1} » en {2} secondes et {3} déplacements !\n{4}",
+    "プレイヤー名（任意）": "Nom du joueur (facultatif)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Saisissez un nom uniquement si vous souhaitez figurer au classement. Les parties sont comptabilisées même sans nom.",
+    "名前なしで遊ぶ": "Jouer sans nom",
+    "名前なし（ランキング対象外）": "Sans nom (hors classement)",
+    "名前なしのためランキングには登録しません。": "Ce résultat ne sera pas ajouté au classement, car aucun nom n’a été saisi.",
+    "プレイ回数を送信中…": "Envoi du nombre de parties…",
+    "プレイ回数を記録しました": "Nombre de parties enregistré",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Impossible d’envoyer le nombre de parties. L’envoi sera réessayé une fois la connexion rétablie.",
+    "イロナラベの詳細ランキングへ": "Classement détaillé d’Ironarabe"
   },
   "de": {
     "イロナラベ": "Ironarabe",
@@ -524,7 +578,16 @@
     "シェア文をコピーしました": "Text zum Teilen kopiert",
     "コピーできませんでした": "Kopieren fehlgeschlagen",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nBei jedem Spiel wird eines von 8 Leveln zufällig gewählt. Folge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nLEVEL {0} „{1}“ in {2} Sekunden und mit {3} Zügen geschafft!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nLEVEL {0} „{1}“ in {2} Sekunden und mit {3} Zügen geschafft!\n{4}",
+    "プレイヤー名（任意）": "Spielername (optional)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Gib nur dann einen Namen ein, wenn du in die Bestenliste aufgenommen werden möchtest. Auch ohne Namen wird die Anzahl der Spiele erfasst.",
+    "名前なしで遊ぶ": "Ohne Namen spielen",
+    "名前なし（ランキング対象外）": "Ohne Namen (nicht in der Bestenliste)",
+    "名前なしのためランキングには登録しません。": "Dieses Ergebnis wird nicht in die Bestenliste aufgenommen, da kein Name eingegeben wurde.",
+    "プレイ回数を送信中…": "Spielanzahl wird gesendet…",
+    "プレイ回数を記録しました": "Spielanzahl gespeichert",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Die Spielanzahl konnte nicht gesendet werden. Der Versand wird wiederholt, sobald du wieder online bist.",
+    "イロナラベの詳細ランキングへ": "Detaillierte Ironarabe-Bestenliste"
   },
   "ko": {
     "イロナラベ": "Ironarabe",
@@ -598,7 +661,16 @@
     "シェア文をコピーしました": "공유 문구를 복사했습니다",
     "コピーできませんでした": "복사하지 못했습니다",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n매번 8개 스테이지 중 하나를 무작위로 선택합니다. 색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n스테이지 {0} 「{1}」을 {2}초, 이동 {3}회로 클리어!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n스테이지 {0} 「{1}」을 {2}초, 이동 {3}회로 클리어!\n{4}",
+    "プレイヤー名（任意）": "플레이어 이름(선택 사항)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "순위표에 등록하려는 경우에만 이름을 입력하세요. 이름 없이 플레이해도 플레이 횟수는 기록됩니다.",
+    "名前なしで遊ぶ": "이름 없이 플레이",
+    "名前なし（ランキング対象外）": "이름 없음(순위 집계 제외)",
+    "名前なしのためランキングには登録しません。": "이름을 입력하지 않아 순위표에 등록되지 않습니다.",
+    "プレイ回数を送信中…": "플레이 횟수 전송 중…",
+    "プレイ回数を記録しました": "플레이 횟수를 기록했습니다",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "플레이 횟수를 전송하지 못했습니다. 인터넷에 연결되면 다시 전송합니다.",
+    "イロナラベの詳細ランキングへ": "Ironarabe 상세 순위표로 이동"
   },
   "ru": {
     "イロナラベ": "Ironarabe",
@@ -672,7 +744,16 @@
     "シェア文をコピーしました": "Текст для публикации скопирован",
     "コピーできませんでした": "Не удалось скопировать",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nКаждый раз — случайный уровень из 8. Следите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nУРОВЕНЬ {0} «{1}» пройден за {2} с! Ходов: {3}.\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nУРОВЕНЬ {0} «{1}» пройден за {2} с! Ходов: {3}.\n{4}",
+    "プレイヤー名（任意）": "Имя игрока (необязательно)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Введите имя, только если хотите попасть в таблицу рекордов. Игры учитываются и без имени.",
+    "名前なしで遊ぶ": "Играть без имени",
+    "名前なし（ランキング対象外）": "Без имени (вне таблицы рекордов)",
+    "名前なしのためランキングには登録しません。": "Результат не будет добавлен в таблицу рекордов, так как имя не указано.",
+    "プレイ回数を送信中…": "Отправка числа игр…",
+    "プレイ回数を記録しました": "Число игр сохранено",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Не удалось отправить число игр. Отправка повторится после подключения к интернету.",
+    "イロナラベの詳細ランキングへ": "Подробная таблица рекордов Ironarabe"
   },
   "it": {
     "イロナラベ": "Ironarabe",
@@ -746,7 +827,16 @@
     "シェア文をコピーしました": "Testo da condividere copiato",
     "コピーできませんでした": "Impossibile copiare",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nUn livello casuale tra 8 a ogni partita. Segui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nHo completato il LIVELLO {0} «{1}» in {2} secondi e {3} mosse!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nHo completato il LIVELLO {0} «{1}» in {2} secondi e {3} mosse!\n{4}",
+    "プレイヤー名（任意）": "Nome del giocatore (facoltativo)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Inserisci un nome solo se vuoi entrare in classifica. Le partite vengono conteggiate anche senza nome.",
+    "名前なしで遊ぶ": "Gioca senza nome",
+    "名前なし（ランキング対象外）": "Senza nome (fuori classifica)",
+    "名前なしのためランキングには登録しません。": "Questo risultato non verrà aggiunto alla classifica perché non è stato inserito un nome.",
+    "プレイ回数を送信中…": "Invio del numero di partite…",
+    "プレイ回数を記録しました": "Numero di partite registrato",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Impossibile inviare il numero di partite. L’invio verrà ritentato quando la connessione sarà ristabilita.",
+    "イロナラベの詳細ランキングへ": "Classifica dettagliata di Ironarabe"
   },
   "zh-Hant": {
     "イロナラベ": "Ironarabe",
@@ -820,7 +910,16 @@
     "シェア文をコピーしました": "已複製分享文字",
     "コピーできませんでした": "無法複製",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n每次從8個關卡中隨機選擇一個。觀察色彩漸層，將7×9的方塊排列到正確位置。\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n以{2}秒、{3}次移動通過了關卡{0}「{1}」！\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\n以{2}秒、{3}次移動通過了關卡{0}「{1}」！\n{4}",
+    "プレイヤー名（任意）": "玩家名稱（選填）",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "僅在想要上榜時輸入名稱。不填名稱也會記錄遊玩次數。",
+    "名前なしで遊ぶ": "不填名稱開始遊戲",
+    "名前なし（ランキング対象外）": "未填寫名稱（不參與排名）",
+    "名前なしのためランキングには登録しません。": "由於未填寫名稱，本次成績不會提交至排行榜。",
+    "プレイ回数を送信中…": "正在傳送遊玩次數…",
+    "プレイ回数を記録しました": "已記錄遊玩次數",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "無法傳送遊玩次數。恢復網路連線後會重新傳送。",
+    "イロナラベの詳細ランキングへ": "查看 Ironarabe 詳細排行榜"
   },
   "id": {
     "イロナラベ": "Ironarabe",
@@ -894,7 +993,16 @@
     "シェア文をコピーしました": "Teks untuk dibagikan telah disalin",
     "コピーできませんでした": "Tidak dapat menyalin",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSatu level acak dari 8 setiap kali bermain. Ikuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nBerhasil menyelesaikan LEVEL {0} “{1}” dalam {2} detik dengan {3} langkah!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nBerhasil menyelesaikan LEVEL {0} “{1}” dalam {2} detik dengan {3} langkah!\n{4}",
+    "プレイヤー名（任意）": "Nama pemain (opsional)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Masukkan nama hanya jika ingin masuk ke papan peringkat. Jumlah permainan tetap dicatat meskipun tanpa nama.",
+    "名前なしで遊ぶ": "Main tanpa nama",
+    "名前なし（ランキング対象外）": "Tanpa nama (tidak masuk peringkat)",
+    "名前なしのためランキングには登録しません。": "Hasil ini tidak akan dimasukkan ke papan peringkat karena tidak ada nama yang diisi.",
+    "プレイ回数を送信中…": "Mengirim jumlah permainan…",
+    "プレイ回数を記録しました": "Jumlah permainan tercatat",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Jumlah permainan tidak dapat dikirim. Pengiriman akan dicoba lagi setelah terhubung ke internet.",
+    "イロナラベの詳細ランキングへ": "Papan peringkat terperinci Ironarabe"
   },
   "tr": {
     "イロナラベ": "Ironarabe",
@@ -968,7 +1076,16 @@
     "シェア文をコピーしました": "Paylaşım metni kopyalandı",
     "コピーできませんでした": "Kopyalanamadı",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nHer oyunda 8 bölümden biri rastgele seçilir. Renk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nBÖLÜM {0} “{1}”, {2} saniyede ve {3} hamlede tamamlandı!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nBÖLÜM {0} “{1}”, {2} saniyede ve {3} hamlede tamamlandı!\n{4}",
+    "プレイヤー名（任意）": "Oyuncu adı (isteğe bağlı)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Yalnızca sıralamaya girmek istiyorsan bir ad gir. Adsız oynadığında da oyun sayısı kaydedilir.",
+    "名前なしで遊ぶ": "Adsız oyna",
+    "名前なし（ランキング対象外）": "Adsız (sıralama dışı)",
+    "名前なしのためランキングには登録しません。": "Ad girilmediği için bu sonuç sıralamaya eklenmeyecek.",
+    "プレイ回数を送信中…": "Oyun sayısı gönderiliyor…",
+    "プレイ回数を記録しました": "Oyun sayısı kaydedildi",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Oyun sayısı gönderilemedi. İnternet bağlantısı sağlandığında yeniden gönderilecek.",
+    "イロナラベの詳細ランキングへ": "Ayrıntılı Ironarabe sıralaması"
   },
   "vi": {
     "イロナラベ": "Ironarabe",
@@ -1042,7 +1159,16 @@
     "シェア文をコピーしました": "Đã sao chép nội dung chia sẻ",
     "コピーできませんでした": "Không thể sao chép",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nMỗi lần chơi sẽ chọn ngẫu nhiên một trong 8 màn. Quan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nĐã hoàn thành MÀN {0} “{1}” trong {2} giây với {3} lượt di chuyển!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nĐã hoàn thành MÀN {0} “{1}” trong {2} giây với {3} lượt di chuyển!\n{4}",
+    "プレイヤー名（任意）": "Tên người chơi (không bắt buộc)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "Chỉ nhập tên nếu bạn muốn có tên trên bảng xếp hạng. Số lần chơi vẫn được ghi nhận ngay cả khi không nhập tên.",
+    "名前なしで遊ぶ": "Chơi không cần tên",
+    "名前なし（ランキング対象外）": "Không có tên (không xếp hạng)",
+    "名前なしのためランキングには登録しません。": "Kết quả này sẽ không được thêm vào bảng xếp hạng vì bạn chưa nhập tên.",
+    "プレイ回数を送信中…": "Đang gửi số lần chơi…",
+    "プレイ回数を記録しました": "Đã ghi nhận số lần chơi",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "Không thể gửi số lần chơi. Hệ thống sẽ gửi lại khi có kết nối mạng.",
+    "イロナラベの詳細ランキングへ": "Bảng xếp hạng chi tiết của Ironarabe"
   },
   "th": {
     "イロナラベ": "Ironarabe",
@@ -1116,7 +1242,16 @@
     "シェア文をコピーしました": "คัดลอกข้อความสำหรับแชร์แล้ว",
     "コピーできませんでした": "ไม่สามารถคัดลอกได้",
     "イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nสุ่ม 1 ด่านจากทั้งหมด 8 ด่านทุกครั้ง สังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{0}",
-    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nผ่านด่าน {0} “{1}” ใน {2} วินาที โดยย้าย {3} ครั้ง!\n{4}"
+    "イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}": "Ironarabe\nผ่านด่าน {0} “{1}” ใน {2} วินาที โดยย้าย {3} ครั้ง!\n{4}",
+    "プレイヤー名（任意）": "ชื่อผู้เล่น (ไม่บังคับ)",
+    "ランキングに登録する場合だけ名前を入力してください。名前なしでもプレイ回数を記録します。": "กรอกชื่อเฉพาะเมื่อต้องการเข้าร่วมตารางอันดับ แม้ไม่กรอกชื่อ ระบบก็จะบันทึกจำนวนครั้งที่เล่น",
+    "名前なしで遊ぶ": "เล่นโดยไม่ระบุชื่อ",
+    "名前なし（ランキング対象外）": "ไม่ระบุชื่อ (ไม่จัดอันดับ)",
+    "名前なしのためランキングには登録しません。": "ผลการเล่นนี้จะไม่ถูกเพิ่มในตารางอันดับ เนื่องจากไม่ได้ระบุชื่อ",
+    "プレイ回数を送信中…": "กำลังส่งจำนวนครั้งที่เล่น…",
+    "プレイ回数を記録しました": "บันทึกจำนวนครั้งที่เล่นแล้ว",
+    "プレイ回数を送信できませんでした。接続後に再送します。": "ส่งจำนวนครั้งที่เล่นไม่สำเร็จ ระบบจะส่งอีกครั้งเมื่อเชื่อมต่ออินเทอร์เน็ต",
+    "イロナラベの詳細ランキングへ": "ดูตารางอันดับแบบละเอียดของ Ironarabe"
   }
 };
 });

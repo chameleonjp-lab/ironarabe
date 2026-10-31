@@ -54,7 +54,7 @@ async function acceptance(engine,viewport,failAudio=false){
   await page.selectOption('#languageSelect','en');
   await page.tap('#homeSoundBtn');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'false');
   await page.tap('#homeSoundBtn');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');
-  await page.tap('#startBtn');await page.tap('#confirmNameBtn');assert.ok((await page.locator('#nameError').innerText()).length);
+  await page.tap('#startBtn');await page.fill('#playerNameInput','x'.repeat(21));await page.tap('#confirmNameBtn');assert.ok((await page.locator('#nameError').innerText()).length);
   await switchLanguage(page,'de');assert.match(await page.locator('#nameError').innerText(),/Spieler/);
   await page.fill('#playerNameInput','Alice 日本語');await page.tap('#confirmNameBtn');
   await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');
@@ -120,7 +120,55 @@ async function failureAcceptance(engine){
   console.log(`PASS ${engine.name()} communication failure: 15 locales, retry-free submit, stale async response isolation`);
  }finally{releaseSubmit?.();releaseRanking?.();await context.close();await browser.close();}
 }
+async function guestAcceptance(engine,viewport){
+ const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();const calls=[],errors=[];let releaseGuest;
+ page.on('pageerror',error=>errors.push(error.message));
+ await page.route('https://*.supabase.co/**',async route=>{
+  const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push({method,payload});
+  if(method==='start_ironarabe_guest_play_v1'){
+   await new Promise(resolve=>{releaseGuest=resolve});await route.fulfill({json:{accepted:true,duplicate:false,start_id:payload.p_start_id,play_id:'00000000-0000-4000-8000-000000000001',game_slug:'ironarabe',client_version:payload.p_client_version}});
+  }else if(method==='get_best_score_ranking'){assert.equal(payload.p_limit,30);await route.fulfill({json:Array.from({length:30},(_,i)=>({rank_no:i===1?1:i+1,display_name:`Existing ${i+1} <&>`,best_score:i===1?1000:1000+i*100}))});}
+  else throw Error('Guest attempted unexpected RPC '+method);
+ });
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);assert.equal(await page.locator('#guestStartBtn').count(),1,'explicit unnamed play choice');
+  const details='https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe';assert.equal(await page.locator('#homeLabLink').getAttribute('href'),details);
+  await page.tap('#startBtn');assert.equal(await page.inputValue('#playerNameInput'),'');await page.tap('#confirmNameBtn');await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing','empty name starts normally');
+  assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,1);const first=calls[0].payload;assert.equal(first.p_game_slug,'ironarabe');assert.ok(!('p_display_name' in first)&&!('p_score' in first));
+  await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));const board=boardFixture.slice();for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);await page.locator(`.tile[data-pos="${i}"]`).dispatchEvent('click');await page.locator(`.tile[data-pos="${j}"]`).dispatchEvent('click');[board[i],board[j]]=[board[j],board[i]];}
+  await page.clock.runFor(4001);assert.equal(await page.locator('body').getAttribute('data-phase'),'result','guest count response never blocks results');await page.locator('.ranking-row').nth(29).waitFor();assert.equal(await page.locator('.ranking-row').count(),30);
+  assert.equal(calls.filter(c=>c.method==='submit_score').length,0);assert.equal(await page.locator('#firstScoreDisplay').isVisible(),false);assert.equal(await page.locator('#bestScoreDisplay').isVisible(),false);assert.equal(await page.locator('#namePlayCountDisplay').isVisible(),false);
+  const catalog=require('../js/translations.js');for(const language of languages){await switchLanguage(page,language);assert.equal(await page.locator('#recordNameDisplay').innerText(),catalog[language]['名前なし（ランキング対象外）']);assert.equal(await page.locator('#rankNote').innerText(),catalog[language]['プレイ回数を送信中…']);}
+  assert.equal(await page.locator('#resultLabLink').getAttribute('href'),details);await page.locator('.ranking-row').nth(29).scrollIntoViewIfNeeded();assert.equal(await page.locator('.ranking-name').nth(29).innerText(),'Existing 30 <&>');
+  const scroll=await page.locator('#resultRankingScroll').evaluate(n=>({scroll:n.scrollTop,max:n.scrollHeight-n.clientHeight}));assert.ok(scroll.scroll>0&&scroll.max>0,'all 30 entries are reachable inside the ranking scroll');
+  await page.evaluate(()=>localStorage.setItem('ironarabe.v2.playerName','Saved Alice'));await page.tap('#againBtn');assert.equal(await page.inputValue('#playerNameInput'),'Saved Alice');assert.ok(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.'))),'replay retains the unacknowledged count');
+  releaseGuest();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));assert.equal(await page.locator('body').getAttribute('data-phase'),'nameConfirm');
+  await page.tap('#guestStartBtn');await page.clock.runFor(3200);await page.waitForFunction(()=>document.body.dataset.phase==='playing');assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,2);assert.notEqual(calls.at(-1).payload.p_start_id,first.p_start_id);assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'Saved Alice');releaseGuest();await page.tap('#retireBtn');
+  assert.equal(calls.filter(c=>c.method==='submit_score').length,0);assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} guest ${viewport.width}x${viewport.height}: optional name, count once/start, no score, 30 ranks, saved name and pending replay`);
+ }finally{releaseGuest?.();await context.close();await browser.close();}
+}
+async function guestRecoveryAcceptance(engine){
+ const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();let mode='hold',releaseFirst;const calls=[],errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.route('https://*.supabase.co/**',async route=>{
+  assert.ok(route.request().url().endsWith('/start_ironarabe_guest_play_v1'),'guest recovery sends count-only RPCs');const payload=route.request().postDataJSON();calls.push(payload);
+  if(mode==='hold'){await new Promise(resolve=>{releaseFirst=resolve});await route.fulfill({status:503,json:{message:'old offline request'}});}
+  else if(mode==='fail')await route.fulfill({status:503,json:{message:'offline'}});
+  else await route.fulfill({json:{accepted:true,duplicate:true,start_id:payload.p_start_id,play_id:'00000000-0000-4000-8000-000000000001',game_slug:'ironarabe',client_version:payload.p_client_version}});
+ });
+ async function start(){await page.tap('#startBtn');await page.tap('#confirmNameBtn');await page.clock.runFor(3200);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');}
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await start();assert.equal(calls.length,1);assert.ok(releaseFirst);
+  await page.evaluate(()=>window.dispatchEvent(new Event('online')));mode='ack';releaseFirst();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));
+  assert.equal(calls.length,2);assert.deepEqual(calls[1],calls[0],'online race retries the original immutable ID/version');await page.tap('#retireBtn');
+  mode='fail';const rejected=page.waitForResponse(r=>r.url().endsWith('/start_ironarabe_guest_play_v1')&&r.status()===503);await start();await rejected;assert.equal(calls.length,3);const pending=calls[2];
+  assert.ok(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.'))));mode='ack';await page.reload();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));assert.equal(calls.length,4);assert.deepEqual(calls[3],pending,'reload retries the previous start without inventing another play');assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.deepEqual(errors,[]);
+  console.log(`PASS ${engine.name()} guest recovery: online during failed request and reload preserve exact start IDs`);
+ }finally{releaseFirst?.();await context.close();await browser.close();}
+}
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{
- for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
- for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))await failureAcceptance(engine);
+ if(process.env.BROWSER_SUITE!=='guest')for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
+ if(process.env.BROWSER_SUITE!=='guest')for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))await failureAcceptance(engine);
+ for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))for(const viewport of [{width:402,height:874},{width:874,height:402}])await guestAcceptance(engine,viewport);
+ for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))await guestRecoveryAcceptance(engine);
 }finally{server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
