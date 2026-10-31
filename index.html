@@ -13,7 +13,7 @@
 <meta name="description" content="色の流れを並べ直す40問のタイムアタックパズル。15言語・効果音に対応。">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:url" content="https://chameleonjp-lab.github.io/ironarabe/">
-<meta name="ironarabe-ui-release" content="ironarabe-web-1.6.1-home-name">
+<meta name="ironarabe-ui-release" content="ironarabe-web-1.6.2-x-share">
 <style>
   :root {
     --bg:#12131c;
@@ -119,6 +119,7 @@
   .home-name { min-width:0; margin-bottom:0; }
   .name-hint { color:var(--muted); font-size:12px; line-height:1.6; margin:7px 0 0; overflow-wrap:anywhere; }
   .home-share-btn { margin-top:0; padding:13px 14px; }
+  .btn.x-share { display:block; background:#000; color:#fff; border:1px solid #444; text-align:center; text-decoration:none; }
   .stage-note { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px 9px; margin:-6px 0 12px; color:var(--muted); font-size:12px; }
   .stage-note strong { color:var(--text); font-size:12px; letter-spacing:.04em; }
   .stage-dots { display:flex; gap:3px; }
@@ -360,7 +361,7 @@
         <li id="stageCountInstruction" data-i18n="全{0}ステージから毎回1つが選ばれる">全40ステージから毎回1つが選ばれる</li>
       </ol>
     </div>
-    <button class="btn secondary home-share-btn" id="homeShareBtn" data-i18n="ゲームをシェア">ゲームをシェア</button>
+    <a class="btn x-share home-share-btn" id="homeShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェアする</a>
     <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
@@ -414,7 +415,7 @@
     <div class="spacer"></div>
     <button class="btn" id="againBtn" data-i18n="もう一度遊ぶ">もう一度遊ぶ</button>
     <div class="btn-row">
-      <button class="btn secondary" id="resultShareBtn" data-i18n="結果をシェア">結果をシェア</button>
+      <a class="btn x-share" id="resultShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェアする</a>
       <button class="btn secondary" id="homeBtn" data-i18n="ホームへ戻る">ホームへ戻る</button>
     </div>
     <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
@@ -596,7 +597,7 @@
     },CLEAR_BOARD_DISPLAY_MS);
   }
   function onBoardTap(e){const target=e.target.closest('.tile');if(!target)return;const pos=parseInt(target.dataset.pos,10);if(!Number.isNaN(pos))selectTile(pos);}
-  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);setMessage(el.resultTime,'{0}秒',()=>[formatScore(score)]);setMessage(el.resultOperations,'{0}回操作',()=>[formatNumber(state.operations)]);updateStageUi();setPhase('result');sound.play('result');loadRankings(false);}
+  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);setMessage(el.resultTime,'{0}秒',()=>[formatScore(score)]);setMessage(el.resultOperations,'{0}回操作',()=>[formatNumber(state.operations)]);updateStageUi();updateShareLinks();setPhase('result');sound.play('result');loadRankings(false);}
   function retire(){if(state.phase!=='playing'||state.cleared||state.inputLocked||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();returnHome();}
 
   const guestCounter=IronarabeGuests.createGuestPlayCounter({
@@ -633,19 +634,14 @@
   function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows);if(rows.length===0)setRankingState('empty','まだランキング記録がありません。');else setRankingState('ready','');}
   function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
-  function showToast(name,message,isError){const target=name==='result'?el.resultToast:el.homeToast;clearToast(name);setMessage(target,message);target.classList.toggle('err',Boolean(isError));const timerId=setTimeout(function(){if(state.toastTimerIds[name]!==timerId)return;clearToast(name);},1800);state.toastTimerIds[name]=timerId;}
-  function copyWithClipboardApi(text){if(!(navigator.clipboard&&navigator.clipboard.writeText))return Promise.reject(new Error('clipboard unavailable'));return navigator.clipboard.writeText(text);}
-  function copyWithTemporaryTextarea(text){return new Promise(function(resolve,reject){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';ta.style.left='-1000px';ta.style.opacity='0';document.body.appendChild(ta);try{ta.focus();ta.select();if(ta.setSelectionRange)ta.setSelectionRange(0,text.length);document.execCommand('copy')?resolve():reject(new Error('copy failed'));}catch(e){reject(e);}finally{document.body.removeChild(ta);}});}
-  function copyText(text){return copyWithClipboardApi(text).catch(function(){return copyWithTemporaryTextarea(text);});}
-  function shareText(text,toastName){function copyAndNotify(){copyText(text).then(()=>showToast(toastName,'シェア文をコピーしました',false)).catch(()=>showToast(toastName,'コピーできませんでした',true));}if(navigator.share){navigator.share({title:t('イロナラベ'),text:text}).catch(function(err){if(err&&err.name==='AbortError')return;copyAndNotify();});return;}copyAndNotify();}
-  function shareHome(){shareText(t('イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}',[formatNumber(STAGES.length),GAME_URL]),'home');}
-  function shareResult(){shareText(t('イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}',[stageShortLabel(state.stage),stageLongLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations),GAME_URL]),'result');}
+  function xShareUrl(text){const url=new URL('https://twitter.com/intent/tweet');url.searchParams.set('text',text);return url.href;}
+  function updateShareLinks(){el.homeShareBtn.href=xShareUrl(t('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}',[GAME_URL]));el.resultShareBtn.href=xShareUrl(t('イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}',[stageShortLabel(state.stage),stageLongLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations),GAME_URL]));}
   function buildLogoChips(){STAGE_PALETTES.slice(0,2).flatMap(function(palette){return palette.corners;}).forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
   function buildStagePackDots(){STAGE_PALETTES.map(function(palette){return palette.anchors?palette.anchors[0]:palette.corners[0];}).forEach(function(hex){const dot=document.createElement('i');dot.style.background=hex;el.stagePackDots.appendChild(dot);});}
 
   function updateCountdownValue(){const step=COUNTDOWN_STEPS[state.countdownStep];el.countdownValue.textContent=step==='START'?t('START'):formatNumber(Number(step));}
   function updateSoundButtons(){[el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){setMessage(button,sound.isEnabled()?'効果音：ON':'効果音：OFF');button.setAttribute('aria-pressed',String(sound.isEnabled()));});}
-  function refreshLanguage(){setMessage(el.stageCountLabel,'全{0}ステージ',()=>[formatNumber(STAGES.length)]);setMessage(el.stageCountInstruction,'全{0}ステージから毎回1つが選ばれる',()=>[formatNumber(STAGES.length)]);i18n.applyTranslations();el.languageSelect.value=i18n.getLanguage();updateStageUi();updateCountdownValue();el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);el.operationDisplay.textContent=formatNumber(state.operations);renderRankingList(el.resultRankingList,state.rankingRows);updateSoundButtons();}
+  function refreshLanguage(){setMessage(el.stageCountLabel,'全{0}ステージ',()=>[formatNumber(STAGES.length)]);setMessage(el.stageCountInstruction,'全{0}ステージから毎回1つが選ばれる',()=>[formatNumber(STAGES.length)]);i18n.applyTranslations();el.languageSelect.value=i18n.getLanguage();updateStageUi();updateShareLinks();updateCountdownValue();el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);el.operationDisplay.textContent=formatNumber(state.operations);renderRankingList(el.resultRankingList,state.rankingRows);updateSoundButtons();}
   IronarabeI18n.SUPPORTED_LANGUAGES.forEach(function(language){const option=document.createElement('option');option.value=language.id;option.textContent=language.name;option.lang=language.id;el.languageSelect.appendChild(option);});
   el.languageSelect.addEventListener('change',function(){i18n.setLanguage(el.languageSelect.value);refreshLanguage();});
   [el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){button.addEventListener('click',function(){sound.setEnabled(!sound.isEnabled());if(sound.isEnabled())sound.unlock();updateSoundButtons();});});
@@ -661,8 +657,6 @@
   el.board.addEventListener('contextmenu',function(e){e.preventDefault();});
   el.againBtn.addEventListener('click',replay);
   el.homeBtn.addEventListener('click',returnHome);
-  el.homeShareBtn.addEventListener('click',shareHome);
-  el.resultShareBtn.addEventListener('click',shareResult);
   el.homeLabLink.href=LAB_URL;
   el.resultLabLink.href=LAB_URL;
   window.addEventListener('pagehide',function(){stopTimer();clearCountdownTimers();clearClearTimer();clearSwapTimer();});

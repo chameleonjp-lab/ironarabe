@@ -11,9 +11,13 @@ const server=http.createServer((req,res)=>{
 });
 const languages=['ja','en','es','pt-BR','zh-Hans','fr','de','ko','ru','it','zh-Hant','id','tr','vi','th'];
 const boardFixture=[0,29,42,3,15,49,6,50,22,33,41,13,55,43,16,36,57,17,37,14,47,20,54,1,31,24,35,46,28,61,4,25,45,18,34,9,53,10,38,40,27,7,51,2,5,8,23,12,32,26,48,21,60,30,11,52,56,39,44,59,58,19,62];
+const gameUrl='https://chameleonjp-lab.github.io/ironarabe/';
+async function mockXComposer(context){await context.route('https://twitter.com/intent/tweet**',route=>{assert.equal(route.request().method(),'GET');return route.fulfill({contentType:'text/html',body:'<title>X composer fixture</title>'});});}
+function shareLinkText(href){assert.ok(href,'share action links to the X composer');const url=new URL(href);assert.equal(url.origin+url.pathname,'https://twitter.com/intent/tweet');assert.deepEqual([...url.searchParams.keys()],['text']);return url.searchParams.get('text');}
+async function openXDraft(page,selector){const link=page.locator(selector),text=shareLinkText(await link.getAttribute('href'));const popupPromise=page.context().waitForEvent('page');await link.click();const popup=await popupPromise;try{await popup.waitForURL('https://twitter.com/intent/tweet**');assert.equal(shareLinkText(popup.url()),text);}finally{await popup.close();}return text;}
 async function bounds(page){
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal page overflow');
- const bad=await page.locator('.screen.active button,.screen.active input,.screen.active select,.screen.active .record-line,.screen.active .hud,.screen.active .result-head,.screen.active .completion-banner,.screen.active .countdown-value').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+2).map(n=>n.id||n.className));
+ const bad=await page.locator('.screen.active button,.screen.active .x-share,.screen.active input,.screen.active select,.screen.active .record-line,.screen.active .hud,.screen.active .result-head,.screen.active .completion-banner,.screen.active .countdown-value').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+2).map(n=>n.id||n.className));
  assert.deepEqual(bad,[],'no clipped controls/text');
 }
 async function switchLanguage(page,language){
@@ -25,10 +29,10 @@ async function acceptance(engine,viewport,failAudio=false){
  const browser=await engine.launch({headless:true});
  const context=await browser.newContext({viewport,deviceScaleFactor:1,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'});
  const page=await context.newPage();const errors=[];const calls=[];let releaseSubmit;
- page.on('pageerror',e=>errors.push(e.message));
+ page.on('pageerror',e=>errors.push(e.message));await mockXComposer(context);
  await page.addInitScript(({failAudio})=>{
-  window.__sounds=[];window.__shared=[];window.__notes=[];
-  Object.defineProperty(navigator,'share',{value:async data=>{window.__shared.push(data);},configurable:true});
+  window.__sounds=[];window.__notes=[];
+  Object.defineProperty(navigator,'share',{value:async()=>{throw Error('Native sharing must not replace X sharing')},configurable:true});
   if(failAudio){window.AudioContext=function(){throw Error('audio unavailable')};window.webkitAudioContext=window.AudioContext;}
   else{const NativeContext=window.AudioContext||window.webkitAudioContext;if(NativeContext)window.AudioContext=function(){const ctx=new NativeContext();const create=ctx.createOscillator.bind(ctx);ctx.createOscillator=function(){const osc=create(),start=osc.start.bind(osc);osc.start=function(when){window.__notes.push(when);return start(when);};return osc;};return ctx;};}
  },{failAudio});
@@ -80,7 +84,7 @@ async function acceptance(engine,viewport,failAudio=false){
   for(const language of languages){await switchLanguage(page,language);await bounds(page);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Alice 日本語');assert.equal(await page.locator('.ranking-name').first().innerText(),'<保持名>');}
   await switchLanguage(page,'de');assert.match(await page.locator('#bestScoreDisplay').innerText(),/34,56/);
   fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${viewport.width}x${viewport.height}-result.png`),fullPage:true});
-  await page.click('#resultShareBtn');const shared=await page.evaluate(()=>__shared.at(-1));assert.ok(shared.text.includes('https://chameleonjp-lab.github.io/ironarabe/'));assert.ok(!shared.text.includes('codeberg'));
+  const shared=await openXDraft(page,'#resultShareBtn');assert.ok(shared.includes(gameUrl));assert.ok(!shared.includes('codeberg'));
   await page.tap('#resultSoundBtn');assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'false');
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'false');await page.tap('#resultSoundBtn');
   assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'true');
@@ -90,7 +94,7 @@ async function acceptance(engine,viewport,failAudio=false){
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.language.v1')),'de');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'true');
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.old.cache')),null);assert.equal(await page.evaluate(()=>sessionStorage.getItem('ironarabe.old.cache')),null);
   const before=calls.length;await page.reload();assert.equal(await page.locator('html').getAttribute('lang'),'de');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');assert.equal(calls.length,before);
-  await page.click('#homeShareBtn');assert.ok((await page.evaluate(()=>__shared.at(-1).text)).includes('https://chameleonjp-lab.github.io/ironarabe/'));
+  assert.ok((await openXDraft(page,'#homeShareBtn')).includes(gameUrl));
   if(failAudio){await page.evaluate(()=>{Object.defineProperty(window,'sessionStorage',{get(){throw new DOMException('blocked','SecurityError')},configurable:true});document.querySelector('#againBtn').click();});assert.equal(await page.locator('body').getAttribute('data-phase'),'home','replay survives storage denial');}
   assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} ${viewport.width}x${viewport.height} audioFailure=${failAudio}: 15 locales, full game, timing, ranking, replay, shares`);
  }finally{if(releaseSubmit)releaseSubmit();await context.close();await browser.close();}
@@ -231,8 +235,29 @@ async function homeStartAcceptance(engine){
   assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} home name: direct start, optional/saved names, validation, IME, repeat taps, 15 languages and portrait/landscape`);
  }finally{await context.close();await browser.close();}
 }
+async function xShareAcceptance(engine){
+ const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'ja-JP'}),page=await context.newPage(),calls=[],errors=[];
+ page.on('pageerror',error=>errors.push(error.message));await mockXComposer(context);
+ await page.addInitScript(()=>{localStorage.setItem('ironarabe.language.v1','ja');localStorage.setItem('ironarabe.sound.v1','false');Object.defineProperty(navigator,'share',{value:async()=>{throw Error('Native sharing must not replace X sharing')},configurable:true});});
+ await page.route('https://*.supabase.co/**',async route=>{const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push({method,payload});if(method==='submit_score')await route.fulfill({json:[{accepted:true,result_display_name:'X Audit',result_first_score:9000,result_best_score:100,result_play_count:3,is_first_play:false,is_new_best:false}]});else if(method==='get_best_score_ranking')await route.fulfill({json:[{rank_no:1,display_name:'Existing name',best_score:100}]});else throw Error('Unexpected share-test RPC '+method);});
+ async function blackButton(selector){assert.equal(await page.locator(selector).innerText(),'Xでシェアする');assert.deepEqual(await page.locator(selector).evaluate(node=>({background:getComputedStyle(node).backgroundColor,color:getComputedStyle(node).color})),{background:'rgb(0, 0, 0)',color:'rgb(255, 255, 255)'});}
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
+  const homeText='イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n'+gameUrl;
+  assert.equal(shareLinkText(await page.locator('#homeShareBtn').getAttribute('href')),homeText);await blackButton('#homeShareBtn');assert.equal(await openXDraft(page,'#homeShareBtn'),homeText);
+  for(const language of languages){await switchLanguage(page,language);const text=shareLinkText(await page.locator('#homeShareBtn').getAttribute('href'));assert.match(await page.locator('#homeShareBtn').innerText(),/X/);assert.equal(text.split('\n').length,3);assert.equal(text.split('\n').at(-1),gameUrl);assert.equal(text.split(gameUrl).length-1,1);assert.ok(text.includes('7×9'));assert.ok(!/\{\d+\}/.test(text));}
+  await switchLanguage(page,'ja');await page.fill('#playerNameInput','X Audit');await page.tap('#startBtn');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  const stage=await page.locator('#stageDisplay').innerText(),title=await page.locator('#stageDisplay').getAttribute('title'),submitted=page.waitForResponse(response=>response.url().endsWith('/submit_score'));
+  await page.evaluate(board=>{for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);document.querySelector(`.tile[data-pos="${i}"]`).click();document.querySelector(`.tile[data-pos="${j}"]`).click();[board[i],board[j]]=[board[j],board[i]];}},boardFixture.slice());await submitted;await page.clock.runFor(4001);assert.equal(await page.locator('body').getAttribute('data-phase'),'result');
+  const score=calls.find(call=>call.method==='submit_score').payload.p_score,resultText=`イロナラベ\nSTAGE ${stage}「${title}」を${(score/100).toFixed(2)}秒・操作49回でクリア！\n${gameUrl}`;
+  await blackButton('#resultShareBtn');assert.equal(await openXDraft(page,'#resultShareBtn'),resultText);
+  for(const language of languages){await switchLanguage(page,language);const text=shareLinkText(await page.locator('#resultShareBtn').getAttribute('href'));assert.match(await page.locator('#resultShareBtn').innerText(),/X/);assert.ok(text.includes(new Intl.NumberFormat(language,{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false}).format(score/100)));assert.equal(text.split('\n').at(-1),gameUrl);assert.ok(!/\{\d+\}/.test(text));}
+  await switchLanguage(page,'ja');fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-x-share-result.png`),fullPage:true});assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} X sharing: exact home text, live result, black/white buttons, 15 locales and intercepted composer popups`);
+ }finally{await context.close();await browser.close();}
+}
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{
  const engines=process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit],suite=process.env.BROWSER_SUITE;
+ if(suite==='x-share'){for(const engine of engines)await xShareAcceptance(engine);return;}
  if(suite==='home-start'){for(const engine of engines)await homeStartAcceptance(engine);return;}
  if(suite!=='guest'&&suite!=='stage-pack')for(const engine of engines)for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
  if(suite!=='guest'&&suite!=='stage-pack')for(const engine of engines)await failureAcceptance(engine);
@@ -240,4 +265,5 @@ async function homeStartAcceptance(engine){
  if(suite!=='stage-pack')for(const engine of engines)await guestRecoveryAcceptance(engine);
  if(suite!=='guest')for(const engine of engines)await stagePackAcceptance(engine);
  if(!suite)for(const engine of engines)await homeStartAcceptance(engine);
+ if(!suite)for(const engine of engines)await xShareAcceptance(engine);
 }finally{server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -100,7 +100,9 @@
     "紅葉": "紅葉",
     "全{0}ステージ": "全{0}ステージ",
     "全{0}ステージから毎回1つが選ばれる": "全{0}ステージから毎回1つが選ばれる",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}",
+    "Xでシェアする": "Xでシェアする",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}"
   },
   "en": {
     "イロナラベ": "Ironarabe",
@@ -194,7 +196,9 @@
     "紅葉": "Autumn Leaves",
     "全{0}ステージ": "{0} stages",
     "全{0}ステージから毎回1つが選ばれる": "One of the {0} stages is chosen at random each time",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nA random stage from {0} each time. Follow the color gradients and arrange the 7×9 tiles in their correct positions.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nA random stage from {0} each time. Follow the color gradients and arrange the 7×9 tiles in their correct positions.\n{1}",
+    "Xでシェアする": "Share on X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFollow the color gradients and arrange the 7×9 tiles in their correct positions.\n{0}"
   },
   "es": {
     "イロナラベ": "Ironarabe",
@@ -288,7 +292,9 @@
     "紅葉": "Hojas de otoño",
     "全{0}ステージ": "{0} niveles",
     "全{0}ステージから毎回1つが選ばれる": "En cada partida se elige uno de los {0} niveles al azar",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn nivel aleatorio entre {0} en cada partida. Sigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn nivel aleatorio entre {0} en cada partida. Sigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{1}",
+    "Xでシェアする": "Compartir en X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{0}"
   },
   "pt-BR": {
     "イロナラベ": "Ironarabe",
@@ -382,7 +388,9 @@
     "紅葉": "Folhas de outono",
     "全{0}ステージ": "{0} fases",
     "全{0}ステージから毎回1つが選ばれる": "Uma das {0} fases é escolhida aleatoriamente a cada partida",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUma fase aleatória entre {0} a cada partida. Siga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUma fase aleatória entre {0} a cada partida. Siga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{1}",
+    "Xでシェアする": "Compartilhar no X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSiga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{0}"
   },
   "zh-Hans": {
     "イロナラベ": "Ironarabe",
@@ -476,7 +484,9 @@
     "紅葉": "红叶",
     "全{0}ステージ": "共{0}个关卡",
     "全{0}ステージから毎回1つが選ばれる": "每次从{0}个关卡中随机选择一个",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n每次从{0}个关卡中随机选择一个。观察色彩渐变，将7×9的方块排列到正确位置。\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n每次从{0}个关卡中随机选择一个。观察色彩渐变，将7×9的方块排列到正确位置。\n{1}",
+    "Xでシェアする": "分享到 X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n观察色彩渐变，将7×9的方块排列到正确位置。\n{0}"
   },
   "fr": {
     "イロナラベ": "Ironarabe",
@@ -570,7 +580,9 @@
     "紅葉": "Feuilles d’automne",
     "全{0}ステージ": "{0} niveaux",
     "全{0}ステージから毎回1つが選ばれる": "Un des {0} niveaux est choisi au hasard à chaque partie",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn niveau choisi au hasard parmi {0} à chaque partie. Suivez les dégradés de couleurs et replacez les tuiles de la grille de 7×9 au bon endroit.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn niveau choisi au hasard parmi {0} à chaque partie. Suivez les dégradés de couleurs et replacez les tuiles de la grille de 7×9 au bon endroit.\n{1}",
+    "Xでシェアする": "Partager sur X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSuivez les dégradés de couleurs et replacez les tuiles de la grille 7×9 au bon endroit.\n{0}"
   },
   "de": {
     "イロナラベ": "Ironarabe",
@@ -664,7 +676,9 @@
     "紅葉": "Herbstlaub",
     "全{0}ステージ": "{0} Level",
     "全{0}ステージから毎回1つが選ばれる": "Bei jedem Spiel wird eines der {0} Level zufällig gewählt",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nBei jedem Spiel wird eines von {0} Leveln zufällig gewählt. Folge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nBei jedem Spiel wird eines von {0} Leveln zufällig gewählt. Folge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{1}",
+    "Xでシェアする": "Auf X teilen",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFolge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{0}"
   },
   "ko": {
     "イロナラベ": "Ironarabe",
@@ -758,7 +772,9 @@
     "紅葉": "단풍",
     "全{0}ステージ": "총 {0}개 스테이지",
     "全{0}ステージから毎回1つが選ばれる": "매번 {0}개 스테이지 중 하나가 무작위로 선택됩니다",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n매번 {0}개 스테이지 중 하나를 무작위로 선택합니다. 색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n매번 {0}개 스테이지 중 하나를 무작위로 선택합니다. 색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{1}",
+    "Xでシェアする": "X에 공유하기",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{0}"
   },
   "ru": {
     "イロナラベ": "Ironarabe",
@@ -852,7 +868,9 @@
     "紅葉": "Осенняя листва",
     "全{0}ステージ": "{0} уровней",
     "全{0}ステージから毎回1つが選ばれる": "Каждый раз случайно выбирается один из {0} уровней",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nКаждый раз — случайный уровень из {0}. Следите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nКаждый раз — случайный уровень из {0}. Следите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{1}",
+    "Xでシェアする": "Поделиться в X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nСледите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{0}"
   },
   "it": {
     "イロナラベ": "Ironarabe",
@@ -946,7 +964,9 @@
     "紅葉": "Foglie d’autunno",
     "全{0}ステージ": "{0} livelli",
     "全{0}ステージから毎回1つが選ばれる": "A ogni partita viene scelto casualmente un livello tra i {0} disponibili",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn livello casuale tra {0} a ogni partita. Segui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn livello casuale tra {0} a ogni partita. Segui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{1}",
+    "Xでシェアする": "Condividi su X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSegui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{0}"
   },
   "zh-Hant": {
     "イロナラベ": "Ironarabe",
@@ -1040,7 +1060,9 @@
     "紅葉": "紅葉",
     "全{0}ステージ": "共{0}個關卡",
     "全{0}ステージから毎回1つが選ばれる": "每次從{0}個關卡中隨機選擇一個",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n每次從{0}個關卡中隨機選擇一個。觀察色彩漸層，將7×9的方塊排列到正確位置。\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n每次從{0}個關卡中隨機選擇一個。觀察色彩漸層，將7×9的方塊排列到正確位置。\n{1}",
+    "Xでシェアする": "分享到 X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n觀察色彩漸層，將7×9的方塊排列到正確位置。\n{0}"
   },
   "id": {
     "イロナラベ": "Ironarabe",
@@ -1134,7 +1156,9 @@
     "紅葉": "Daun musim gugur",
     "全{0}ステージ": "{0} level",
     "全{0}ステージから毎回1つが選ばれる": "Satu dari {0} level dipilih secara acak setiap kali bermain",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nSatu level acak dari {0} setiap kali bermain. Ikuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nSatu level acak dari {0} setiap kali bermain. Ikuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{1}",
+    "Xでシェアする": "Bagikan di X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nIkuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{0}"
   },
   "tr": {
     "イロナラベ": "Ironarabe",
@@ -1228,7 +1252,9 @@
     "紅葉": "Sonbahar Yaprakları",
     "全{0}ステージ": "Toplam {0} bölüm",
     "全{0}ステージから毎回1つが選ばれる": "Her oyunda {0} bölümden biri rastgele seçilir",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nHer oyunda {0} bölümden biri rastgele seçilir. Renk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nHer oyunda {0} bölümden biri rastgele seçilir. Renk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{1}",
+    "Xでシェアする": "X'te paylaş",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nRenk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{0}"
   },
   "vi": {
     "イロナラベ": "Ironarabe",
@@ -1322,7 +1348,9 @@
     "紅葉": "Lá thu",
     "全{0}ステージ": "Tổng cộng {0} màn",
     "全{0}ステージから毎回1つが選ばれる": "Mỗi lần chơi sẽ chọn ngẫu nhiên một trong {0} màn",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nMỗi lần chơi sẽ chọn ngẫu nhiên một trong {0} màn. Quan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nMỗi lần chơi sẽ chọn ngẫu nhiên một trong {0} màn. Quan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{1}",
+    "Xでシェアする": "Chia sẻ trên X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nQuan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{0}"
   },
   "th": {
     "イロナラベ": "Ironarabe",
@@ -1416,7 +1444,9 @@
     "紅葉": "ใบไม้เปลี่ยนสี",
     "全{0}ステージ": "ทั้งหมด {0} ด่าน",
     "全{0}ステージから毎回1つが選ばれる": "สุ่มเลือก 1 ด่านจากทั้งหมด {0} ด่านในแต่ละครั้ง",
-    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nสุ่ม 1 ด่านจากทั้งหมด {0} ด่านทุกครั้ง สังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{1}"
+    "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nสุ่ม 1 ด่านจากทั้งหมด {0} ด่านทุกครั้ง สังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{1}",
+    "Xでシェアする": "แชร์บน X",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nสังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{0}"
   }
 };
 });
