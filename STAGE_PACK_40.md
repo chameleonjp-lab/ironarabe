@@ -58,7 +58,7 @@ UIの公開識別子だけを `ironarabe-web-1.6.0-stagepack40` に更新した�
 
 匿名開始RPCのallowlistも40問に対応する必要がある。実験場の [40問用DB手順](https://github.com/chameleonjp-lab/chameleonjp_lab/blob/main/docs/chameleonjp-lab/16_ironarabe_stage_pack_40.md) に、未導入の場合の初回用SQLと旧8問を導入済みの場合の関数のみ更新するSQLを用意した。DBの実際の状態と関数のfingerprintを読取確認し、管理者が適切な経路を適用する。スコア表・履歴・名前・日時・既存の開始記録を書き換えない。
 
-**40問版は未公開で、匿名開始回数のSQLも本番未適用。** 先行する8問版はマージSHA `5a24e28` でPagesから公開され、設定済みのGitHub Actionsによるbuild/deploy/公開hash検証が成功している。公開後受入を経てゲーム登録1件のURL2列も切替済み。40問対応RPCを管理者が準備してから本体PRをマージし、同じActionsによる40問版の配備と受入を確認する。Pagesの再設定や旧pagesブランチへのコピーは不要。旧Codebergサイトは停止・削除していない。
+**40問版は公開済み。** 利用者によるPR #18のマージ後、初回マージSHA `43b6c01655932a37828152324f0f0b7622ff9921` を[run 41165939863](https://github.com/chameleonjp-lab/ironarabe/actions/runs/41165939863)が配備し、build/deploy/公開hash検証の全jobが成功した。先行8問版の公開後受入を経てゲーム登録1件のURL2列も切替済み。匿名回数のDB適用状況と共通集計の互換性は上記のDB手順へ記録する。Pagesの再設定や旧pagesブランチへのコピーは不要。旧Codebergサイトは停止・削除していない。
 
 ## 検証
 
@@ -71,3 +71,5 @@ UIの公開識別子だけを `ironarabe-web-1.6.0-stagepack40` に更新した�
 先行8問版の公開受入では、マージSHAと全ファイルhashを検証し、Chromium/WebKitで実際に配信されたHTML/JSを使って15言語、音設定、縦横、開始→クリア→結果を確認した。スコア送信は遮断し、既存ランキング29件だけを本番から読み取った。環境のプロキシCAをブラウザが直接信頼しなかったため、公開ファイルと読取RPCは環境CAを検証するNode fetch経由で取得した。TLS検証は無効化していない。
 
 その後に登録1件のURL2列のみを管理接続で更新し、game_scores 29件 / score_runs 567件の全列hashと他ゲーム登録のhashが前後で一致した。[公開・切替証拠](https://github.com/chameleonjp-lab/chameleonjp_lab/blob/main/docs/evidence/ironarabe-pages-live-20261031.json)には集約値だけを記録し、プレイヤー名や鍵を含めない。
+
+40問版の公開後も、初回配信SHAと全ファイルhashがマージした版と一致した。Chromium/WebKitで配信中のHTML/JSを使い、15言語、40問の案内、新配色モジュール、音設定、縦横、開始→クリア→結果、本番の既存ランキング29件の読取を確認した。試験スコアの送信は遮断している。実機Safariは引き続き未確認。
