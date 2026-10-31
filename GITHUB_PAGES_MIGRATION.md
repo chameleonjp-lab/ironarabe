@@ -58,7 +58,7 @@ DBへはSELECTのみ。初回・ベスト・名前・回数・日時・履歴は
 
 名前なし回数の追加SQL（PR-Bの `ironarabe-guest-play-count.sql`、現時点で未適用）は、本体公開前に管理者が適用する。URL切替SQLとは別であり、スコア・名前・履歴の変更や登録URLの先行切替は行わない。
 
-1. **PR-Aだけ**を利用者が現在の既定ブランチへマージする。PR段階のCIはテスト/buildのみで配備しない。
+1. **本体追補PR #17**を利用者が現在の既定ブランチへマージする。PR段階のCIはテスト/buildのみで配備しない。
 2. `GitHub Pages` workflowの成功と、`github-pages` environmentのdeployment URLを確認する。成果物は `index.html`、5つのruntime JS、SHAとhashを含む `release.json` だけ。内部資料・テスト・設定・DB文書は公開しない。
 3. `release.json` のsource SHAがマージcommitに一致し、各ファイルhashが一致することを公開検証ツールで確認する。HTTP200だけで新版成功としない。
 4. 新URLで15言語切替、音設定、開始→完成4秒→結果、既存ランキングの読み取りを確認する。試験プレイの `submit_score` はブラウザの通信mockで遮断する。本番へ試験スコアを送信しない。
@@ -109,3 +109,8 @@ Codeberg Pagesは既存静的HTMLにcanonical、新URLへのリンク、必要�
 
 ### 名前任意の追記後の検証
 本体は既存7検証＋Node86テスト成功。Chromium/WebKitの縦横・匿名/名前あり・上位30名・回数再送・online競合・reloadを含む12シナリオに成功。独立レビューで見つかった本文受信timeout、接続復帰の取りこぼし、待機rowの失敗表示を再現テストで修正した。匿名DB追加は隔離PGliteの15テストで検証し、本番へは適用していない。既存29名/567履歴は全列hashが再度一致した。
+
+
+### 作業中のマージと追補PR
+初回 #16 は2026-10-31 02:26:04 UTCに `50cc78d`、実験場 #37 は02:26:28に `80143a9` としてマージされたことを再取得した。今回の任意名追記はそのマージに含まれていないため、最新の既定ブランチから本体 [#17](https://github.com/chameleonjp-lab/ironarabe/pull/17) / DB [#38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) を作成した。既存branch/historyを強制変更していない。
+初回マージ後の公開run41159990774はbuild/upload成功、configure-pagesの設定取得404でdeploy失敗。新URLも404のまま。管理者のPages設定と追加匿名SQL適用が必要で、追補2PRはDraftとする。本書の今後のPR-A/PR-B手順はこの追補版を指す。URL2列切替は引き続き新サイト受入後のみ。

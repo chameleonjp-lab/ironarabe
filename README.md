@@ -143,4 +143,6 @@ node tools/verify-result-only-v14.cjs
 
 名前ありは従来どおりクリア時に既存ランキングへ送信します。名前なしは実際にプレイ画面へ進んだ時点で専用RPCへ開始回数だけを送信し、名前・スコア・参加者・順位を作りません。回数の未送信記録は端末に保存し、reload/online/次回開始で同じUUIDを再送するため、通信断からの再送で二重計上されません。
 
-この追加機能には [PR-B #37](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/37) の `ironarabe-guest-play-count.sql` 適用が必要です。追加SQLは現時点で本番未適用で、匿名回数の本番計測を確認済みとは扱いません。追加SQLを管理者が適用してから本体を公開し、URL2列切替SQLは新サイトの公開後受入が済んでから適用します。
+この追加機能には [DB追補PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) の `ironarabe-guest-play-count.sql` 適用が必要です。追加SQLは現時点で本番未適用で、匿名回数の本番計測を確認済みとは扱いません。追加SQLを管理者が適用してから本体を公開し、URL2列切替SQLは新サイトの公開後受入が済んでから適用します。
+
+初回PR #16はマージ済みですがPages未設定で公開は未完了です。任意名の追補は [PR #17](https://github.com/chameleonjp-lab/ironarabe/pull/17)、匿名回数SQLは [PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38) を参照してください。

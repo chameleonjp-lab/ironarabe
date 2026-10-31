@@ -10,7 +10,7 @@
 - 未送信匿名開始はstart_id/client_versionだけを永続queueへ保存し、reload/online/次回開始に同じIDで再送。再プレイの不要キャッシュ整理から除外する。保存不能時はmemoryで処理。
 - 新しいprivate表と限定RPCが必要。既存タッケウ専用RPCやrecord_game_playへの偽名送信はしない。
 - DB本番スコア書込みなし、旧29名/567履歴のhashを前後比較。追加SQLはPRでレビュー可能にし、本番適用・公開の未実施を明記する。
-- 既定branch変更・直接push・merge・force・旧branch削除なし。既存2PRの作業branchへ追記。
+- 既定branch変更・直接push・merge・force・旧branch削除なし。初回2PRは作業中にマージされたため、最新既定ブランチから追補PR #17/#38へ変更を分離する。
 
 ## Tasks
 - [x] タッケウ/現行DB定義とPR最新状態の調査。両PR未merge、既存scorehash前回と一致。
@@ -30,3 +30,5 @@
 - 独立レビュー3件を修正。RPC本文完了までdeadline維持、online時は明示recoverオプションで1回だけfollowup、失敗で停止した全待機rowへfailed通知。各再現テストRED→GREEN。
 - DB再読取: 29名/567履歴、MD5両方が追記前と一致。本番DB書込みなし。匿名追加SQL/URL切替SQLは未適用。
 - 実機iPhone17Pro Safariは未確認。新サイト公開とDB適用は未完了のまま、既存2PRを更新する。
+
+- マージ再取得: 本体50cc78d/実験場80143a9。追補基点へcherry-pickし、元のfeature branchや既存履歴は削除・強制更新しない。初回deployはPages設定404で失敗を確認。
