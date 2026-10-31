@@ -4,7 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#161822">
-<title>イロナラベ</title>
+<title data-i18n="イロナラベ">イロナラベ</title>
+<link rel="canonical" href="https://chameleonjp-lab.github.io/ironarabe/">
+<meta property="og:url" content="https://chameleonjp-lab.github.io/ironarabe/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="イロナラベ — Ironarabe">
+<meta property="og:description" content="A 7×9 color tile time-attack puzzle with eight stages.">
+<meta name="description" content="色の流れを並べ直す8ステージのタイムアタックパズル。15言語・効果音に対応。">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:url" content="https://chameleonjp-lab.github.io/ironarabe/">
+<meta name="ironarabe-ui-release" content="ironarabe-web-1.5.0-i18n-sound-pages">
 <style>
   :root {
     --bg:#12131c;
@@ -284,46 +293,69 @@
       transition-duration:.001ms !important;
     }
   }
+  .preferences { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .language-picker { display:flex; align-items:center; gap:8px; min-width:0; color:var(--muted); font-size:13px; }
+  select, .sound-toggle { font:inherit; min-height:44px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; color:var(--text); background:var(--panel); }
+  select { max-width:190px; }
+  .sound-toggle { font-size:13px; overflow-wrap:anywhere; }
+  .result-sound { align-self:flex-end; }
+  .btn, .lead, .card, .game-hint, .ranking-title { overflow-wrap:anywhere; }
+  .btn-row { flex-wrap:wrap; }
+  .btn-row .btn { flex:1 1 150px; }
+  .record-line { align-items:flex-start; flex-wrap:wrap; }
+  .record-line .label { flex:1 1 145px; }
+  .record-line .val { max-width:100%; white-space:normal; overflow-wrap:anywhere; text-align:end; }
+  .record-line .val.stage-value { max-width:100%; overflow:visible; white-space:normal; }
+  .ranking-row { grid-template-columns:minmax(38px,auto) minmax(0,1fr) auto; }
+  .hud .stat { min-width:0; }
+  .hud .stat .k { overflow-wrap:anywhere; letter-spacing:.02em; }
+  .countdown-value { max-width:100%; overflow-wrap:anywhere; font-size:clamp(32px,12vw,72px); }
+  .completion-banner { min-width:0; width:max-content; max-width:96%; border-radius:16px; }
+  .completion-banner strong { overflow-wrap:anywhere; font-size:20px; letter-spacing:.02em; }
 </style>
 </head>
 <body>
 <div class="app">
   <section id="screen-home" class="screen active">
-    <h1 class="logo">イロナラベ</h1>
+    <div class="preferences">
+      <label class="language-picker"><span data-i18n="言語">言語</span><select id="languageSelect" aria-label="言語" data-i18n-attrs="aria-label"></select></label>
+      <button class="sound-toggle" id="homeSoundBtn" type="button" aria-pressed="true">効果音：ON</button>
+    </div>
+    <h1 class="logo" data-i18n="イロナラベ">イロナラベ</h1>
     <div class="logo-chips" id="logoChips"></div>
-    <p class="lead">色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。</p>
-    <div class="stage-note"><span class="stage-dots" id="stagePackDots" aria-hidden="true"></span><strong>全8ステージ</strong><span>毎回ランダム</span></div>
+    <p class="lead" data-i18n="色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。">色の流れを見ながら、7×9のタイルを正しい場所へ並べ直すタイムアタックです。</p>
+    <div class="stage-note"><span class="stage-dots" id="stagePackDots" aria-hidden="true"></span><strong data-i18n="全8ステージ">全8ステージ</strong><span data-i18n="毎回ランダム">毎回ランダム</span></div>
     <div class="home-actions">
-      <button class="btn" id="startBtn">ゲームを始める</button>
-      <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel">遊び方</button>
+      <button class="btn" id="startBtn" data-i18n="ゲームを始める">ゲームを始める</button>
+      <button class="btn secondary" id="howToBtn" aria-expanded="false" aria-controls="howToPanel" data-i18n="遊び方">遊び方</button>
     </div>
     <div class="card" id="howToPanel" hidden>
-      <h3>遊び方</h3>
+      <h3 data-i18n="遊び方">遊び方</h3>
       <ol>
-        <li>動かせるタイルを1枚選ぶ</li>
-        <li>別のタイルを選ぶと2枚が入れ替わる</li>
-        <li>印のあるタイルは固定で動かせない</li>
-        <li>全体を正しい色の流れへ戻すとクリア</li>
-        <li>タイム計測はカウントダウン後に始まる</li>
-        <li>全8ステージから毎回1つが選ばれる</li>
+        <li data-i18n="動かせるタイルを1枚選ぶ">動かせるタイルを1枚選ぶ</li>
+        <li data-i18n="別のタイルを選ぶと2枚が入れ替わる">別のタイルを選ぶと2枚が入れ替わる</li>
+        <li data-i18n="印のあるタイルは固定で動かせない">印のあるタイルは固定で動かせない</li>
+        <li data-i18n="全体を正しい色の流れへ戻すとクリア">全体を正しい色の流れへ戻すとクリア</li>
+        <li data-i18n="タイム計測はカウントダウン後に始まる">タイム計測はカウントダウン後に始まる</li>
+        <li data-i18n="全8ステージから毎回1つが選ばれる">全8ステージから毎回1つが選ばれる</li>
       </ol>
     </div>
-    <button class="btn secondary home-share-btn" id="homeShareBtn">ゲームをシェア</button>
-    <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/">カメレオンJPの実験場へ</a>
+    <button class="btn secondary home-share-btn" id="homeShareBtn" data-i18n="ゲームをシェア">ゲームをシェア</button>
+    <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" data-i18n="カメレオンJPの実験場へ">カメレオンJPの実験場へ</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
 
   <section id="screen-nameConfirm" class="screen">
-    <h2>プレイヤー名を確認</h2>
-    <p class="lead">ランキング送信と結果表示に使う名前を確認してください。</p>
-    <div class="card"><p>現在の保存名: <strong id="savedNameLabel">--</strong></p></div>
+    <h2 data-i18n="プレイヤー名を確認">プレイヤー名を確認</h2>
+    <p class="lead" data-i18n="ランキング送信と結果表示に使う名前を確認してください。">ランキング送信と結果表示に使う名前を確認してください。</p>
+    <div class="card"><p><span data-i18n="現在の保存名:">現在の保存名:</span> <strong id="savedNameLabel">--</strong></p></div>
     <div class="field">
-      <label for="playerNameInput">プレイヤー名</label>
-      <input type="text" id="playerNameInput" autocomplete="nickname" enterkeyhint="done" placeholder="なまえを入力">
+      <label for="playerNameInput" data-i18n="プレイヤー名">プレイヤー名</label>
+      <input type="text" id="playerNameInput" autocomplete="nickname" enterkeyhint="done" placeholder="なまえを入力" data-i18n-attrs="placeholder">
     </div>
     <p class="error" id="nameError" aria-live="polite"></p>
-    <button class="btn" id="confirmNameBtn">この名前で始める</button>
-    <button class="btn secondary" id="nameBackBtn">戻る</button>
+    <button class="btn" id="confirmNameBtn" data-i18n="この名前で始める">この名前で始める</button>
+    <button class="btn secondary" id="nameBackBtn" data-i18n="戻る">戻る</button>
   </section>
 
   <section id="screen-countdown" class="screen countdown-screen">
@@ -333,62 +365,71 @@
 
   <section id="screen-playing" class="screen">
     <div class="hud">
-      <div class="stat"><div class="k">TIME</div><div class="v" id="timeDisplay">0.00</div></div>
-      <div class="stat"><div class="k">操作回数</div><div class="v" id="operationDisplay">0</div></div>
-      <div class="stat stage-stat"><div class="k">STAGE</div><div class="v" id="stageDisplay">1 / 8</div></div>
+      <div class="stat"><div class="k" data-i18n="TIME">TIME</div><div class="v" id="timeDisplay">0.00</div></div>
+      <div class="stat"><div class="k" data-i18n="操作回数">操作回数</div><div class="v" id="operationDisplay">0</div></div>
+      <div class="stat stage-stat"><div class="k" data-i18n="STAGE">STAGE</div><div class="v" id="stageDisplay">1 / 8</div></div>
     </div>
     <div class="board-wrap">
       <div class="board" id="board"></div>
       <div class="completion-banner" id="completionBanner" hidden aria-live="assertive">
-        <strong>完成！</strong>
+        <strong data-i18n="完成！">完成！</strong>
         <span id="completionSummary">0.00秒・操作0回</span>
       </div>
     </div>
-    <p class="game-hint">2つのタイルを順番にタップすると入れ替わります。右上に印のあるタイルは動かせません。</p>
-    <div class="game-footer"><button class="btn ghost" id="retireBtn">リタイア</button></div>
+    <p class="game-hint" data-i18n="2つのタイルを順番にタップすると入れ替わります。右上に印のあるタイルは動かせません。">2つのタイルを順番にタップすると入れ替わります。右上に印のあるタイルは動かせません。</p>
+    <div class="game-footer"><button class="btn ghost" id="retireBtn" data-i18n="リタイア">リタイア</button></div>
   </section>
 
   <section id="screen-result" class="screen">
+    <button class="sound-toggle result-sound" id="resultSoundBtn" type="button" aria-pressed="true">効果音：ON</button>
     <div class="result-head">
-      <div style="font-size:14px;color:var(--muted);letter-spacing:.1em;">今回の記録</div>
-      <div class="big-time" id="resultTime">0.00<span style="font-size:22px;">秒</span></div>
+      <div style="font-size:14px;color:var(--muted);letter-spacing:.1em;" data-i18n="今回の記録">今回の記録</div>
+      <div class="big-time" id="resultTime">0.00<span style="font-size:22px;" data-i18n="秒">秒</span></div>
       <div id="bestBadge" class="badge" style="display:none;"></div>
     </div>
     <div class="card">
-      <h3 id="nameRecordTitle">登録名の記録</h3>
-      <div class="record-line"><span class="label">プレイヤー名</span><span class="val" id="recordNameDisplay">--</span></div>
-      <div class="record-line"><span class="label">登録名の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
-      <div class="record-line"><span class="label">登録名のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
-      <div class="record-line"><span class="label">登録名のプレイ回数</span><span class="val" id="namePlayCountDisplay">--回</span></div>
-      <div class="record-line"><span class="label">ステージ</span><span class="val stage-value" id="resultStage">--</span></div>
-      <div class="record-line"><span class="label">操作回数</span><span class="val" id="resultOperations">0回</span></div>
+      <h3 id="nameRecordTitle" data-i18n="登録名の記録">登録名の記録</h3>
+      <div class="record-line"><span class="label" data-i18n="プレイヤー名">プレイヤー名</span><span class="val" id="recordNameDisplay">--</span></div>
+      <div class="record-line"><span class="label" data-i18n="登録名の初回記録">登録名の初回記録</span><span class="val" id="firstScoreDisplay">--.--秒</span></div>
+      <div class="record-line"><span class="label" data-i18n="登録名のベスト記録">登録名のベスト記録</span><span class="val" id="bestScoreDisplay">--.--秒</span></div>
+      <div class="record-line"><span class="label" data-i18n="登録名のプレイ回数">登録名のプレイ回数</span><span class="val" id="namePlayCountDisplay">--回</span></div>
+      <div class="record-line"><span class="label" data-i18n="ステージ">ステージ</span><span class="val stage-value" id="resultStage">--</span></div>
+      <div class="record-line"><span class="label" data-i18n="操作回数">操作回数</span><span class="val" id="resultOperations">0回</span></div>
       <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
     </div>
     <div class="rank-note" id="rankNote" aria-live="polite"></div>
-    <div class="card ranking-card" aria-label="ベストタイムランキング30位まで">
-      <div class="ranking-title"><h3>ベストタイムランキング</h3><span>30位まで</span></div>
-      <div class="ranking-status" id="resultRankingStatus" aria-live="polite">読み込み中…</div>
+    <div class="card ranking-card" aria-label="ベストタイムランキング30位まで" data-i18n-attrs="aria-label">
+      <div class="ranking-title"><h3 data-i18n="ベストタイムランキング">ベストタイムランキング</h3><span data-i18n="30位まで">30位まで</span></div>
+      <div class="ranking-status" id="resultRankingStatus" aria-live="polite" data-i18n="読み込み中…">読み込み中…</div>
       <div class="ranking-scroll" id="resultRankingScroll" hidden><div id="resultRankingList" role="list"></div></div>
     </div>
     <div class="toast" id="resultToast" aria-live="polite"></div>
     <div class="spacer"></div>
-    <button class="btn" id="againBtn">もう一度遊ぶ</button>
+    <button class="btn" id="againBtn" data-i18n="もう一度遊ぶ">もう一度遊ぶ</button>
     <div class="btn-row">
-      <button class="btn secondary" id="resultShareBtn">結果をシェア</button>
-      <button class="btn secondary" id="homeBtn">ホームへ戻る</button>
+      <button class="btn secondary" id="resultShareBtn" data-i18n="結果をシェア">結果をシェア</button>
+      <button class="btn secondary" id="homeBtn" data-i18n="ホームへ戻る">ホームへ戻る</button>
     </div>
-    <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/">カメレオンJPの実験場へ</a>
+    <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" data-i18n="カメレオンJPの実験場へ">カメレオンJPの実験場へ</a>
   </section>
 </div>
 
+<script src="js/language-options.js"></script>
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/sound-effects.js"></script>
 <script>
 "use strict";
 (function () {
+  const i18n=IronarabeI18n.createI18n();
+  const {t,formatNumber,setMessage}=i18n;
+  const sound=IronarabeSound.createSoundEffects();
+  const PREFERENCE_KEYS=new Set([IronarabeI18n.LANGUAGE_STORAGE_KEY,IronarabeSound.SOUND_STORAGE_KEY]);
   const COLS=7, ROWS=9, TOTAL=COLS*ROWS;
   const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2';
   const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000, RANKING_FETCH_TIMEOUT_MS=10000;
   const COUNTDOWN_STEP_MS=700, COUNTDOWN_START_MS=300, SWAP_ANIMATION_MS=140, CLEAR_BOARD_DISPLAY_MS=4000, RANKING_LIMIT=30;
-  const GAME_URL='https://chameleonjp.codeberg.page/ironarabe/';
+  const GAME_URL='https://chameleonjp-lab.github.io/ironarabe/';
   const LAB_URL='https://chameleonjp-lab.github.io/chameleonjp_lab/';
   const STAGE_ROTATION_NAMES=['0°','90°','180°','270°'];
   const STAGE_PALETTES=[
@@ -408,7 +449,7 @@
     selectedIndex:null, operations:0, startTime:null, elapsedMs:0, cleared:false, playId:0,
     clearPlayId:null, rafId:null, countdownToken:0, countdownTimerIds:[], resultShownPlayId:null,
     clearTimerId:null, swapTimerId:null, submittedPlayId:null,
-    rankingRequestId:0, rankingRows:[], toastTimerIds:{home:null,result:null}
+    countdownStep:0, rankingRequestId:0, rankingRows:[], toastTimerIds:{home:null,result:null}
   };
 
   const el={
@@ -419,6 +460,7 @@
       playing:document.getElementById('screen-playing'),
       result:document.getElementById('screen-result')
     },
+    languageSelect:document.getElementById('languageSelect'), homeSoundBtn:document.getElementById('homeSoundBtn'), resultSoundBtn:document.getElementById('resultSoundBtn'),
     logoChips:document.getElementById('logoChips'), stagePackDots:document.getElementById('stagePackDots'), startBtn:document.getElementById('startBtn'),
     howToBtn:document.getElementById('howToBtn'), howToPanel:document.getElementById('howToPanel'),
     homeShareBtn:document.getElementById('homeShareBtn'), homeToast:document.getElementById('homeToast'),
@@ -443,8 +485,8 @@
   function safeStorageSet(key,value){try{localStorage.setItem(key,value);return true;}catch(e){return false;}}
   function elapsedMsToScore(ms){return Math.round(ms/10);}
   function isValidScore(score){return Number.isFinite(score)&&Number.isInteger(score)&&score>0;}
-  function formatScore(score){return isValidScore(score)?(score/SCORE_SCALE).toFixed(SCORE_DECIMALS):'--.--';}
-  function formatElapsedMs(ms){const score=elapsedMsToScore(ms);return isValidScore(score)?formatScore(score):(0).toFixed(SCORE_DECIMALS);}
+  function formatScore(score){return isValidScore(score)?formatNumber(score/SCORE_SCALE,SCORE_DECIMALS):'--.--';}
+  function formatElapsedMs(ms){const score=elapsedMsToScore(ms);return isValidScore(score)?formatScore(score):formatNumber(0,SCORE_DECIMALS);}
   function countGraphemes(value){if(window.Intl&&Intl.Segmenter){return Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(value)).length;}return Array.from(value).length;}
   function normalizeName(value){return String(value||'').trim();}
   function validateName(value){const name=normalizeName(value),len=countGraphemes(name);if(len<1)return {ok:false,message:'プレイヤー名を1文字以上入力してください。'};if(len>20)return {ok:false,message:'プレイヤー名は20文字以内にしてください。'};return {ok:true,name:name};}
@@ -452,25 +494,25 @@
   function buildStages(){const stages=[];STAGE_PALETTES.forEach(function(palette){for(let rotation=0;rotation<4;rotation++){const corners=rotateCornersClockwise(palette.corners,rotation),number=stages.length+1,id=palette.id+'-r'+rotation;stages.push({id:id,number:number,paletteId:palette.id,paletteName:palette.name,rotation:rotation,rotationLabel:STAGE_ROTATION_NAMES[rotation],challenge:{id:CHALLENGE_ID+'-'+id,topLeft:corners[0],topRight:corners[1],bottomRight:corners[2],bottomLeft:corners[3]}});}});return stages;}
   function randomInt(max){if(max<=1)return 0;if(globalThis.crypto&&typeof globalThis.crypto.getRandomValues==='function'){const values=new Uint32Array(1);globalThis.crypto.getRandomValues(values);return values[0]%max;}return Math.floor(Math.random()*max);}
   function refillStageBag(){const bag=STAGES.map(function(_,index){return index;});for(let i=bag.length-1;i>0;i--){const j=randomInt(i+1),tmp=bag[i];bag[i]=bag[j];bag[j]=tmp;}if(bag.length>1&&state.lastStageIndex!==null&&bag[0]===state.lastStageIndex){const tmp=bag[0];bag[0]=bag[1];bag[1]=tmp;}state.stageBag=bag;}
-  function stageShortLabel(stage){return stage?stage.number+' / '+STAGES.length:'-- / '+STAGES.length;}
-  function stageLongLabel(stage){return stage?stage.paletteName+' '+stage.rotationLabel:'--';}
+  function stageShortLabel(stage){return stage?formatNumber(stage.number)+' / '+formatNumber(STAGES.length):'-- / '+formatNumber(STAGES.length);}
+  function stageLongLabel(stage){return stage?t(stage.paletteName)+' '+formatNumber(stage.rotation*90)+'°':'--';}
   function currentClientVersion(){return CLIENT_VERSION+'-'+(state.stage?state.stage.id:'unknown');}
-  function updateStageUi(){const shortLabel=stageShortLabel(state.stage),longLabel=stageLongLabel(state.stage);el.stageDisplay.textContent=shortLabel;el.stageDisplay.title=longLabel;el.countdownStage.textContent='STAGE '+shortLabel+'・'+longLabel;el.resultStage.textContent=longLabel+' ('+shortLabel+')';}
+  function updateStageUi(){const shortLabel=stageShortLabel(state.stage),longLabel=stageLongLabel(state.stage);el.stageDisplay.textContent=shortLabel;el.stageDisplay.title=longLabel;setMessage(el.countdownStage,'STAGE {0}・{1}',()=>[stageShortLabel(state.stage),stageLongLabel(state.stage)]);el.resultStage.textContent=longLabel+' ('+shortLabel+')';}
   function chooseNextStage(){if(state.stageBag.length===0)refillStageBag();const index=state.stageBag.shift();state.stage=STAGES[index];state.lastStageIndex=index;updateStageUi();return state.stage;}
   function migrateOldPlayerName(){if(safeStorageGet(LS.playerName))return;const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok)safeStorageSet(LS.playerName,old.name);}
-  function getSavedPlayerName(){return safeStorageGet(LS.playerName)||'';}
-  function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName)keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
-  function clearReplayCachePreserveName(){const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();clearStorageNamespace(localStorage);clearStorageNamespace(sessionStorage);if(savedName)safeStorageSet(LS.playerName,savedName);state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
+  function getSavedPlayerName(){return safeStorageGet(LS.playerName)||state.playerName||'';}
+  function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName&&!PREFERENCE_KEYS.has(key))keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
+  function clearReplayCachePreserveName(){sound.stop();const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();try{clearStorageNamespace(localStorage);}catch(e){}try{clearStorageNamespace(sessionStorage);}catch(e){}if(savedName)safeStorageSet(LS.playerName,savedName);state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
   function replay(){clearReplayCachePreserveName();openNameConfirm();}
   function setPhase(nextPhase){state.phase=nextPhase;document.body.dataset.phase=nextPhase;Object.keys(el.screens).forEach(k=>el.screens[k].classList.toggle('active',k===nextPhase));window.scrollTo(0,0);}
   function clearCountdownTimers(){state.countdownTimerIds.forEach(id=>clearTimeout(id));state.countdownTimerIds=[];state.countdownToken+=1;el.confirmNameBtn.disabled=false;}
   function clearClearTimer(){if(state.clearTimerId!==null){clearTimeout(state.clearTimerId);state.clearTimerId=null;}}
   function clearSwapTimer(){if(state.swapTimerId!==null){clearTimeout(state.swapTimerId);state.swapTimerId=null;}Array.from(el.board.children).forEach(tile=>tile.classList.remove('swapping'));}
-  function clearToast(name){const target=name==='result'?el.resultToast:el.homeToast;if(state.toastTimerIds[name]!==null){clearTimeout(state.toastTimerIds[name]);state.toastTimerIds[name]=null;}target.textContent='';target.classList.remove('err');}
+  function clearToast(name){const target=name==='result'?el.resultToast:el.homeToast;if(state.toastTimerIds[name]!==null){clearTimeout(state.toastTimerIds[name]);state.toastTimerIds[name]=null;}setMessage(target,'');target.classList.remove('err');}
   function clearAllToasts(){clearToast('home');clearToast('result');}
-  function hideCompletion(){el.completionBanner.hidden=true;el.completionSummary.textContent='';}
+  function hideCompletion(){el.completionBanner.hidden=true;setMessage(el.completionSummary,'');}
   function clearPendingTimers(){clearCountdownTimers();clearClearTimer();clearSwapTimer();clearAllToasts();}
-  function returnHome(){stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';setPhase('home');}
+  function returnHome(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';setPhase('home');}
 
   function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -488,16 +530,16 @@
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
-  function preparePlay(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent='0';el.timeDisplay.textContent='0.00';resetNameRecord();updateRankingStatus('idle');return state.playId;}
+  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);});}
-  function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');el.countdownValue.textContent=COUNTDOWN_STEPS[0];COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;el.countdownValue.textContent=step;},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
-  function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const savedName=getSavedPlayerName();el.playerNameInput.value=savedName;el.savedNameLabel.textContent=savedName||'--';el.nameError.textContent='';el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
-  function confirmPlayerName(){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return;const v=validateName(el.playerNameInput.value);if(!v.ok){el.nameError.textContent=v.message;return;}state.playerName=v.name;safeStorageSet(LS.playerName,v.name);el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
+  function startCountdown(playId){if(state.phase!=='nameConfirm')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.confirmNameBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
+  function openNameConfirm(){stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;const savedName=getSavedPlayerName();el.playerNameInput.value=savedName;el.savedNameLabel.textContent=savedName||'--';setMessage(el.nameError,'');el.confirmNameBtn.disabled=false;state.inputLocked=false;setPhase('nameConfirm');setTimeout(()=>el.playerNameInput.focus(),0);}
+  function confirmPlayerName(){if(state.phase!=='nameConfirm'||el.confirmNameBtn.disabled)return;const v=validateName(el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);return;}state.playerName=v.name;safeStorageSet(LS.playerName,v.name);el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
   function selectTile(pos){
     if(state.phase!=='playing'||state.inputLocked||state.cleared)return;
-    if(state.fixedSet.has(pos))return;
-    if(state.selectedIndex===null){state.selectedIndex=pos;el.board.children[pos].classList.add('selected');return;}
-    if(state.selectedIndex===pos){el.board.children[pos].classList.remove('selected');state.selectedIndex=null;return;}
+    if(!Number.isInteger(pos)||pos<0||pos>=TOTAL||state.fixedSet.has(pos))return;
+    if(state.selectedIndex===null){state.selectedIndex=pos;el.board.children[pos].classList.add('selected');sound.play('select');return;}
+    if(state.selectedIndex===pos){el.board.children[pos].classList.remove('selected');state.selectedIndex=null;sound.play('cancel');return;}
     const a=state.selectedIndex,b=pos,playId=state.playId,tmp=state.board[a];
     state.inputLocked=true;
     state.board[a]=state.board[b];
@@ -507,8 +549,9 @@
     updateTileVisual(a);
     updateTileVisual(b);
     state.operations+=1;
-    el.operationDisplay.textContent=String(state.operations);
+    el.operationDisplay.textContent=formatNumber(state.operations);
     if(checkCleared()){onClear();return;}
+    sound.play('swap');
     const aEl=el.board.children[a],bEl=el.board.children[b];
     if(aEl)aEl.classList.add('swapping');
     if(bEl)bEl.classList.add('swapping');
@@ -529,9 +572,11 @@
     el.retireBtn.disabled=true;
     stopTimer();
     state.elapsedMs=Math.round(performance.now()-state.startTime);
+    sound.play('swap');
+    sound.play('complete');
     el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);
     el.board.classList.add('cleared');
-    el.completionSummary.textContent='STAGE '+stageShortLabel(state.stage)+'・'+formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回';
+    setMessage(el.completionSummary,'STAGE {0}・{1}秒・操作{2}回',()=>[stageShortLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations)]);
     el.completionBanner.hidden=false;
     state.clearPlayId=state.playId;
     const playId=state.clearPlayId;
@@ -544,36 +589,45 @@
     },CLEAR_BOARD_DISPLAY_MS);
   }
   function onBoardTap(e){const target=e.target.closest('.tile');if(!target)return;const pos=parseInt(target.dataset.pos,10);if(!Number.isNaN(pos))selectTile(pos);}
-  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);el.resultTime.innerHTML=formatScore(score)+'<span style="font-size:22px;">秒</span>';el.resultOperations.textContent=String(state.operations)+'回';updateStageUi();setPhase('result');loadRankings(false);}
+  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);setMessage(el.resultTime,'{0}秒',()=>[formatScore(score)]);setMessage(el.resultOperations,'{0}回操作',()=>[formatNumber(state.operations)]);updateStageUi();setPhase('result');sound.play('result');loadRankings(false);}
   function retire(){if(state.phase!=='playing'||state.cleared||state.inputLocked||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();returnHome();}
 
   function getRpcUrl(name){const base=(RANKING_CONFIG.supabaseUrl||'').trim().replace(/\/+$/,'');return base?base+'/rest/v1/rpc/'+name:'';}
   function isRankingConfigured(){return Boolean(getRpcUrl('submit_score')&&(RANKING_CONFIG.publishableKey||'').trim());}
   function postRpc(name,payload,timeoutMs){return new Promise(function(resolve,reject){if(!isRankingConfigured()){reject(new Error('ranking unconfigured'));return;}const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),timeoutMs);fetch(getRpcUrl(name),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal}).then(async function(res){clearTimeout(timeoutId);const text=await res.text();let data=null;if(text){try{data=JSON.parse(text);}catch(e){throw new Error('invalid json');}}if(!res.ok)throw new Error('http '+res.status);resolve(data);}).catch(function(error){clearTimeout(timeoutId);reject(error);});});}
-  function updateRankingStatus(status){el.rankNote.classList.toggle('err',status==='failed');if(status==='submitting')el.rankNote.textContent='ランキング送信中…';else if(status==='success')el.rankNote.textContent='ランキングへ登録しました';else if(status==='failed')el.rankNote.textContent='ランキング送信に失敗しました';else if(status==='unconfigured')el.rankNote.textContent='ランキングは未設定です';else el.rankNote.textContent='';}
-  function resetNameRecord(){el.recordNameDisplay.textContent='--';el.firstScoreDisplay.textContent='--.--秒';el.bestScoreDisplay.textContent='--.--秒';el.namePlayCountDisplay.textContent='--回';el.nameRecordStatus.textContent='';el.nameRecordStatus.classList.remove('err');el.bestBadge.textContent='';el.bestBadge.style.display='none';}
-  function setNameRecordPending(playerName){resetNameRecord();el.recordNameDisplay.textContent=playerName;el.nameRecordStatus.textContent='登録名の記録を取得中…';}
-  function setNameRecordFailure(){el.nameRecordStatus.textContent='登録名の記録を取得できませんでした。';el.nameRecordStatus.classList.add('err');}
-  function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;el.firstScoreDisplay.textContent=formatScore(Number(record.result_first_score))+'秒';el.bestScoreDisplay.textContent=formatScore(Number(record.result_best_score))+'秒';el.namePlayCountDisplay.textContent=String(Number(record.result_play_count)||0)+'回';el.nameRecordStatus.textContent='Supabaseに保存された登録名の記録です。';el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='登録名の初回記録';else if(record.is_new_best)badge='登録名のベスト更新！';el.bestBadge.textContent=badge;el.bestBadge.style.display=badge?'inline-block':'none';}
+  function updateRankingStatus(status){el.rankNote.classList.toggle('err',status==='failed');if(status==='submitting')setMessage(el.rankNote,'ランキング送信中…');else if(status==='success')setMessage(el.rankNote,'ランキングへ登録しました');else if(status==='failed')setMessage(el.rankNote,'ランキング送信に失敗しました');else if(status==='unconfigured')setMessage(el.rankNote,'ランキングは未設定です');else setMessage(el.rankNote,'');}
+  function resetNameRecord(){el.recordNameDisplay.textContent='--';setMessage(el.firstScoreDisplay,'{0}秒',['--.--']);setMessage(el.bestScoreDisplay,'{0}秒',['--.--']);setMessage(el.namePlayCountDisplay,'{0}回プレイ',['--']);setMessage(el.nameRecordStatus,'');el.nameRecordStatus.classList.remove('err');setMessage(el.bestBadge,'');el.bestBadge.style.display='none';}
+  function setNameRecordPending(playerName){resetNameRecord();el.recordNameDisplay.textContent=playerName;setMessage(el.nameRecordStatus,'登録名の記録を取得中…');}
+  function setNameRecordFailure(){setMessage(el.nameRecordStatus,'登録名の記録を取得できませんでした。');el.nameRecordStatus.classList.add('err');}
+  function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;setMessage(el.firstScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_first_score))]);setMessage(el.bestScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_best_score))]);setMessage(el.namePlayCountDisplay,'{0}回プレイ',()=>[formatNumber(Number(record.result_play_count)||0)]);setMessage(el.nameRecordStatus,'Supabaseに保存された登録名の記録です。');el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='登録名の初回記録';else if(record.is_new_best)badge='登録名のベスト更新！';setMessage(el.bestBadge,badge);el.bestBadge.style.display=badge?'inline-block':'none';}
   function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
   function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:currentClientVersion()};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
 
-  function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');statusEl.textContent=message||'';statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}
-  function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';rank.textContent=String(row.rankNo)+'位';const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent='秒';score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
+  function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');setMessage(statusEl,message||'');statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}
+  function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';setMessage(rank,'{0}位',()=>[formatNumber(row.rankNo)]);const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent=t('秒');score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
   function normalizeRankingRows(data){if(!Array.isArray(data))return [];return data.slice(0,RANKING_LIMIT).map(function(row,index){return {rankNo:Number.isFinite(Number(row.rank_no))?Number(row.rank_no):index+1,displayName:String(row.display_name||'--'),bestScore:Number(row.best_score)};}).filter(row=>isValidScore(row.bestScore));}
   function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows);if(rows.length===0)setRankingState('empty','まだランキング記録がありません。');else setRankingState('ready','');}
   function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
-  function showToast(name,message,isError){const target=name==='result'?el.resultToast:el.homeToast;clearToast(name);target.textContent=message;target.classList.toggle('err',Boolean(isError));const timerId=setTimeout(function(){if(state.toastTimerIds[name]!==timerId)return;clearToast(name);},1800);state.toastTimerIds[name]=timerId;}
+  function showToast(name,message,isError){const target=name==='result'?el.resultToast:el.homeToast;clearToast(name);setMessage(target,message);target.classList.toggle('err',Boolean(isError));const timerId=setTimeout(function(){if(state.toastTimerIds[name]!==timerId)return;clearToast(name);},1800);state.toastTimerIds[name]=timerId;}
   function copyWithClipboardApi(text){if(!(navigator.clipboard&&navigator.clipboard.writeText))return Promise.reject(new Error('clipboard unavailable'));return navigator.clipboard.writeText(text);}
   function copyWithTemporaryTextarea(text){return new Promise(function(resolve,reject){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';ta.style.left='-1000px';ta.style.opacity='0';document.body.appendChild(ta);try{ta.focus();ta.select();if(ta.setSelectionRange)ta.setSelectionRange(0,text.length);document.execCommand('copy')?resolve():reject(new Error('copy failed'));}catch(e){reject(e);}finally{document.body.removeChild(ta);}});}
   function copyText(text){return copyWithClipboardApi(text).catch(function(){return copyWithTemporaryTextarea(text);});}
-  function shareText(text,toastName){function copyAndNotify(){copyText(text).then(()=>showToast(toastName,'シェア文をコピーしました',false)).catch(()=>showToast(toastName,'コピーできませんでした',true));}if(navigator.share){navigator.share({title:'イロナラベ',text:text}).catch(function(err){if(err&&err.name==='AbortError')return;copyAndNotify();});return;}copyAndNotify();}
-  function shareHome(){shareText('イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n'+GAME_URL,'home');}
-  function shareResult(){shareText('イロナラベ\nSTAGE '+stageShortLabel(state.stage)+'「'+stageLongLabel(state.stage)+'」を'+formatElapsedMs(state.elapsedMs)+'秒・操作'+state.operations+'回でクリア！\n'+GAME_URL,'result');}
+  function shareText(text,toastName){function copyAndNotify(){copyText(text).then(()=>showToast(toastName,'シェア文をコピーしました',false)).catch(()=>showToast(toastName,'コピーできませんでした',true));}if(navigator.share){navigator.share({title:t('イロナラベ'),text:text}).catch(function(err){if(err&&err.name==='AbortError')return;copyAndNotify();});return;}copyAndNotify();}
+  function shareHome(){shareText(t('イロナラベ\n全8ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}',[GAME_URL]),'home');}
+  function shareResult(){shareText(t('イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}',[stageShortLabel(state.stage),stageLongLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations),GAME_URL]),'result');}
   function buildLogoChips(){STAGE_PALETTES.flatMap(function(palette){return palette.corners;}).forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
   function buildStagePackDots(){STAGE_PALETTES.flatMap(function(palette){return palette.corners;}).forEach(function(hex){const dot=document.createElement('i');dot.style.background=hex;el.stagePackDots.appendChild(dot);});}
 
+  function updateCountdownValue(){const step=COUNTDOWN_STEPS[state.countdownStep];el.countdownValue.textContent=step==='START'?t('START'):formatNumber(Number(step));}
+  function updateSoundButtons(){[el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){setMessage(button,sound.isEnabled()?'効果音：ON':'効果音：OFF');button.setAttribute('aria-pressed',String(sound.isEnabled()));});}
+  function refreshLanguage(){i18n.applyTranslations();el.languageSelect.value=i18n.getLanguage();updateStageUi();updateCountdownValue();el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);el.operationDisplay.textContent=formatNumber(state.operations);renderRankingList(el.resultRankingList,state.rankingRows);updateSoundButtons();}
+  IronarabeI18n.SUPPORTED_LANGUAGES.forEach(function(language){const option=document.createElement('option');option.value=language.id;option.textContent=language.name;option.lang=language.id;el.languageSelect.appendChild(option);});
+  el.languageSelect.addEventListener('change',function(){i18n.setLanguage(el.languageSelect.value);refreshLanguage();});
+  [el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){button.addEventListener('click',function(){sound.setEnabled(!sound.isEnabled());if(sound.isEnabled())sound.unlock();updateSoundButtons();});});
+  // These calls run in the gesture stack, including iPhone Safari touch and keyboard activation.
+  document.addEventListener('pointerdown',function(){sound.unlock();},{capture:true,passive:true});
+  document.addEventListener('keydown',function(){sound.unlock();},{capture:true});
   el.startBtn.addEventListener('click',openNameConfirm);
   el.howToBtn.addEventListener('click',function(){const open=el.howToPanel.hidden;el.howToPanel.hidden=!open;el.howToBtn.setAttribute('aria-expanded',String(open));});
   el.confirmNameBtn.addEventListener('click',confirmPlayerName);
@@ -596,6 +650,7 @@
   state.playerName=getSavedPlayerName();
   resetNameRecord();
   setRankingState('idle','');
+  refreshLanguage();
   setPhase('home');
 }());
 </script>

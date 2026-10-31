@@ -47,7 +47,7 @@ if (manifest) {
     schema_version: 1,
     game_slug: "ironarabe",
     title: "イロナラベ",
-    game_url: "https://chameleonjp.codeberg.page/ironarabe/",
+    game_url: "https://chameleonjp-lab.github.io/ironarabe/",
     is_active: true,
     release_date: "2026-07-20",
     top_ranking_type: "best",
@@ -71,7 +71,7 @@ if (manifest) {
   requireTrue(!/sb_publishable_|service_role|secret key/i.test(manifestText), "manifest must not contain credentials");
 
   requireTrue(index.includes("const GAME_SLUG='ironarabe'"), "index GAME_SLUG mismatch");
-  requireTrue(index.includes("const GAME_URL='https://chameleonjp.codeberg.page/ironarabe/'"), "index GAME_URL mismatch");
+  requireTrue(index.includes("const GAME_URL='https://chameleonjp-lab.github.io/ironarabe/'"), "index GAME_URL mismatch");
   requireTrue(index.includes("CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2'"), "index CLIENT_VERSION mismatch");
   requireTrue(index.includes("const STAGES=buildStages()"), "index stage-pack contract missing");
   requireTrue(index.includes("p_client_version:currentClientVersion()"), "stage-aware p_client_version missing");
@@ -129,7 +129,7 @@ requireTrue(readme.includes("RELEASE_STATUS_v3.md"), "README must link to curren
 requireTrue(readme.includes("tools/verify-stage-pack-v13.cjs"), "README must list the stage-pack verifier");
 requireTrue(readme.includes("tools/verify-result-only-v14.cjs"), "README must list the result-only verifier");
 requireTrue(readme.includes("ホーム画面にはランキングと端末ローカルベストを表示しません"), "README must describe the network-free home screen");
-requireTrue(readme.includes("保存済みのプレイヤー名だけを残し"), "README must describe name-only replay cache retention");
+requireTrue(readme.includes("保存済みのプレイヤー名・言語・効果音設定を残し"), "README must describe player name and preference retention");
 requireTrue(readme.includes("release/ironarabe-game-registration.json"), "README must link to registration manifest");
 requireTrue(readme.includes("release/supabase-preflight-v1.json"), "README must link to Supabase preflight result");
 requireTrue(spec.includes("ステージ数は8"), "SPEC_v4 must define eight stages");

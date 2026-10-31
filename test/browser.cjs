@@ -1,0 +1,126 @@
+'use strict';
+// Local-only full-game acceptance: every Supabase request is intercepted.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');const path=require('node:path');const http=require('node:http');
+const {chromium,webkit}=require('playwright');
+const root=path.resolve(__dirname,'..');
+const server=http.createServer((req,res)=>{
+ const target=path.resolve(root,'.'+new URL(req.url,'http://local').pathname.replace(/\/$/,'/index.html'));
+ if(!target.startsWith(root+path.sep)){res.writeHead(403).end();return;}
+ try{res.setHeader('Content-Type',target.endsWith('.js')?'text/javascript':'text/html');res.end(fs.readFileSync(target));}catch{res.writeHead(404).end();}
+});
+const languages=['ja','en','es','pt-BR','zh-Hans','fr','de','ko','ru','it','zh-Hant','id','tr','vi','th'];
+const boardFixture=[0,29,42,3,15,49,6,50,22,33,41,13,55,43,16,36,57,17,37,14,47,20,54,1,31,24,35,46,28,61,4,25,45,18,34,9,53,10,38,40,27,7,51,2,5,8,23,12,32,26,48,21,60,30,11,52,56,39,44,59,58,19,62];
+async function bounds(page){
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal page overflow');
+ const bad=await page.locator('.screen.active button,.screen.active input,.screen.active select,.screen.active .record-line,.screen.active .hud,.screen.active .result-head,.screen.active .completion-banner,.screen.active .countdown-value').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+2).map(n=>n.id||n.className));
+ assert.deepEqual(bad,[],'no clipped controls/text');
+}
+async function switchLanguage(page,language){
+ await page.locator('#languageSelect').evaluate((node,value)=>{node.value=value;node.dispatchEvent(new Event('change',{bubbles:true}));},language);
+ assert.equal(await page.locator('html').getAttribute('lang'),language);
+ await bounds(page);
+}
+async function acceptance(engine,viewport,failAudio=false){
+ const browser=await engine.launch({headless:true});
+ const context=await browser.newContext({viewport,deviceScaleFactor:1,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'});
+ const page=await context.newPage();const errors=[];const calls=[];let releaseSubmit;
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(({failAudio})=>{
+  window.__sounds=[];window.__shared=[];window.__notes=[];
+  Object.defineProperty(navigator,'share',{value:async data=>{window.__shared.push(data);},configurable:true});
+  if(failAudio){window.AudioContext=function(){throw Error('audio unavailable')};window.webkitAudioContext=window.AudioContext;}
+  else{const NativeContext=window.AudioContext||window.webkitAudioContext;if(NativeContext)window.AudioContext=function(){const ctx=new NativeContext();const create=ctx.createOscillator.bind(ctx);ctx.createOscillator=function(){const osc=create(),start=osc.start.bind(osc);osc.start=function(when){window.__notes.push(when);return start(when);};return osc;};return ctx;};}
+ },{failAudio});
+ await page.route('**/js/sound-effects.js',async route=>{
+  const source=fs.readFileSync(path.join(root,'js/sound-effects.js'),'utf8');
+  await route.fulfill({contentType:'text/javascript',body:source+`\nconst originalSoundFactory=IronarabeSound.createSoundEffects;IronarabeSound.createSoundEffects=(options)=>{const api=originalSoundFactory(options);return {...api,play(kind){window.__sounds.push(kind);return api.play(kind);}};};`});
+ });
+ await page.route('https://*.supabase.co/**',async route=>{
+  const request=route.request();const payload=request.postDataJSON();const method=new URL(request.url()).pathname.split('/').pop();calls.push({method,payload});
+  if(method==='submit_score'){
+   await new Promise(resolve=>{releaseSubmit=resolve;});
+   await route.fulfill({json:[{accepted:true,result_display_name:'Alice 日本語',result_first_score:12345,result_best_score:3456,result_play_count:8,is_first_play:false,is_new_best:true}]});
+  }else if(method==='get_best_score_ranking')await route.fulfill({json:[{rank_no:1,display_name:'<保持名>',best_score:3456},{rank_no:1,display_name:'Tie',best_score:3456}]});
+  else throw Error('Unexpected RPC '+method);
+ });
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
+  assert.equal(await page.locator('#languageSelect option').count(),15);
+  assert.equal(calls.length,0,'home does not fetch rankings');
+  await page.click('#howToBtn');
+  for(const language of languages){await page.selectOption('#languageSelect',language);await bounds(page);}
+  await page.click('#howToBtn');
+  await page.selectOption('#languageSelect','en');
+  await page.tap('#homeSoundBtn');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'false');
+  await page.tap('#homeSoundBtn');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');
+  await page.tap('#startBtn');await page.tap('#confirmNameBtn');assert.ok((await page.locator('#nameError').innerText()).length);
+  await switchLanguage(page,'de');assert.match(await page.locator('#nameError').innerText(),/Spieler/);
+  await page.fill('#playerNameInput','Alice 日本語');await page.tap('#confirmNameBtn');
+  await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');
+  assert.equal(await page.locator('.tile').count(),63);assert.equal(await page.locator('.tile.fixed').count(),8);
+  await page.tap('.tile[data-pos="0"]');assert.equal(await page.locator('.selected').count(),0);
+  await page.tap('.tile[data-pos="1"]');await page.tap('.tile[data-pos="1"]');
+  assert.deepEqual(await page.evaluate(()=>__sounds),['select','cancel']);
+  for(const language of languages){await switchLanguage(page,language);}
+  await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  const board=boardFixture.slice();let moves=0;
+  for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);await page.click(`.tile[data-pos="${i}"]`);await page.click(`.tile[data-pos="${j}"]`);[board[i],board[j]]=[board[j],board[i]];moves++;}
+  assert.equal(await page.locator('#completionBanner').isVisible(),true);
+  const frozen=await page.locator('#timeDisplay').innerText();
+  await page.clock.runFor(3990);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');assert.equal(await page.locator('#timeDisplay').innerText(),frozen);
+  await page.clock.runFor(30);assert.equal(await page.locator('body').getAttribute('data-phase'),'result');
+  assert.equal(calls.filter(c=>c.method==='submit_score').length,1);
+  const sent=calls.find(c=>c.method==='submit_score').payload;
+  assert.equal(sent.p_game_slug,'ironarabe');assert.equal(sent.p_display_name,'Alice 日本語');assert.ok(Number.isInteger(sent.p_score)&&sent.p_score>0);
+  assert.match(sent.p_client_version,/^ironarabe-web-1\.4\.1-stagepack001-v2-(sunset|aurora)-r[0-3]$/);
+  assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='complete').length),1);assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='result').length),1);
+  assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='swap').length),moves);
+  releaseSubmit();await page.waitForFunction(()=>document.querySelector('#namePlayCountDisplay').textContent.includes('8'));
+  for(const language of languages){await switchLanguage(page,language);await bounds(page);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Alice 日本語');assert.equal(await page.locator('.ranking-name').first().innerText(),'<保持名>');}
+  await switchLanguage(page,'de');assert.match(await page.locator('#bestScoreDisplay').innerText(),/34,56/);
+  fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${viewport.width}x${viewport.height}-result.png`),fullPage:true});
+  await page.click('#resultShareBtn');const shared=await page.evaluate(()=>__shared.at(-1));assert.ok(shared.text.includes('https://chameleonjp-lab.github.io/ironarabe/'));assert.ok(!shared.text.includes('codeberg'));
+  await page.tap('#resultSoundBtn');assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'false');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'false');await page.tap('#resultSoundBtn');
+  assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'true');
+  if(!failAudio)assert.ok(await page.evaluate(()=>__notes.length>0),'gesture-enabled native Web Audio schedules tones');
+  await page.evaluate(()=>{localStorage.setItem('ironarabe.old.cache','stale');sessionStorage.setItem('ironarabe.old.cache','stale')});
+  await page.click('#againBtn');assert.equal(await page.inputValue('#playerNameInput'),'Alice 日本語');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.language.v1')),'de');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'true');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.old.cache')),null);assert.equal(await page.evaluate(()=>sessionStorage.getItem('ironarabe.old.cache')),null);
+  const before=calls.length;await page.reload();assert.equal(await page.locator('html').getAttribute('lang'),'de');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');assert.equal(calls.length,before);
+  await page.click('#homeShareBtn');assert.ok((await page.evaluate(()=>__shared.at(-1).text)).includes('https://chameleonjp-lab.github.io/ironarabe/'));
+  if(failAudio){await page.evaluate(()=>{Object.defineProperty(window,'sessionStorage',{get(){throw new DOMException('blocked','SecurityError')},configurable:true});document.querySelector('#againBtn').click();});assert.equal(await page.locator('body').getAttribute('data-phase'),'nameConfirm','replay survives storage denial');}
+  assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} ${viewport.width}x${viewport.height} audioFailure=${failAudio}: 15 locales, full game, timing, ranking, replay, shares`);
+ }finally{if(releaseSubmit)releaseSubmit();await context.close();await browser.close();}
+}
+async function failureAcceptance(engine){
+ const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
+ const errors=[],calls=[];let round=1,releaseSubmit,releaseRanking;page.on('pageerror',e=>errors.push(e.message));
+ await page.route('https://*.supabase.co/**',async route=>{
+  const method=new URL(route.request().url()).pathname.split('/').pop();calls.push(method);
+  if(round===1){await route.fulfill({status:503,json:{message:'offline'}});return;}
+  if(method==='submit_score'){await new Promise(resolve=>{releaseSubmit=resolve});await route.fulfill({json:[{accepted:true,result_normalized_name:'Alice',result_display_name:'Alice',result_first_score:12345,result_best_score:3456,result_play_count:9,is_first_play:false,is_new_best:true}]});}
+  else{await new Promise(resolve=>{releaseRanking=resolve});await route.fulfill({json:[{rank_no:1,display_name:'Late stale name',first_score:12345,best_score:3456,play_count:9,updated_at:'2026-10-31T00:00:00Z'}]});}
+ });
+ async function solve(){
+  await page.fill('#playerNameInput','Alice');await page.tap('#confirmNameBtn');await page.clock.runFor(3200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  const board=boardFixture.slice();for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);await page.locator(`.tile[data-pos="${i}"]`).dispatchEvent('click');await page.locator(`.tile[data-pos="${j}"]`).dispatchEvent('click');[board[i],board[j]]=[board[j],board[i]];}
+  await page.clock.runFor(4001);
+ }
+ try{
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.tap('#startBtn');await solve();
+  await page.waitForFunction(()=>document.querySelector('#rankNote').classList.contains('err')&&document.querySelector('#resultRankingStatus').classList.contains('err'));
+  const catalog=require('../js/translations.js');for(const language of languages){await switchLanguage(page,language);assert.equal(await page.locator('#rankNote').innerText(),catalog[language]['ランキング送信に失敗しました']);assert.equal(await page.locator('#nameRecordStatus').innerText(),catalog[language]['登録名の記録を取得できませんでした。']);assert.equal(await page.locator('#resultRankingStatus').innerText(),catalog[language]['ランキングを読み込めませんでした。']);}
+  assert.equal(calls.filter(method=>method==='submit_score').length,1);await page.tap('#againBtn');round=2;await solve();
+  assert.equal(await page.locator('body').getAttribute('data-phase'),'result');await page.waitForFunction(()=>document.querySelector('#resultRankingStatus').getAttribute('data-i18n')==='ランキングを読み込み中…');
+  assert.ok(releaseSubmit&&releaseRanking);await page.tap('#againBtn');const count=calls.length;releaseSubmit();releaseRanking();
+  await page.waitForTimeout(100);assert.equal(await page.locator('body').getAttribute('data-phase'),'nameConfirm');assert.equal(await page.locator('#recordNameDisplay').innerText(),'--');assert.equal(await page.locator('#resultRankingList').innerText(),'');assert.equal(calls.length,count,'stale submit does not start another ranking request');assert.equal(await page.inputValue('#playerNameInput'),'Alice');assert.deepEqual(errors,[]);
+  console.log(`PASS ${engine.name()} communication failure: 15 locales, retry-free submit, stale async response isolation`);
+ }finally{releaseSubmit?.();releaseRanking?.();await context.close();await browser.close();}
+}
+(async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{
+ for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))for(const viewport of [{width:402,height:874},{width:874,height:402}])await acceptance(engine,viewport,viewport.width===874);
+ for(const engine of (process.env.BROWSER_ENGINES==='chromium'?[chromium]:[chromium,webkit]))await failureAcceptance(engine);
+}finally{server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -45,9 +45,9 @@
 
 ## 再プレイ時の軽量化
 
-「もう一度遊ぶ」を押した時は、保存済みのプレイヤー名だけを残し、次を消去します。
+「もう一度遊ぶ」を押した時は、保存済みのプレイヤー名・言語・効果音設定を残し、次を消去します。
 
-- 名前以外の`ironarabe.` localStorage
+- 名前・言語・効果音設定以外の`ironarabe.` localStorage
 - `ironarabe.` sessionStorage
 - タイル、正解配列、盤面配列、固定集合
 - メモリ上のランキング結果
@@ -67,13 +67,29 @@ Supabaseのスコア履歴は削除しません。
 - 認証: Publishable keyを`apikey`ヘッダーに使用
 - secret key、service_role key、Bearer認証は使用しません
 
-## 公開状況
+## 15言語と効果音
+
+ホーム上部の言語メニューは、初回にブラウザの優先言語を使い、手動選択を端末へ保存します。対応ID・言語名・判定規則はサイノメ現行版に合わせています。
+
+`ja`, `en`, `es`, `pt-BR`, `zh-Hans`, `fr`, `de`, `ko`, `ru`, `it`, `zh-Hant`, `id`, `tr`, `vi`, `th`
+
+画面・通知・共有文・ステージ名・数値表示を再読み込みせず切り替えます。入力された名前、スコア保存値、ステージIDは変換しません。
+
+Web Audio APIで選択・キャンセル・交換・完成・結果発表の5音を生成します。初期値はONで、ホームと結果画面から変更できます。利用者操作で音声を有効化し、設定は再プレイ後も維持します。音声が使えなくてもプレイできます。
+
+## 公開状況（切替準備・未公開）
 
 ```text
-https://chameleonjp.codeberg.page/ironarabe/
+https://chameleonjp-lab.github.io/ironarabe/
 ```
 
-Supabase登録は有効です。
+上記は移行先の正式URLです。2026-10-31の作業時点ではHTTP 404で、稼働確認は未完了です。PR-Aマージ後の公開確認を経て実験場・Supabaseを切り替えます。
+
+現在稼働中の旧公開先は `https://chameleonjp.codeberg.page/ironarabe/` です。今回停止・削除しません。
+
+GitHub Pagesは `.github/workflows/github-pages.yml` で、既定ブランチ `claude/ironarabe-new-game-wlys30` へのマージ後に自動配備します。PRでは検証のみ実行し、本番配備しません。公開設定と順序は [GITHUB_PAGES_MIGRATION.md](./GITHUB_PAGES_MIGRATION.md) を参照してください。
+
+Supabase登録は有効なまま維持します。登録URLは公開確認後まで旧URLのままです。
 
 ```text
 is_active: true
@@ -85,7 +101,7 @@ score_scale: 100
 score_decimals: 2
 ```
 
-公開後の実プレイについて、`score_runs` 1件、`game_scores` 1件、名前単位のプレイ回数1回を確認済みです。
+旧Codeberg版での公開後の実プレイについて、`score_runs` 1件、`game_scores` 1件、名前単位のプレイ回数1回を確認済みです。
 
 基本版識別子:
 
@@ -96,22 +112,26 @@ ironarabe-web-1.4.1-stagepack001-v2
 ## 検証
 
 ```bash
-node tools/verify-production-ui.cjs
-node tools/verify-ranking-ui-v12.cjs
+npm ci
+npm test
+npx playwright install --with-deps chromium webkit
+npm run test:browser
+npm run build
+
+# 個別の既存検証も引き続き実行可能:
 node tools/verify-stage-pack-v13.cjs
 node tools/verify-result-only-v14.cjs
-node tools/verify-release-contract.cjs
-node tools/verify-codeberg-publish-workflow.cjs
 ```
 
 ## ドキュメント
 
-- 現在の仕様: [SPEC_v4.md](./SPEC_v4.md)
+- 今回の追加仕様・公開手順: [GITHUB_PAGES_MIGRATION.md](./GITHUB_PAGES_MIGRATION.md)
+- ゲームの基本仕様: [SPEC_v4.md](./SPEC_v4.md)
 - 現在の確認項目: [REVIEW_CHECKLIST_v4.md](./REVIEW_CHECKLIST_v4.md)
-- 現在の公開状態: [RELEASE_STATUS_v3.md](./RELEASE_STATUS_v3.md)
-- Codeberg公開設定: [CODEBERG_PUBLISH_SETUP_v1.md](./CODEBERG_PUBLISH_SETUP_v1.md)
-- 公開反映の自動確認: [PUBLICATION_VERIFICATION_v1.md](./PUBLICATION_VERIFICATION_v1.md)
-- Supabase登録値の正本: [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)
+- 旧Codeberg版の確認記録: [RELEASE_STATUS_v3.md](./RELEASE_STATUS_v3.md)
+- 旧Codeberg公開設定（履歴）: [CODEBERG_PUBLISH_SETUP_v1.md](./CODEBERG_PUBLISH_SETUP_v1.md)
+- 旧Codeberg公開確認（履歴）: [PUBLICATION_VERIFICATION_v1.md](./PUBLICATION_VERIFICATION_v1.md)
+- Supabase登録の切替予定値（DB未適用）: [release/ironarabe-game-registration.json](./release/ironarabe-game-registration.json)
 - Supabaseプリフライト結果: [release/supabase-preflight-v1.json](./release/supabase-preflight-v1.json)
 - 難易度比較: [DIFFICULTY_STUDY_v1.md](./DIFFICULTY_STUDY_v1.md)
 - 旧仕様: [SPEC_v3.md](./SPEC_v3.md)、[REVIEW_CHECKLIST_v3.md](./REVIEW_CHECKLIST_v3.md)、[RELEASE_STATUS_v2.md](./RELEASE_STATUS_v2.md)

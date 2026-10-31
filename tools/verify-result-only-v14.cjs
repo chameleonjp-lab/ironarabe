@@ -20,7 +20,7 @@ if (scripts.length === 1) {
 
 const required = [
   ["CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2'", "result-only client version mismatch"],
-  ["<h3 id=\"nameRecordTitle\">登録名の記録</h3>", "registered-name record heading missing"],
+  ["<h3 id=\"nameRecordTitle\" data-i18n=\"登録名の記録\">登録名の記録</h3>", "registered-name record heading missing"],
   ["登録名の初回記録", "registered-name first score missing"],
   ["登録名のベスト記録", "registered-name best score missing"],
   ["登録名のプレイ回数", "registered-name play count missing"],
@@ -92,4 +92,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("OK: home is network-free, result uses registered-name records, and replay preserves only the name");
+console.log("OK: home is network-free, result uses registered-name records, and replay preserves name and preferences");
