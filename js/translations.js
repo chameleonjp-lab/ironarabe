@@ -105,7 +105,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}",
     "音量": "音量",
     "共有文をコピー": "共有文をコピー",
-    "再試行": "再試行"
+    "再試行": "再試行",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。"
   },
   "en": {
     "イロナラベ": "Ironarabe",
@@ -204,7 +205,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFollow the color gradients and arrange the 7×9 tiles in their correct positions.\n{0}",
     "音量": "Volume",
     "共有文をコピー": "Copy share text",
-    "再試行": "Retry"
+    "再試行": "Retry",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "This device cannot save the record. To avoid losing the result, do not reload; retry when saving is available."
   },
   "es": {
     "イロナラベ": "Ironarabe",
@@ -303,7 +305,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{0}",
     "音量": "Volumen",
     "共有文をコピー": "Copiar texto para compartir",
-    "再試行": "Reintentar"
+    "再試行": "Reintentar",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Este dispositivo no puede guardar el registro. Para no perder el resultado, no recargues; reintenta cuando se pueda guardar."
   },
   "pt-BR": {
     "イロナラベ": "Ironarabe",
@@ -402,7 +405,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSiga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{0}",
     "音量": "Volume",
     "共有文をコピー": "Copiar texto de compartilhamento",
-    "再試行": "Tentar novamente"
+    "再試行": "Tentar novamente",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Este dispositivo não consegue salvar o registro. Para não perder o resultado, não recarregue; tente novamente quando for possível salvar."
   },
   "zh-Hans": {
     "イロナラベ": "Ironarabe",
@@ -501,7 +505,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n观察色彩渐变，将7×9的方块排列到正确位置。\n{0}",
     "音量": "音量",
     "共有文をコピー": "复制分享文字",
-    "再試行": "重试"
+    "再試行": "重试",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "此设备无法保存记录。为避免丢失结果，请勿刷新页面，待可保存时重试。"
   },
   "fr": {
     "イロナラベ": "Ironarabe",
@@ -600,7 +605,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSuivez les dégradés de couleurs et replacez les tuiles de la grille 7×9 au bon endroit.\n{0}",
     "音量": "Volume",
     "共有文をコピー": "Copier le texte à partager",
-    "再試行": "Réessayer"
+    "再試行": "Réessayer",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Cet appareil ne peut pas enregistrer le résultat. Pour ne pas le perdre, ne rechargez pas la page ; réessayez lorsque l’enregistrement sera possible."
   },
   "de": {
     "イロナラベ": "Ironarabe",
@@ -699,7 +705,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFolge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{0}",
     "音量": "Lautstärke",
     "共有文をコピー": "Text zum Teilen kopieren",
-    "再試行": "Erneut versuchen"
+    "再試行": "Erneut versuchen",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Dieses Gerät kann den Eintrag nicht speichern. Lade die Seite nicht neu, damit das Ergebnis erhalten bleibt. Versuche es erneut, sobald Speichern möglich ist."
   },
   "ko": {
     "イロナラベ": "Ironarabe",
@@ -798,7 +805,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{0}",
     "音量": "음량",
     "共有文をコピー": "공유 문구 복사",
-    "再試行": "다시 시도"
+    "再試行": "다시 시도",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "이 기기에 기록을 저장할 수 없습니다. 결과를 잃지 않도록 새로고침하지 말고, 저장할 수 있을 때 다시 시도하세요."
   },
   "ru": {
     "イロナラベ": "Ironarabe",
@@ -897,7 +905,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nСледите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{0}",
     "音量": "Громкость",
     "共有文をコピー": "Копировать текст публикации",
-    "再試行": "Повторить"
+    "再試行": "Повторить",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Устройство не может сохранить запись. Чтобы не потерять результат, не перезагружайте страницу. Повторите попытку, когда сохранение станет доступно."
   },
   "it": {
     "イロナラベ": "Ironarabe",
@@ -996,7 +1005,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSegui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{0}",
     "音量": "Volume",
     "共有文をコピー": "Copia testo da condividere",
-    "再試行": "Riprova"
+    "再試行": "Riprova",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Questo dispositivo non può salvare il record. Per non perdere il risultato, non ricaricare la pagina; riprova quando sarà possibile salvare."
   },
   "zh-Hant": {
     "イロナラベ": "Ironarabe",
@@ -1095,7 +1105,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n觀察色彩漸層，將7×9的方塊排列到正確位置。\n{0}",
     "音量": "音量",
     "共有文をコピー": "複製分享文字",
-    "再試行": "重試"
+    "再試行": "重試",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "此裝置無法儲存紀錄。為避免遺失結果，請勿重新載入頁面，待可儲存時重試。"
   },
   "id": {
     "イロナラベ": "Ironarabe",
@@ -1194,7 +1205,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nIkuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{0}",
     "音量": "Volume",
     "共有文をコピー": "Salin teks berbagi",
-    "再試行": "Coba lagi"
+    "再試行": "Coba lagi",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Perangkat ini tidak dapat menyimpan catatan. Agar hasil tidak hilang, jangan muat ulang halaman; coba lagi saat penyimpanan tersedia."
   },
   "tr": {
     "イロナラベ": "Ironarabe",
@@ -1293,7 +1305,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nRenk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{0}",
     "音量": "Ses düzeyi",
     "共有文をコピー": "Paylaşım metnini kopyala",
-    "再試行": "Yeniden dene"
+    "再試行": "Yeniden dene",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Bu cihaz kaydı saklayamıyor. Sonucu kaybetmemek için sayfayı yenilemeyin; kayıt mümkün olduğunda yeniden deneyin."
   },
   "vi": {
     "イロナラベ": "Ironarabe",
@@ -1392,7 +1405,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nQuan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{0}",
     "音量": "Âm lượng",
     "共有文をコピー": "Sao chép nội dung chia sẻ",
-    "再試行": "Thử lại"
+    "再試行": "Thử lại",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Thiết bị này không thể lưu bản ghi. Để không mất kết quả, đừng tải lại trang; hãy thử lại khi có thể lưu."
   },
   "th": {
     "イロナラベ": "Ironarabe",
@@ -1491,7 +1505,8 @@
     "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nสังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{0}",
     "音量": "ระดับเสียง",
     "共有文をコピー": "คัดลอกข้อความแชร์",
-    "再試行": "ลองอีกครั้ง"
+    "再試行": "ลองอีกครั้ง",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "อุปกรณ์นี้บันทึกข้อมูลไม่ได้ เพื่อไม่ให้ผลหาย อย่าโหลดหน้าใหม่ ให้ลองอีกครั้งเมื่อสามารถบันทึกได้"
   }
 };
 });

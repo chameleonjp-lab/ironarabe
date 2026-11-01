@@ -90,6 +90,7 @@
           const AudioContext = windowObject && (windowObject.AudioContext || windowObject.webkitAudioContext);
           if (typeof AudioContext !== "function") return false;
           context = new AudioContext();
+          context.onstatechange = () => { if (context.state !== "running") stop(); };
         }
         if (context.state === "running") return true;
         if (resumePending || typeof context.resume !== "function") return false;

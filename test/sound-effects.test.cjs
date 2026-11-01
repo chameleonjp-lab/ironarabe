@@ -454,3 +454,5 @@ test('volume preserves zero across reload and stops pending voices', () => {
   next.setVolume(0.4);
   assert.equal(loadModule().createSoundEffects({storage,windowObject:{}}).getVolume(),0.4);
 });
+
+test('interrupted context stops scheduled sounds without waiting for visibilitychange',()=>{const h=harness();h.sound.unlock();h.sound.play('complete');const c=h.contexts[0];c.state='interrupted';c.onstatechange?.();assert.ok(c.oscillators.every(o=>o.disconnected));assert.ok(c.gains.every(g=>g.disconnected));});

@@ -535,7 +535,7 @@
   function clearAllToasts(){clearToast('home');clearToast('result');}
   function hideCompletion(){el.completionBanner.hidden=true;setMessage(el.completionSummary,'');}
   function clearPendingTimers(){clearCountdownTimers();clearClearTimer();clearSwapTimer();clearAllToasts();}
-  function returnHome(){state.scorePlay=null;sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
+  function returnHome(){state.rankingRequestId+=1;state.rankingRows=[];state.scorePlay=null;sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
 
   function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -553,7 +553,7 @@
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
-  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');state.scorePlay=scoreQueue.capture(state.playerName,currentClientVersion());document.getElementById('retryScore').hidden=true;return state.playId;}
+  function preparePlay(){state.rankingRequestId+=1;state.rankingRows=[];sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');state.scorePlay=scoreQueue.capture(state.playerName,currentClientVersion());document.getElementById('retryScore').hidden=true;return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);if(!state.playerName)state.guestStartId=guestCounter.record(currentClientVersion());if(!state.playerName&&!state.guestStartId)state.guestCountStatus='failed';});}
   function startCountdown(playId){if(state.phase!=='home')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.startBtn.disabled=true;el.guestStartBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
   function startGame(anonymous=false){if(state.phase!=='home'||el.startBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);el.playerNameInput.focus();return;}setMessage(el.nameError,'');state.playerName=v.name;if(!anonymous){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
@@ -644,19 +644,19 @@
     if(item.state==='sending')updateRankingStatus('submitting');
     else if(item.state==='submitted'){updateRankingStatus('success');applyNameRecord(receipt);loadRankings(true);}
     else{updateRankingStatus('failed');setNameRecordFailure();}
+    if(item.persisted===false)setMessage(el.rankNote,'端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。');
   }
   function submitScoreForCurrentPlay(playId,playerName,elapsedMs){
     if(!playerName||state.submittedPlayId===playId)return;
     state.submittedPlayId=playId;
     const score=elapsedMsToScore(elapsedMs);
     if(!isRankingConfigured()||!isValidScore(score)||!state.scorePlay){updateRankingStatus('failed');return;}
-    scoreQueue.enqueue(state.scorePlay,score,{elapsedMs,operations:state.operations,stageId:state.stage.id});
-    void scoreQueue.drain();
+    try{scoreQueue.enqueue(state.scorePlay,score,{elapsedMs,operations:state.operations,stageId:state.stage.id});void scoreQueue.drain();}catch{updateRankingStatus('failed');setNameRecordFailure();}
   }
 
   function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');setMessage(statusEl,message||'');statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}
   function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';setMessage(rank,'{0}位',()=>[formatNumber(row.rankNo)]);const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent=t('秒');score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
-  function normalizeRankingRows(data){if(!Array.isArray(data))return [];return data.slice(0,RANKING_LIMIT).map(function(row,index){return {rankNo:Number.isFinite(Number(row.rank_no))?Number(row.rank_no):index+1,displayName:String(row.display_name||'--'),bestScore:Number(row.best_score)};}).filter(row=>isValidScore(row.bestScore));}
+  function normalizeRankingRows(data){if(!Array.isArray(data)||data.some(row=>!row||!Number.isSafeInteger(row.rank_no)||row.rank_no<1||typeof row.display_name!=='string'||!Number.isSafeInteger(row.best_score)||!isValidScore(row.best_score)))throw new Error('Invalid ranking response');return data.slice(0,RANKING_LIMIT).map(row=>({rankNo:row.rank_no,displayName:row.display_name,bestScore:row.best_score}));}
   function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows);if(rows.length===0)setRankingState('empty','まだランキング記録がありません。');else setRankingState('ready','');}
   function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
@@ -707,7 +707,8 @@
   setPhase('home');
   void guestCounter.retry();
   window.addEventListener('online',function(){void guestCounter.retry({recover:true});});
-  const restoredScore=scoreQueue.list().at(-1);
+  function isRestorableScore(item){const p=item?.presentation;return Boolean(item&&item.state!=='conflict'&&p&&Number.isFinite(p.elapsedMs)&&p.elapsedMs>0&&Number.isSafeInteger(p.operations)&&p.operations>=0&&typeof p.stageId==='string'&&item.payload?.p_client_version?.endsWith('-'+p.stageId)&&isValidScore(item.payload.p_score)&&elapsedMsToScore(p.elapsedMs)===item.payload.p_score);}
+  const restoredScore=scoreQueue.list().filter(isRestorableScore).at(-1);
   if(restoredScore?.presentation&&Number.isFinite(restoredScore.presentation.elapsedMs)){
     const stage=STAGES.find(value=>value.id===restoredScore.presentation.stageId);
     if(stage){state.stage=stage;state.scorePlay={id:restoredScore.id,name:restoredScore.payload.p_display_name,clientVersion:restoredScore.payload.p_client_version};

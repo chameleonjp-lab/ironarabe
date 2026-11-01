@@ -256,7 +256,7 @@ async function xShareAcceptance(engine){
  }finally{await context.close();await browser.close();}
 }
 async function scoreQueueAcceptance(engine){
- const browser=await engine.launch({headless:true}),page=await browser.newPage({locale:'ja-JP',reducedMotion:'reduce'}),calls=[],ledger=new Map(),errors=[];let offline=true;
+ const browser=await engine.launch({headless:true}),page=await browser.newPage({locale:'ja-JP',reducedMotion:'reduce'}),calls=[],ledger=new Map(),errors=[];let offline=true,invalidRanking=false;
  page.on('pageerror',error=>errors.push(error.message));
  await page.route('https://*.supabase.co/**',async route=>{
   const method=new URL(route.request().url()).pathname.split('/').pop(),p=route.request().postDataJSON();
@@ -265,7 +265,7 @@ async function scoreQueueAcceptance(engine){
    if(offline)return route.fulfill({status:503,json:{message:'lost acknowledgement'}});
    return route.fulfill({json:[{accepted:true,was_duplicate:true,result_normalized_name:p.p_display_name,result_display_name:p.p_display_name,result_first_score:p.p_score,result_best_score:p.p_score,result_play_count:1,is_first_play:true,is_new_best:true}]});
   }
-  assert.equal(method,'get_best_score_ranking');return route.fulfill({json:[]});
+  assert.equal(method,'get_best_score_ranking');return route.fulfill({json:invalidRanking?[{display_name:'missing rank',best_score:100}]:[]});
  });
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
@@ -277,7 +277,11 @@ async function scoreQueueAcceptance(engine){
   offline=false;await page.reload();await page.waitForFunction(()=>document.body.dataset.phase==='result'&&document.querySelector('#rankNote').textContent.includes('登録しました'));
   assert.equal(calls.length,2);assert.deepEqual(calls[0],calls[1]);assert.equal(ledger.size,1);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Captured Alice');assert.equal(await page.locator('#resultShareBtn').getAttribute('href'),share);
   await switchLanguage(page,'en');await page.click('#reloadRanking');assert.equal(calls.length,2);assert.deepEqual(errors,[]);
-  console.log(`PASS ${engine.name()} lost score ACK/reload: one receipt, immutable name/version/result, read-only ranking retry`);
+  invalidRanking=true;await page.click('#reloadRanking');await page.waitForFunction(()=>document.querySelector('#resultRankingStatus').classList.contains('err'));invalidRanking=false;
+  await page.reload();assert.equal(calls.length,2);assert.equal(await page.locator('body').getAttribute('data-phase'),'home');
+  await page.selectOption('#languageSelect','ja');await page.fill('#playerNameInput','Quota');await page.evaluate(()=>{window.originalSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('ironarabe:score-pending:'))throw new DOMException('quota','QuotaExceededError');return window.originalSet.call(this,k,v)}});await page.click('#startBtn');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  await page.evaluate(board=>{for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);document.querySelector(`.tile[data-pos="${i}"]`).click();document.querySelector(`.tile[data-pos="${j}"]`).click();[board[i],board[j]]=[board[j],board[i]];}},boardFixture.slice());await page.clock.runFor(4001);assert.equal(calls.length,2);assert.match(await page.locator('#rankNote').innerText(),/端末に記録を保存できません/);await page.evaluate(()=>{Storage.prototype.setItem=window.originalSet});await page.click('#retryScore');await page.waitForFunction(()=>document.querySelector('#rankNote').textContent.includes('登録しました'));assert.equal(calls.length,3);assert.deepEqual(errors,[]);
+  console.log(`PASS ${engine.name()} lost score ACK/reload/quota/malformed ranking: durable receipt, immutable result, no duplicate, no production writes`);
  }finally{await browser.close();}
 }
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{
