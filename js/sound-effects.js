@@ -97,10 +97,13 @@
         const resumedContext = context;
         resumePending = true;
         const resumed = context.resume();
-        Promise.resolve(resumed).then(
-          () => { if (context === resumedContext) resumePending = false; },
-          () => { if (context === resumedContext) resumePending = false; }
-        );
+        // Coalesce this synchronous gesture only. Safari may leave resume()
+        // pending forever; the next gesture must call it synchronously again.
+        // Settlement never changes the gate or replays discarded sound effects.
+        Promise.resolve(resumed).catch(() => {});
+        Promise.resolve().then(() => {
+          if (context === resumedContext) resumePending = false;
+        });
         return context.state === "running";
       } catch (_) {
         resumePending = false;
