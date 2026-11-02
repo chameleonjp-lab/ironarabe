@@ -90,3 +90,7 @@ TDDで保存・ACK・不正ランキング・復元・音中断の失敗を確�
 DBnormal RPC適用・読み戻し、identity（同名別人/改名継続/厳密30人）、Pages Source現物再確認・本人マージ後の公開SHA受入、別origin端末保存移行、母語/実音/長時間/iPhone実機は未完了。過去の設定確認や自動WebKitを最新本番・実機確認へ読み替えない。
 
 独立レビュー追補（04:14 JST）：結果→ホーム→新runの間に以前のランキング応答が到着すると古い一覧を反映する問題を回帰再現し、ホーム帰還と新run準備の両方で読取世代とcacheを無効化した。scoreの旧UUID通知隔離は維持。合計121テスト成功。現行get_best_score_ranking定義も読み取り確認し、rank_no列、設定されたasc/desc、通常記録の集計、同点rankとupdated_at/display_name順の境界を確認。DB変更なし。
+
+## 09:37 JST 受領応答境界の後続修正
+
+normal RPCのfirst/best/play_countをSQL integerの範囲、countを1以上に制限し、イロナラベの既存昇順に対して今回提出点より大きいbest応答を成功扱いしません。異常応答はpendingのまま保全し、再読込後も同じUUID/内容で再送。0・過去の負数は合法範囲で保持し、現在のゲーム上限を過去記録へ遡及適用しません。名前・ID・採点・匿名開始・DB・公開設定は非変更。15追加回帰を含むunit/buildを検証し、固定headのブラウザCI結果はPR本文へ追記します。本番/実機/identity残件は維持します。

@@ -499,7 +499,7 @@
     homeBtn:document.getElementById('homeBtn'), resultLabLink:document.getElementById('resultLabLink')
   };
 
-  const scoreQueue=CommonScoreQueue.createScoreQueue({gameSlug:GAME_SLUG,
+  const scoreQueue=CommonScoreQueue.createScoreQueue({gameSlug:GAME_SLUG,scoreOrder:'asc',
     storage:(()=>{try{return localStorage;}catch{return null;}})(),
     send:payload=>postRpc('submit_score_once_shared_v1',payload,SCORE_SUBMIT_TIMEOUT_MS),
     onChange:onScoreQueueChange});
