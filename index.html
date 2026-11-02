@@ -372,7 +372,6 @@
       </ol>
     </div>
     <a class="btn x-share home-share-btn" id="homeShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
-    <button class="btn" id="homeCopyBtn" type="button" data-i18n="共有文をコピー">共有文をコピー</button>
     <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">ランキング</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
@@ -418,6 +417,10 @@
       <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
     </div>
     <div class="rank-note" id="rankNote" aria-live="polite"></div><button id="retryScore" type="button" data-i18n="再試行" hidden>再試行</button>
+    <div class="btn-row result-primary-actions">
+    <button class="btn" id="againBtn" data-i18n="もう一度遊ぶ">もう一度遊ぶ</button>
+      <a class="btn x-share" id="resultShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
+    </div>
     <div class="card ranking-card" aria-label="ベストタイムランキング30位まで" data-i18n-attrs="aria-label">
       <div class="ranking-title"><h3 data-i18n="ベストタイムランキング">ベストタイムランキング</h3><span data-i18n="30位まで">30位まで</span></div>
       <div class="ranking-status" id="resultRankingStatus" aria-live="polite" data-i18n="読み込み中…">読み込み中…</div>
@@ -426,10 +429,7 @@
     </div>
     <div class="toast" id="resultToast" aria-live="polite"></div>
     <div class="spacer"></div>
-    <button class="btn" id="againBtn" data-i18n="もう一度遊ぶ">もう一度遊ぶ</button>
     <div class="btn-row">
-      <a class="btn x-share" id="resultShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
-    <button class="btn" id="resultCopyBtn" type="button" data-i18n="共有文をコピー">共有文をコピー</button>
       <button class="btn secondary" id="homeBtn" data-i18n="ホームへ戻る">ホームへ戻る</button>
     </div>
     <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">ランキング</a>
@@ -680,9 +680,32 @@
   [el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){button.addEventListener('click',function(){sound.setEnabled(!sound.isEnabled());if(sound.isEnabled())sound.unlock();updateSoundButtons();});});
   const volumeControls=[document.getElementById('homeVolume'),document.getElementById('resultVolume')];
   volumeControls.forEach(function(input){input.value=String(sound.getVolume()*100);input.addEventListener('input',function(){sound.setVolume(Number(input.value)/100);volumeControls.forEach(other=>{other.value=input.value;});});});
-  async function copyShare(link){updateShareLinks();const text=new URL(link.href).searchParams.get('text');try{await navigator.clipboard.writeText(text);}catch(_){window.prompt(t('共有文をコピー'),text);}}
-  document.getElementById('homeCopyBtn').addEventListener('click',()=>copyShare(el.homeShareBtn));
-  document.getElementById('resultCopyBtn').addEventListener('click',()=>copyShare(el.resultShareBtn));
+  function activateXShare(event, link) {
+    updateShareLinks();
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const href = link.href;
+    const text = new URL(href).searchParams.get('text');
+    let popup;
+    try {
+      popup = window.open('', '_blank');
+      if (!popup) throw new Error('Popup unavailable');
+      popup.opener = null;
+      if (popup.opener !== null) throw new Error('Popup opener could not be detached');
+      const target = popup.document.createElement('a');
+      target.href = href;
+      target.target = '_self';
+      target.rel = 'noreferrer';
+      target.referrerPolicy = 'no-referrer';
+      popup.document.body.append(target);
+      target.click();
+    } catch (_) {
+      try { if (popup) popup.close(); } catch (_) {}
+      window.prompt(t('共有文をコピー'), text);
+    }
+  }
+  el.homeShareBtn.addEventListener('click', event => activateXShare(event, el.homeShareBtn));
+  el.resultShareBtn.addEventListener('click', event => activateXShare(event, el.resultShareBtn));
   // These calls run in the gesture stack, including iPhone Safari touch and keyboard activation.
   document.addEventListener('pointerdown',function(e){if(!e.target.closest('.sound-toggle, .volume-control'))sound.unlock();},{capture:true,passive:true});
   document.addEventListener('keydown',function(e){if(!e.target.closest('.sound-toggle, .volume-control'))sound.unlock();},{capture:true});
