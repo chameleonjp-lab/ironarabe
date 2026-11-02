@@ -12,7 +12,7 @@ const RUNTIME_FILES = Object.freeze([
   "js/translations.js",
   "js/i18n.js",
   "js/sound-effects.js",
-  "js/stage-pack.js", "js/guest-plays.js", "js/score-queue.js"
+  "js/stage-pack.js", "js/guest-plays.js", "js/score-queue.js", "assets/social-preview.png"
 ]);
 const PUBLIC_FILES = Object.freeze([...RUNTIME_FILES, "release.json"]);
 const RELEASE_CONTRACT = Object.freeze({
@@ -59,10 +59,10 @@ function validateHtml(html) {
       continue;
     }
     const file = (source[1] ?? source[2] ?? source[3]).replace(/^\.\//, "");
-    if (!RUNTIME_FILES.slice(1).includes(file)) throw new Error(`Script is outside the Pages allowlist: ${file}`);
+    if (!RUNTIME_FILES.filter((file) => file.endsWith(".js")).includes(file)) throw new Error(`Script is outside the Pages allowlist: ${file}`);
     scripts.push(file);
   }
-  if (JSON.stringify(scripts) !== JSON.stringify(RUNTIME_FILES.slice(1))) {
+  if (JSON.stringify(scripts) !== JSON.stringify(RUNTIME_FILES.filter((file) => file.endsWith(".js")))) {
     throw new Error("index.html must load each allowlisted runtime script once, in dependency order.");
   }
   // Additional local resources require an explicit addition to the public allowlist.
@@ -111,7 +111,7 @@ function listPublicFiles(directory, prefix = "") {
     const relative = prefix + entry.name;
     if (entry.isSymbolicLink()) throw new Error(`Public artifact must not contain a symlink: ${relative}`);
     if (entry.isDirectory()) {
-      if (relative !== "js") throw new Error(`Unexpected directory outside the Pages allowlist: ${relative}`);
+      if (!["js", "assets"].includes(relative)) throw new Error(`Unexpected directory outside the Pages allowlist: ${relative}`);
       files.push(...listPublicFiles(path.join(directory, entry.name), relative + "/"));
     } else if (entry.isFile()) {
       files.push(relative);
