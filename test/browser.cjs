@@ -44,7 +44,7 @@ async function acceptance(engine,viewport,failAudio=false){
   const request=route.request();const payload=request.postDataJSON();const method=new URL(request.url()).pathname.split('/').pop();calls.push({method,payload});
   if(method==='submit_score_once_shared_v1'){
    await new Promise(resolve=>{releaseSubmit=resolve;});
-   await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'Alice 日本語',result_first_score:12345,result_best_score:3456,result_play_count:8,is_first_play:false,is_new_best:true}]});
+   await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'Alice 日本語',result_first_score:12345,result_best_score:Math.min(3456,payload.p_score),result_play_count:8,is_first_play:false,is_new_best:true}]});
   }else if(method==='get_best_score_ranking')await route.fulfill({json:[{rank_no:1,display_name:'<保持名>',best_score:3456},{rank_no:1,display_name:'Tie',best_score:3456}]});
   else throw Error('Unexpected RPC '+method);
  });
@@ -82,7 +82,7 @@ async function acceptance(engine,viewport,failAudio=false){
   assert.equal(await page.evaluate(()=>__sounds.filter(s=>s==='swap').length),moves);
   releaseSubmit();await page.waitForFunction(()=>document.querySelector('#namePlayCountDisplay').textContent.includes('8'));
   for(const language of languages){await switchLanguage(page,language);await bounds(page);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Alice 日本語');assert.equal(await page.locator('.ranking-name').first().innerText(),'<保持名>');}
-  await switchLanguage(page,'de');assert.match(await page.locator('#bestScoreDisplay').innerText(),/34,56/);
+  await switchLanguage(page,'de');const expectedBest=new Intl.NumberFormat('de',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.min(3456,sent.p_score)/100);assert.ok((await page.locator('#bestScoreDisplay').innerText()).includes(expectedBest));
   fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${viewport.width}x${viewport.height}-result.png`),fullPage:true});
   const shared=await openXDraft(page,'#resultShareBtn');assert.ok(shared.includes(gameUrl));assert.ok(!shared.includes('codeberg'));
   await page.tap('#resultSoundBtn');assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'false');
@@ -103,9 +103,9 @@ async function failureAcceptance(engine){
  const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
  const errors=[],calls=[];let round=1,releaseSubmit,releaseRanking,releaseAll=false;page.on('pageerror',e=>errors.push(e.message));
  await page.route('https://*.supabase.co/**',async route=>{
-  const method=new URL(route.request().url()).pathname.split('/').pop();calls.push(method);
+  const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push(method);
   if(round===1){await route.fulfill({status:503,json:{message:'offline'}});return;}
-  if(method==='submit_score_once_shared_v1'){if(!releaseAll)await new Promise(resolve=>{releaseSubmit=()=>{releaseAll=true;resolve();}});await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:'Alice',result_display_name:'Alice',result_first_score:12345,result_best_score:3456,result_play_count:9,is_first_play:false,is_new_best:true}]});}
+  if(method==='submit_score_once_shared_v1'){if(!releaseAll)await new Promise(resolve=>{releaseSubmit=()=>{releaseAll=true;resolve();}});await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:'Alice',result_display_name:'Alice',result_first_score:12345,result_best_score:Math.min(3456,payload.p_score),result_play_count:9,is_first_play:false,is_new_best:true}]});}
   else{await new Promise(resolve=>{releaseRanking=resolve});await route.fulfill({json:[{rank_no:1,display_name:'Late stale name',first_score:12345,best_score:3456,play_count:9,updated_at:'2026-10-31T00:00:00Z'}]});}
  });
  async function solve(){
@@ -177,7 +177,7 @@ async function stagePackAcceptance(engine){
  await page.addInitScript(()=>localStorage.setItem('ironarabe.sound.v1','false'));
  await page.route('https://*.supabase.co/**',async route=>{
   const request=route.request(),method=new URL(request.url()).pathname.split('/').pop(),payload=request.postDataJSON();calls.push({method,payload});
-  if(method==='submit_score_once_shared_v1')await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'Stage Audit',result_first_score:100,result_best_score:100,result_play_count:calls.filter(c=>c.method==='submit_score_once_shared_v1').length,is_first_play:false,is_new_best:false}]});
+  if(method==='submit_score_once_shared_v1')await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'Stage Audit',result_first_score:100,result_best_score:Math.min(100,payload.p_score),result_play_count:calls.filter(c=>c.method==='submit_score_once_shared_v1').length,is_first_play:false,is_new_best:false}]});
   else if(method==='get_best_score_ranking'){assert.equal(payload.p_limit,30);await route.fulfill({json:[{rank_no:1,display_name:'Existing record',best_score:100}]});}
   else throw Error('Unexpected stage audit RPC '+method);
  });
@@ -239,7 +239,7 @@ async function xShareAcceptance(engine){
  const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'ja-JP'}),page=await context.newPage(),calls=[],errors=[];
  page.on('pageerror',error=>errors.push(error.message));await mockXComposer(context);
  await page.addInitScript(()=>{localStorage.setItem('ironarabe.language.v1','ja');localStorage.setItem('ironarabe.sound.v1','false');Object.defineProperty(navigator,'share',{value:async()=>{throw Error('Native sharing must not replace X sharing')},configurable:true});});
- await page.route('https://*.supabase.co/**',async route=>{const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push({method,payload});if(method==='submit_score_once_shared_v1')await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'X Audit',result_first_score:9000,result_best_score:100,result_play_count:3,is_first_play:false,is_new_best:false}]});else if(method==='get_best_score_ranking')await route.fulfill({json:[{rank_no:1,display_name:'Existing name',best_score:100}]});else throw Error('Unexpected share-test RPC '+method);});
+ await page.route('https://*.supabase.co/**',async route=>{const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push({method,payload});if(method==='submit_score_once_shared_v1')await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'X Audit',result_first_score:9000,result_best_score:Math.min(100,payload.p_score),result_play_count:3,is_first_play:false,is_new_best:false}]});else if(method==='get_best_score_ranking')await route.fulfill({json:[{rank_no:1,display_name:'Existing name',best_score:100}]});else throw Error('Unexpected share-test RPC '+method);});
  async function blackButton(selector){assert.equal(await page.locator(selector).innerText(),'Xでシェア');assert.deepEqual(await page.locator(selector).evaluate(node=>({background:getComputedStyle(node).backgroundColor,color:getComputedStyle(node).color})),{background:'rgb(0, 0, 0)',color:'rgb(255, 255, 255)'});}
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
