@@ -12,7 +12,7 @@ const RUNTIME_FILES = Object.freeze([
   "js/translations.js",
   "js/i18n.js",
   "js/sound-effects.js",
-  "js/stage-pack.js", "js/guest-plays.js"
+  "js/stage-pack.js", "js/guest-plays.js", "js/score-queue.js"
 ]);
 const PUBLIC_FILES = Object.freeze([...RUNTIME_FILES, "release.json"]);
 const RELEASE_CONTRACT = Object.freeze({

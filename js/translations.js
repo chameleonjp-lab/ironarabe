@@ -89,7 +89,7 @@
     "プレイ回数を送信中…": "プレイ回数を送信中…",
     "プレイ回数を記録しました": "プレイ回数を記録しました",
     "プレイ回数を送信できませんでした。接続後に再送します。": "プレイ回数を送信できませんでした。接続後に再送します。",
-    "イロナラベの詳細ランキングへ": "イロナラベの詳細ランキングへ",
+    "イロナラベの詳細ランキングへ": "ランキング",
     "青海": "青海",
     "若葉": "若葉",
     "琥珀": "琥珀",
@@ -101,8 +101,12 @@
     "全{0}ステージ": "全{0}ステージ",
     "全{0}ステージから毎回1つが選ばれる": "全{0}ステージから毎回1つが選ばれる",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}",
-    "Xでシェアする": "Xでシェアする",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}"
+    "Xでシェアする": "Xでシェア",
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}",
+    "音量": "音量",
+    "共有文をコピー": "共有文をコピー",
+    "再試行": "再試行",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。"
   },
   "en": {
     "イロナラベ": "Ironarabe",
@@ -185,7 +189,7 @@
     "プレイ回数を送信中…": "Sending play count…",
     "プレイ回数を記録しました": "Play count recorded",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Could not send the play count. It will be retried when you are online.",
-    "イロナラベの詳細ランキングへ": "Ironarabe ranking details",
+    "イロナラベの詳細ランキングへ": "Leaderboard",
     "青海": "Ocean",
     "若葉": "Fresh Leaves",
     "琥珀": "Amber",
@@ -198,7 +202,11 @@
     "全{0}ステージから毎回1つが選ばれる": "One of the {0} stages is chosen at random each time",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nA random stage from {0} each time. Follow the color gradients and arrange the 7×9 tiles in their correct positions.\n{1}",
     "Xでシェアする": "Share on X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFollow the color gradients and arrange the 7×9 tiles in their correct positions.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFollow the color gradients and arrange the 7×9 tiles in their correct positions.\n{0}",
+    "音量": "Volume",
+    "共有文をコピー": "Copy share text",
+    "再試行": "Retry",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "This device cannot save the record. To avoid losing the result, do not reload; retry when saving is available."
   },
   "es": {
     "イロナラベ": "Ironarabe",
@@ -281,7 +289,7 @@
     "プレイ回数を送信中…": "Enviando el número de partidas…",
     "プレイ回数を記録しました": "Número de partidas registrado",
     "プレイ回数を送信できませんでした。接続後に再送します。": "No se ha podido enviar el número de partidas. Se volverá a intentar cuando tengas conexión.",
-    "イロナラベの詳細ランキングへ": "Detalles de la clasificación de Ironarabe",
+    "イロナラベの詳細ランキングへ": "Clasificación",
     "青海": "Océano",
     "若葉": "Hojas nuevas",
     "琥珀": "Ámbar",
@@ -294,7 +302,11 @@
     "全{0}ステージから毎回1つが選ばれる": "En cada partida se elige uno de los {0} niveles al azar",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn nivel aleatorio entre {0} en cada partida. Sigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{1}",
     "Xでシェアする": "Compartir en X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSigue los degradados de color y coloca las fichas de la cuadrícula de 7×9 en su lugar.\n{0}",
+    "音量": "Volumen",
+    "共有文をコピー": "Copiar texto para compartir",
+    "再試行": "Reintentar",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Este dispositivo no puede guardar el registro. Para no perder el resultado, no recargues; reintenta cuando se pueda guardar."
   },
   "pt-BR": {
     "イロナラベ": "Ironarabe",
@@ -377,7 +389,7 @@
     "プレイ回数を送信中…": "Enviando a contagem de partidas…",
     "プレイ回数を記録しました": "Contagem de partidas registrada",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Não foi possível enviar a contagem de partidas. O envio será tentado novamente quando houver conexão.",
-    "イロナラベの詳細ランキングへ": "Detalhes do ranking de Ironarabe",
+    "イロナラベの詳細ランキングへ": "Classificação",
     "青海": "Oceano",
     "若葉": "Folhas novas",
     "琥珀": "Âmbar",
@@ -390,7 +402,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Uma das {0} fases é escolhida aleatoriamente a cada partida",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUma fase aleatória entre {0} a cada partida. Siga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{1}",
     "Xでシェアする": "Compartilhar no X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSiga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSiga os degradês de cores e coloque as peças da grade de 7×9 nos lugares certos.\n{0}",
+    "音量": "Volume",
+    "共有文をコピー": "Copiar texto de compartilhamento",
+    "再試行": "Tentar novamente",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Este dispositivo não consegue salvar o registro. Para não perder o resultado, não recarregue; tente novamente quando for possível salvar."
   },
   "zh-Hans": {
     "イロナラベ": "Ironarabe",
@@ -473,7 +489,7 @@
     "プレイ回数を送信中…": "正在发送游玩次数…",
     "プレイ回数を記録しました": "已记录游玩次数",
     "プレイ回数を送信できませんでした。接続後に再送します。": "无法发送游玩次数。恢复网络连接后会重新发送。",
-    "イロナラベの詳細ランキングへ": "查看 Ironarabe 详细排行榜",
+    "イロナラベの詳細ランキングへ": "排行榜",
     "青海": "碧海",
     "若葉": "嫩叶",
     "琥珀": "琥珀",
@@ -486,7 +502,11 @@
     "全{0}ステージから毎回1つが選ばれる": "每次从{0}个关卡中随机选择一个",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n每次从{0}个关卡中随机选择一个。观察色彩渐变，将7×9的方块排列到正确位置。\n{1}",
     "Xでシェアする": "分享到 X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n观察色彩渐变，将7×9的方块排列到正确位置。\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n观察色彩渐变，将7×9的方块排列到正确位置。\n{0}",
+    "音量": "音量",
+    "共有文をコピー": "复制分享文字",
+    "再試行": "重试",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "此设备无法保存记录。为避免丢失结果，请勿刷新页面，待可保存时重试。"
   },
   "fr": {
     "イロナラベ": "Ironarabe",
@@ -569,7 +589,7 @@
     "プレイ回数を送信中…": "Envoi du nombre de parties…",
     "プレイ回数を記録しました": "Nombre de parties enregistré",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Impossible d’envoyer le nombre de parties. L’envoi sera réessayé une fois la connexion rétablie.",
-    "イロナラベの詳細ランキングへ": "Classement détaillé d’Ironarabe",
+    "イロナラベの詳細ランキングへ": "Classement",
     "青海": "Océan",
     "若葉": "Jeunes feuilles",
     "琥珀": "Ambre",
@@ -582,7 +602,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Un des {0} niveaux est choisi au hasard à chaque partie",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn niveau choisi au hasard parmi {0} à chaque partie. Suivez les dégradés de couleurs et replacez les tuiles de la grille de 7×9 au bon endroit.\n{1}",
     "Xでシェアする": "Partager sur X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSuivez les dégradés de couleurs et replacez les tuiles de la grille 7×9 au bon endroit.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSuivez les dégradés de couleurs et replacez les tuiles de la grille 7×9 au bon endroit.\n{0}",
+    "音量": "Volume",
+    "共有文をコピー": "Copier le texte à partager",
+    "再試行": "Réessayer",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Cet appareil ne peut pas enregistrer le résultat. Pour ne pas le perdre, ne rechargez pas la page ; réessayez lorsque l’enregistrement sera possible."
   },
   "de": {
     "イロナラベ": "Ironarabe",
@@ -665,7 +689,7 @@
     "プレイ回数を送信中…": "Spielanzahl wird gesendet…",
     "プレイ回数を記録しました": "Spielanzahl gespeichert",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Die Spielanzahl konnte nicht gesendet werden. Der Versand wird wiederholt, sobald du wieder online bist.",
-    "イロナラベの詳細ランキングへ": "Detaillierte Ironarabe-Bestenliste",
+    "イロナラベの詳細ランキングへ": "Rangliste",
     "青海": "Ozean",
     "若葉": "Junges Laub",
     "琥珀": "Bernstein",
@@ -678,7 +702,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Bei jedem Spiel wird eines der {0} Level zufällig gewählt",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nBei jedem Spiel wird eines von {0} Leveln zufällig gewählt. Folge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{1}",
     "Xでシェアする": "Auf X teilen",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFolge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nFolge den Farbverläufen und bringe die 7×9 Kacheln an die richtigen Stellen.\n{0}",
+    "音量": "Lautstärke",
+    "共有文をコピー": "Text zum Teilen kopieren",
+    "再試行": "Erneut versuchen",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Dieses Gerät kann den Eintrag nicht speichern. Lade die Seite nicht neu, damit das Ergebnis erhalten bleibt. Versuche es erneut, sobald Speichern möglich ist."
   },
   "ko": {
     "イロナラベ": "Ironarabe",
@@ -761,7 +789,7 @@
     "プレイ回数を送信中…": "플레이 횟수 전송 중…",
     "プレイ回数を記録しました": "플레이 횟수를 기록했습니다",
     "プレイ回数を送信できませんでした。接続後に再送します。": "플레이 횟수를 전송하지 못했습니다. 인터넷에 연결되면 다시 전송합니다.",
-    "イロナラベの詳細ランキングへ": "Ironarabe 상세 순위표로 이동",
+    "イロナラベの詳細ランキングへ": "순위표",
     "青海": "푸른 바다",
     "若葉": "새잎",
     "琥珀": "호박",
@@ -774,7 +802,11 @@
     "全{0}ステージから毎回1つが選ばれる": "매번 {0}개 스테이지 중 하나가 무작위로 선택됩니다",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n매번 {0}개 스테이지 중 하나를 무작위로 선택합니다. 색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{1}",
     "Xでシェアする": "X에 공유하기",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n색의 그라데이션을 보며 7×9 타일을 올바른 위치에 배열해 보세요.\n{0}",
+    "音量": "음량",
+    "共有文をコピー": "공유 문구 복사",
+    "再試行": "다시 시도",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "이 기기에 기록을 저장할 수 없습니다. 결과를 잃지 않도록 새로고침하지 말고, 저장할 수 있을 때 다시 시도하세요."
   },
   "ru": {
     "イロナラベ": "Ironarabe",
@@ -857,7 +889,7 @@
     "プレイ回数を送信中…": "Отправка числа игр…",
     "プレイ回数を記録しました": "Число игр сохранено",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Не удалось отправить число игр. Отправка повторится после подключения к интернету.",
-    "イロナラベの詳細ランキングへ": "Подробная таблица рекордов Ironarabe",
+    "イロナラベの詳細ランキングへ": "Рейтинг",
     "青海": "Океан",
     "若葉": "Молодая листва",
     "琥珀": "Янтарь",
@@ -870,7 +902,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Каждый раз случайно выбирается один из {0} уровней",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nКаждый раз — случайный уровень из {0}. Следите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{1}",
     "Xでシェアする": "Поделиться в X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nСледите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nСледите за цветовыми переходами и расставляйте плитки поля 7×9 по правильным местам.\n{0}",
+    "音量": "Громкость",
+    "共有文をコピー": "Копировать текст публикации",
+    "再試行": "Повторить",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Устройство не может сохранить запись. Чтобы не потерять результат, не перезагружайте страницу. Повторите попытку, когда сохранение станет доступно."
   },
   "it": {
     "イロナラベ": "Ironarabe",
@@ -953,7 +989,7 @@
     "プレイ回数を送信中…": "Invio del numero di partite…",
     "プレイ回数を記録しました": "Numero di partite registrato",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Impossibile inviare il numero di partite. L’invio verrà ritentato quando la connessione sarà ristabilita.",
-    "イロナラベの詳細ランキングへ": "Classifica dettagliata di Ironarabe",
+    "イロナラベの詳細ランキングへ": "Classifica",
     "青海": "Oceano",
     "若葉": "Foglie nuove",
     "琥珀": "Ambra",
@@ -966,7 +1002,11 @@
     "全{0}ステージから毎回1つが選ばれる": "A ogni partita viene scelto casualmente un livello tra i {0} disponibili",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nUn livello casuale tra {0} a ogni partita. Segui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{1}",
     "Xでシェアする": "Condividi su X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSegui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nSegui le sfumature di colore e sistema le tessere della griglia 7×9 nelle posizioni corrette.\n{0}",
+    "音量": "Volume",
+    "共有文をコピー": "Copia testo da condividere",
+    "再試行": "Riprova",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Questo dispositivo non può salvare il record. Per non perdere il risultato, non ricaricare la pagina; riprova quando sarà possibile salvare."
   },
   "zh-Hant": {
     "イロナラベ": "Ironarabe",
@@ -1049,7 +1089,7 @@
     "プレイ回数を送信中…": "正在傳送遊玩次數…",
     "プレイ回数を記録しました": "已記錄遊玩次數",
     "プレイ回数を送信できませんでした。接続後に再送します。": "無法傳送遊玩次數。恢復網路連線後會重新傳送。",
-    "イロナラベの詳細ランキングへ": "查看 Ironarabe 詳細排行榜",
+    "イロナラベの詳細ランキングへ": "排行榜",
     "青海": "碧海",
     "若葉": "嫩葉",
     "琥珀": "琥珀",
@@ -1062,7 +1102,11 @@
     "全{0}ステージから毎回1つが選ばれる": "每次從{0}個關卡中隨機選擇一個",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\n每次從{0}個關卡中隨機選擇一個。觀察色彩漸層，將7×9的方塊排列到正確位置。\n{1}",
     "Xでシェアする": "分享到 X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n觀察色彩漸層，將7×9的方塊排列到正確位置。\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\n觀察色彩漸層，將7×9的方塊排列到正確位置。\n{0}",
+    "音量": "音量",
+    "共有文をコピー": "複製分享文字",
+    "再試行": "重試",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "此裝置無法儲存紀錄。為避免遺失結果，請勿重新載入頁面，待可儲存時重試。"
   },
   "id": {
     "イロナラベ": "Ironarabe",
@@ -1145,7 +1189,7 @@
     "プレイ回数を送信中…": "Mengirim jumlah permainan…",
     "プレイ回数を記録しました": "Jumlah permainan tercatat",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Jumlah permainan tidak dapat dikirim. Pengiriman akan dicoba lagi setelah terhubung ke internet.",
-    "イロナラベの詳細ランキングへ": "Papan peringkat terperinci Ironarabe",
+    "イロナラベの詳細ランキングへ": "Peringkat",
     "青海": "Samudra",
     "若葉": "Daun muda",
     "琥珀": "Ambar",
@@ -1158,7 +1202,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Satu dari {0} level dipilih secara acak setiap kali bermain",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nSatu level acak dari {0} setiap kali bermain. Ikuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{1}",
     "Xでシェアする": "Bagikan di X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nIkuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nIkuti gradasi warna dan susun ubin pada bidang 7×9 ke posisi yang benar.\n{0}",
+    "音量": "Volume",
+    "共有文をコピー": "Salin teks berbagi",
+    "再試行": "Coba lagi",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Perangkat ini tidak dapat menyimpan catatan. Agar hasil tidak hilang, jangan muat ulang halaman; coba lagi saat penyimpanan tersedia."
   },
   "tr": {
     "イロナラベ": "Ironarabe",
@@ -1241,7 +1289,7 @@
     "プレイ回数を送信中…": "Oyun sayısı gönderiliyor…",
     "プレイ回数を記録しました": "Oyun sayısı kaydedildi",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Oyun sayısı gönderilemedi. İnternet bağlantısı sağlandığında yeniden gönderilecek.",
-    "イロナラベの詳細ランキングへ": "Ayrıntılı Ironarabe sıralaması",
+    "イロナラベの詳細ランキングへ": "Sıralama",
     "青海": "Okyanus",
     "若葉": "Taze Yapraklar",
     "琥珀": "Kehribar",
@@ -1254,7 +1302,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Her oyunda {0} bölümden biri rastgele seçilir",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nHer oyunda {0} bölümden biri rastgele seçilir. Renk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{1}",
     "Xでシェアする": "X'te paylaş",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nRenk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nRenk geçişlerini takip ederek 7×9 kareyi doğru yerlerine yerleştir.\n{0}",
+    "音量": "Ses düzeyi",
+    "共有文をコピー": "Paylaşım metnini kopyala",
+    "再試行": "Yeniden dene",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Bu cihaz kaydı saklayamıyor. Sonucu kaybetmemek için sayfayı yenilemeyin; kayıt mümkün olduğunda yeniden deneyin."
   },
   "vi": {
     "イロナラベ": "Ironarabe",
@@ -1337,7 +1389,7 @@
     "プレイ回数を送信中…": "Đang gửi số lần chơi…",
     "プレイ回数を記録しました": "Đã ghi nhận số lần chơi",
     "プレイ回数を送信できませんでした。接続後に再送します。": "Không thể gửi số lần chơi. Hệ thống sẽ gửi lại khi có kết nối mạng.",
-    "イロナラベの詳細ランキングへ": "Bảng xếp hạng chi tiết của Ironarabe",
+    "イロナラベの詳細ランキングへ": "Bảng xếp hạng",
     "青海": "Đại dương",
     "若葉": "Lá non",
     "琥珀": "Hổ phách",
@@ -1350,7 +1402,11 @@
     "全{0}ステージから毎回1つが選ばれる": "Mỗi lần chơi sẽ chọn ngẫu nhiên một trong {0} màn",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nMỗi lần chơi sẽ chọn ngẫu nhiên một trong {0} màn. Quan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{1}",
     "Xでシェアする": "Chia sẻ trên X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nQuan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nQuan sát dải màu chuyển sắc và xếp các ô trong lưới 7×9 về đúng vị trí.\n{0}",
+    "音量": "Âm lượng",
+    "共有文をコピー": "Sao chép nội dung chia sẻ",
+    "再試行": "Thử lại",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "Thiết bị này không thể lưu bản ghi. Để không mất kết quả, đừng tải lại trang; hãy thử lại khi có thể lưu."
   },
   "th": {
     "イロナラベ": "Ironarabe",
@@ -1433,7 +1489,7 @@
     "プレイ回数を送信中…": "กำลังส่งจำนวนครั้งที่เล่น…",
     "プレイ回数を記録しました": "บันทึกจำนวนครั้งที่เล่นแล้ว",
     "プレイ回数を送信できませんでした。接続後に再送します。": "ส่งจำนวนครั้งที่เล่นไม่สำเร็จ ระบบจะส่งอีกครั้งเมื่อเชื่อมต่ออินเทอร์เน็ต",
-    "イロナラベの詳細ランキングへ": "ดูตารางอันดับแบบละเอียดของ Ironarabe",
+    "イロナラベの詳細ランキングへ": "อันดับ",
     "青海": "มหาสมุทร",
     "若葉": "ใบไม้อ่อน",
     "琥珀": "อำพัน",
@@ -1446,7 +1502,11 @@
     "全{0}ステージから毎回1つが選ばれる": "สุ่มเลือก 1 ด่านจากทั้งหมด {0} ด่านในแต่ละครั้ง",
     "イロナラベ\n全{0}ステージから毎回ランダム。色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{1}": "Ironarabe\nสุ่ม 1 ด่านจากทั้งหมด {0} ด่านทุกครั้ง สังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{1}",
     "Xでシェアする": "แชร์บน X",
-    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nสังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{0}"
+    "イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}": "Ironarabe\nสังเกตการไล่สีแล้วจัดแผ่นในตาราง 7×9 ให้ตรงตำแหน่งที่ถูกต้อง\n{0}",
+    "音量": "ระดับเสียง",
+    "共有文をコピー": "คัดลอกข้อความแชร์",
+    "再試行": "ลองอีกครั้ง",
+    "端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。": "อุปกรณ์นี้บันทึกข้อมูลไม่ได้ เพื่อไม่ให้ผลหาย อย่าโหลดหน้าใหม่ ให้ลองอีกครั้งเมื่อสามารถบันทึกได้"
   }
 };
 });

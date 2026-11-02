@@ -34,8 +34,6 @@ const required = [
   ["const LOCAL_CACHE_PREFIX='ironarabe.'", "application cache namespace missing"],
   ["const LS={playerName:'ironarabe.v2.playerName',oldPlayerName:'ironarabe.playerName'}", "only current and legacy player-name keys may remain"],
   ["key!==LS.playerName", "current player name must be preserved"],
-  ["clearStorageNamespace(localStorage)", "localStorage cleanup missing"],
-  ["clearStorageNamespace(sessionStorage)", "sessionStorage cleanup missing"],
   ["state.playId+=1", "replay must invalidate prior play callbacks"],
   ["state.rankingRequestId+=1", "replay must invalidate prior ranking callbacks"],
   ["state.rankingRows=[]", "ranking memory cache must be cleared"],
@@ -73,7 +71,7 @@ for (const [needle, message] of forbidden) check(!html.includes(needle), message
 const returnHome = (html.match(/function returnHome\(\)\{[^\n]+/) || [""])[0];
 const showResult = (html.match(/function showResult\(playId\)\{[^\n]+/) || [""])[0];
 const startup = html.slice(html.lastIndexOf("buildLogoChips();"));
-const submitFlow = (html.match(/function submitScoreForCurrentPlay\([^\n]+/) || [""])[0];
+const submitFlow = html.slice(html.indexOf("function onScoreQueueChange("),html.indexOf("function submitScoreForCurrentPlay("));
 
 check(returnHome.length > 0, "returnHome function missing");
 check(!returnHome.includes("loadRankings("), "home return still performs ranking I/O");

@@ -25,7 +25,7 @@ requireText("if(checkCleared()){onClear();return;}","solving operation must clea
 requireText("record.result_play_count","submit response play count missing");
 requireText("record.result_first_score","submit response first score missing");
 requireText("record.result_best_score","submit response best score missing");
-requireText("p_client_version:currentClientVersion()","stage-aware submitted client version missing");
+requireText("scoreQueue.capture(state.playerName,currentClientVersion())","stage-aware submitted client version missing");
 requireText("return CLIENT_VERSION+'-'+(state.stage?state.stage.id:'unknown')","stage identifier must suffix client version");
 requireText("function setRankingState(status,message){const statusEl=el.resultRankingStatus","result-only ranking state missing");
 requireText("function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows)","result-only ranking render missing");

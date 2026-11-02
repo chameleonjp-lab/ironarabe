@@ -309,6 +309,8 @@
   select, .sound-toggle { font:inherit; min-height:44px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; color:var(--text); background:var(--panel); }
   select { max-width:190px; color-scheme:dark; }
   .sound-toggle { font-size:13px; overflow-wrap:anywhere; }
+  .volume-control { display:flex; align-items:center; gap:8px; max-width:100%; }
+  .volume-control input { min-height:44px; width:120px; max-width:40vw; }
   .result-sound { align-self:flex-end; }
   .btn, .lead, .card, .game-hint, .ranking-title { overflow-wrap:anywhere; }
   .btn-row { flex-wrap:wrap; }
@@ -331,6 +333,7 @@
   <section id="screen-home" class="screen active">
     <div class="preferences">
       <label class="language-picker"><span data-i18n="言語">言語</span><select id="languageSelect" aria-label="言語" data-i18n-attrs="aria-label"></select></label>
+      <label class="volume-control"><span data-i18n="音量">音量</span><input id="homeVolume" type="range" min="0" max="100" value="100" aria-label="音量" data-i18n-attrs="aria-label"></label>
       <button class="sound-toggle" id="homeSoundBtn" type="button" aria-pressed="true">効果音：ON</button>
     </div>
     <h1 class="logo" data-i18n="イロナラベ">イロナラベ</h1>
@@ -361,8 +364,9 @@
         <li id="stageCountInstruction" data-i18n="全{0}ステージから毎回1つが選ばれる">全40ステージから毎回1つが選ばれる</li>
       </ol>
     </div>
-    <a class="btn x-share home-share-btn" id="homeShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェアする</a>
-    <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
+    <a class="btn x-share home-share-btn" id="homeShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
+    <button class="btn" id="homeCopyBtn" type="button" data-i18n="共有文をコピー">共有文をコピー</button>
+    <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">ランキング</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
 
@@ -389,6 +393,7 @@
   </section>
 
   <section id="screen-result" class="screen">
+    <label class="volume-control"><span data-i18n="音量">音量</span><input id="resultVolume" type="range" min="0" max="100" value="100" aria-label="音量" data-i18n-attrs="aria-label"></label>
     <button class="sound-toggle result-sound" id="resultSoundBtn" type="button" aria-pressed="true">効果音：ON</button>
     <div class="result-head">
       <div style="font-size:14px;color:var(--muted);letter-spacing:.1em;" data-i18n="今回の記録">今回の記録</div>
@@ -405,20 +410,22 @@
       <div class="record-line"><span class="label" data-i18n="操作回数">操作回数</span><span class="val" id="resultOperations">0回</span></div>
       <div class="record-status" id="nameRecordStatus" aria-live="polite"></div>
     </div>
-    <div class="rank-note" id="rankNote" aria-live="polite"></div>
+    <div class="rank-note" id="rankNote" aria-live="polite"></div><button id="retryScore" type="button" data-i18n="再試行" hidden>再試行</button>
     <div class="card ranking-card" aria-label="ベストタイムランキング30位まで" data-i18n-attrs="aria-label">
       <div class="ranking-title"><h3 data-i18n="ベストタイムランキング">ベストタイムランキング</h3><span data-i18n="30位まで">30位まで</span></div>
       <div class="ranking-status" id="resultRankingStatus" aria-live="polite" data-i18n="読み込み中…">読み込み中…</div>
+    <button type="button" class="btn" id="reloadRanking" data-i18n="再試行">再試行</button>
       <div class="ranking-scroll" id="resultRankingScroll" hidden><div id="resultRankingList" role="list"></div></div>
     </div>
     <div class="toast" id="resultToast" aria-live="polite"></div>
     <div class="spacer"></div>
     <button class="btn" id="againBtn" data-i18n="もう一度遊ぶ">もう一度遊ぶ</button>
     <div class="btn-row">
-      <a class="btn x-share" id="resultShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェアする</a>
+      <a class="btn x-share" id="resultShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
+    <button class="btn" id="resultCopyBtn" type="button" data-i18n="共有文をコピー">共有文をコピー</button>
       <button class="btn secondary" id="homeBtn" data-i18n="ホームへ戻る">ホームへ戻る</button>
     </div>
-    <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">イロナラベの詳細ランキングへ</a>
+    <a class="panel-link" id="resultLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">ランキング</a>
   </section>
 </div>
 
@@ -428,13 +435,14 @@
 <script src="js/sound-effects.js"></script>
 <script src="js/stage-pack.js"></script>
 <script src="js/guest-plays.js"></script>
+<script src="js/score-queue.js"></script>
 <script>
 "use strict";
 (function () {
   const i18n=IronarabeI18n.createI18n();
   const {t,formatNumber,setMessage}=i18n;
   const sound=IronarabeSound.createSoundEffects();
-  const PREFERENCE_KEYS=new Set([IronarabeI18n.LANGUAGE_STORAGE_KEY,IronarabeSound.SOUND_STORAGE_KEY]);
+  const PREFERENCE_KEYS=new Set([IronarabeI18n.LANGUAGE_STORAGE_KEY,IronarabeSound.SOUND_STORAGE_KEY,IronarabeSound.VOLUME_STORAGE_KEY]);
   const COLS=7, ROWS=9, TOTAL=COLS*ROWS;
   const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2';
   const SCORE_SCALE=100, SCORE_DECIMALS=2, SCORE_SUBMIT_TIMEOUT_MS=10000, RANKING_FETCH_TIMEOUT_MS=10000;
@@ -491,6 +499,11 @@
     homeBtn:document.getElementById('homeBtn'), resultLabLink:document.getElementById('resultLabLink')
   };
 
+  const scoreQueue=CommonScoreQueue.createScoreQueue({gameSlug:GAME_SLUG,scoreOrder:'asc',
+    storage:(()=>{try{return localStorage;}catch{return null;}})(),
+    send:payload=>postRpc('submit_score_once_shared_v1',payload,SCORE_SUBMIT_TIMEOUT_MS),
+    onChange:onScoreQueueChange});
+
   function safeStorageGet(key){try{return localStorage.getItem(key);}catch(e){return null;}}
   function safeStorageSet(key,value){try{localStorage.setItem(key,value);return true;}catch(e){return false;}}
   function elapsedMsToScore(ms){return Math.round(ms/10);}
@@ -509,10 +522,10 @@
   function currentClientVersion(){return CLIENT_VERSION+'-'+(state.stage?state.stage.id:'unknown');}
   function updateStageUi(){const shortLabel=stageShortLabel(state.stage),longLabel=stageLongLabel(state.stage);el.stageDisplay.textContent=shortLabel;el.stageDisplay.title=longLabel;setMessage(el.countdownStage,'STAGE {0}・{1}',()=>[stageShortLabel(state.stage),stageLongLabel(state.stage)]);el.resultStage.textContent=longLabel+' ('+shortLabel+')';}
   function chooseNextStage(){if(state.stageBag.length===0)refillStageBag();const index=state.stageBag.shift();state.stage=STAGES[index];state.lastStageIndex=index;updateStageUi();return state.stage;}
-  function migrateOldPlayerName(){if(safeStorageGet(LS.playerName))return;const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok&&old.name)safeStorageSet(LS.playerName,old.name);}
-  function getSavedPlayerName(){return safeStorageGet(LS.playerName)||state.savedName||'';}
+  function migrateOldPlayerName(){if(safeStorageGet(LS.playerName)!==null)return;const old=validateName(safeStorageGet(LS.oldPlayerName)||'');if(old.ok&&old.name)safeStorageSet(LS.playerName,old.name);}
+  function getSavedPlayerName(){return safeStorageGet(LS.playerName)??state.savedName??'';}
   function clearStorageNamespace(storage){try{const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key&&key.startsWith(LOCAL_CACHE_PREFIX)&&key!==LS.playerName&&!PREFERENCE_KEYS.has(key)&&!key.startsWith(IronarabeGuests.GUEST_PENDING_PREFIX))keys.push(key);}keys.forEach(function(key){storage.removeItem(key);});}catch(e){}}
-  function clearReplayCachePreserveName(){sound.stop();const savedName=getSavedPlayerName()||state.playerName;state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();try{clearStorageNamespace(localStorage);}catch(e){}try{clearStorageNamespace(sessionStorage);}catch(e){}if(savedName)safeStorageSet(LS.playerName,savedName);state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
+  function clearReplayCachePreserveName(){sound.stop();state.playId+=1;state.rankingRequestId+=1;state.rankingRows=[];clearPendingTimers();state.stage=null;state.tiles=[];state.solution=[];state.board=[];state.fixedSet=new Set();state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.clearPlayId=null;state.resultShownPlayId=null;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';state.inputLocked=true;el.board.innerHTML='';el.resultRankingList.innerHTML='';setRankingState('idle','');resetNameRecord();clearToast('result');}
   function replay(){clearReplayCachePreserveName();returnHome();}
   function setPhase(nextPhase){state.phase=nextPhase;document.body.dataset.phase=nextPhase;Object.keys(el.screens).forEach(k=>el.screens[k].classList.toggle('active',k===nextPhase));window.scrollTo(0,0);}
   function clearCountdownTimers(){state.countdownTimerIds.forEach(id=>clearTimeout(id));state.countdownTimerIds=[];state.countdownToken+=1;el.startBtn.disabled=false;el.guestStartBtn.disabled=false;}
@@ -522,7 +535,7 @@
   function clearAllToasts(){clearToast('home');clearToast('result');}
   function hideCompletion(){el.completionBanner.hidden=true;setMessage(el.completionSummary,'');}
   function clearPendingTimers(){clearCountdownTimers();clearClearTimer();clearSwapTimer();clearAllToasts();}
-  function returnHome(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
+  function returnHome(){state.rankingRequestId+=1;state.rankingRows=[];state.scorePlay=null;sound.stop();stopTimer();clearPendingTimers();hideCompletion();state.selectedIndex=null;state.inputLocked=true;el.retireBtn.disabled=true;el.board.innerHTML='';el.playerNameInput.value=getSavedPlayerName();setMessage(el.nameError,'');setPhase('home');}
 
   function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -540,10 +553,10 @@
   function stopTimer(){if(state.rafId!==null){cancelAnimationFrame(state.rafId);state.rafId=null;}}
   function prefersReducedMotion(){return Boolean(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}
   function finishSwap(playId,a,b){state.swapTimerId=null;const aEl=el.board.children[a],bEl=el.board.children[b];if(aEl)aEl.classList.remove('swapping');if(bEl)bEl.classList.remove('swapping');if(playId!==state.playId||state.phase!=='playing'||state.cleared)return;state.inputLocked=false;}
-  function preparePlay(){sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');return state.playId;}
+  function preparePlay(){state.rankingRequestId+=1;state.rankingRows=[];sound.stop();stopTimer();clearPendingTimers();hideCompletion();el.retireBtn.disabled=true;initFixedSet();chooseNextStage();state.tiles=buildTiles(state.stage.challenge);const s=shuffledBoard();state.solution=s.solution;state.board=s.board;state.selectedIndex=null;state.operations=0;state.startTime=null;state.elapsedMs=0;state.cleared=false;state.playId+=1;state.clearPlayId=null;state.resultShownPlayId=null;state.inputLocked=true;state.submittedPlayId=null;state.guestStartId=null;state.guestCountStatus='pending';el.board.innerHTML='';el.operationDisplay.textContent=formatNumber(0);el.timeDisplay.textContent=formatNumber(0,2);resetNameRecord();updateRankingStatus('idle');state.scorePlay=scoreQueue.capture(state.playerName,currentClientVersion());document.getElementById('retryScore').hidden=true;return state.playId;}
   function beginPlaying(playId){if(playId!==state.playId)return;requestAnimationFrame(function(){if(playId!==state.playId)return;renderBoard();setPhase('playing');state.startTime=performance.now();state.elapsedMs=0;state.inputLocked=false;el.retireBtn.disabled=false;state.rafId=requestAnimationFrame(tick);if(!state.playerName)state.guestStartId=guestCounter.record(currentClientVersion());if(!state.playerName&&!state.guestStartId)state.guestCountStatus='failed';});}
   function startCountdown(playId){if(state.phase!=='home')return;clearCountdownTimers();state.inputLocked=true;const token=state.countdownToken+1;state.countdownToken=token;el.startBtn.disabled=true;el.guestStartBtn.disabled=true;setPhase('countdown');state.countdownStep=0;updateCountdownValue();COUNTDOWN_STEPS.slice(1).forEach(function(step,idx){const id=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownStep=idx+1;updateCountdownValue();},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*(idx+1));state.countdownTimerIds.push(id);});const done=setTimeout(function(){if(token!==state.countdownToken||playId!==state.playId)return;state.countdownTimerIds=[];beginPlaying(playId);},COUNTDOWN_START_MS+COUNTDOWN_STEP_MS*COUNTDOWN_STEPS.length);state.countdownTimerIds.push(done);}
-  function startGame(anonymous=false){if(state.phase!=='home'||el.startBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);el.playerNameInput.focus();return;}setMessage(el.nameError,'');state.playerName=v.name;if(v.name){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
+  function startGame(anonymous=false){if(state.phase!=='home'||el.startBtn.disabled)return;const v=validateName(anonymous?'':el.playerNameInput.value);if(!v.ok){setMessage(el.nameError,v.message);el.playerNameInput.focus();return;}setMessage(el.nameError,'');state.playerName=v.name;if(!anonymous){state.savedName=v.name;safeStorageSet(LS.playerName,v.name);}el.playerNameInput.blur();if(document.activeElement===el.playerNameInput)document.activeElement.blur();const playId=preparePlay();startCountdown(playId);}
   function selectTile(pos){
     if(state.phase!=='playing'||state.inputLocked||state.cleared)return;
     if(!Number.isInteger(pos)||pos<0||pos>=TOTAL||state.fixedSet.has(pos))return;
@@ -616,7 +629,7 @@
       const res=await fetch(getRpcUrl(name),{method:'POST',headers:{'Content-Type':'application/json','apikey':RANKING_CONFIG.publishableKey},body:JSON.stringify(payload),signal:controller.signal});
       const text=await res.text();let data=null;
       if(text){try{data=JSON.parse(text);}catch(e){throw new Error('invalid json');}}
-      if(!res.ok)throw new Error('http '+res.status);
+      if(!res.ok){const error=new Error('http '+res.status);error.code=data?.code;throw error;}
       return data;
     }finally{clearTimeout(timeoutId);}
   }
@@ -625,12 +638,25 @@
   function setNameRecordPending(playerName){resetNameRecord();el.recordNameDisplay.textContent=playerName;setMessage(el.nameRecordStatus,'登録名の記録を取得中…');}
   function setNameRecordFailure(){setMessage(el.nameRecordStatus,'登録名の記録を取得できませんでした。');el.nameRecordStatus.classList.add('err');}
   function applyNameRecord(record){if(!record)return;el.recordNameDisplay.textContent=record.result_display_name||state.playerName;setMessage(el.firstScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_first_score))]);setMessage(el.bestScoreDisplay,'{0}秒',()=>[formatScore(Number(record.result_best_score))]);setMessage(el.namePlayCountDisplay,'{0}回プレイ',()=>[formatNumber(Number(record.result_play_count)||0)]);setMessage(el.nameRecordStatus,'Supabaseに保存された登録名の記録です。');el.nameRecordStatus.classList.remove('err');let badge='';if(record.is_first_play)badge='登録名の初回記録';else if(record.is_new_best)badge='登録名のベスト更新！';setMessage(el.bestBadge,badge);el.bestBadge.style.display=badge?'inline-block':'none';}
-  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){if(!playerName)return;if(state.submittedPlayId===playId)return;state.submittedPlayId=playId;updateRankingStatus(isRankingConfigured()?'submitting':'unconfigured');submitScore(playerName,elapsedMs).then(function(result){if(playId!==state.playId)return;updateRankingStatus(result.status);if(result.status==='success'){applyNameRecord(result.record);loadRankings(true);}else{setNameRecordFailure();loadRankings(false);}}).catch(function(){if(playId!==state.playId)return;updateRankingStatus('failed');setNameRecordFailure();loadRankings(false);});}
-  function submitScore(playerName,elapsedMs){const score=elapsedMsToScore(elapsedMs);if(!isRankingConfigured())return Promise.resolve({status:'unconfigured'});if(!isValidScore(score))return Promise.resolve({status:'failed'});const payload={p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:currentClientVersion()};return postRpc('submit_score',payload,SCORE_SUBMIT_TIMEOUT_MS).then(function(data){const row=Array.isArray(data)?data[0]:data;if(!row||row.accepted!==true)return {status:'failed'};return {status:'success',record:row};}).catch(function(){return {status:'failed'};});}
+  function onScoreQueueChange(item,receipt){
+    if(item.id!==state.scorePlay?.id)return;
+    document.getElementById('retryScore').hidden=item.state!=='pending';
+    if(item.state==='sending')updateRankingStatus('submitting');
+    else if(item.state==='submitted'){updateRankingStatus('success');applyNameRecord(receipt);loadRankings(true);}
+    else{updateRankingStatus('failed');setNameRecordFailure();}
+    if(item.persisted===false)setMessage(el.rankNote,'端末に記録を保存できません。結果を失わないため、再読み込みせず保存できる状態で再送してください。');
+  }
+  function submitScoreForCurrentPlay(playId,playerName,elapsedMs){
+    if(!playerName||state.submittedPlayId===playId)return;
+    state.submittedPlayId=playId;
+    const score=elapsedMsToScore(elapsedMs);
+    if(!isRankingConfigured()||!isValidScore(score)||!state.scorePlay){updateRankingStatus('failed');return;}
+    try{scoreQueue.enqueue(state.scorePlay,score,{elapsedMs,operations:state.operations,stageId:state.stage.id});void scoreQueue.drain();}catch{updateRankingStatus('failed');setNameRecordFailure();}
+  }
 
   function setRankingState(status,message){const statusEl=el.resultRankingStatus,scrollEl=el.resultRankingScroll;statusEl.classList.toggle('err',status==='error');setMessage(statusEl,message||'');statusEl.hidden=status==='ready'||status==='idle';scrollEl.hidden=status!=='ready';}
   function renderRankingList(listEl,rows){listEl.innerHTML='';rows.forEach(function(row){const item=document.createElement('div');item.className='ranking-row';item.setAttribute('role','listitem');const rank=document.createElement('span');rank.className='ranking-rank';setMessage(rank,'{0}位',()=>[formatNumber(row.rankNo)]);const name=document.createElement('span');name.className='ranking-name';name.textContent=row.displayName;const score=document.createElement('span');score.className='ranking-score';score.textContent=formatScore(row.bestScore);const unit=document.createElement('small');unit.textContent=t('秒');score.appendChild(unit);item.append(rank,name,score);listEl.appendChild(item);});}
-  function normalizeRankingRows(data){if(!Array.isArray(data))return [];return data.slice(0,RANKING_LIMIT).map(function(row,index){return {rankNo:Number.isFinite(Number(row.rank_no))?Number(row.rank_no):index+1,displayName:String(row.display_name||'--'),bestScore:Number(row.best_score)};}).filter(row=>isValidScore(row.bestScore));}
+  function normalizeRankingRows(data){if(!Array.isArray(data)||data.some(row=>!row||!Number.isSafeInteger(row.rank_no)||row.rank_no<1||typeof row.display_name!=='string'||!Number.isSafeInteger(row.best_score)||!isValidScore(row.best_score)))throw new Error('Invalid ranking response');return data.slice(0,RANKING_LIMIT).map(row=>({rankNo:row.rank_no,displayName:row.display_name,bestScore:row.best_score}));}
   function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows);if(rows.length===0)setRankingState('empty','まだランキング記録がありません。');else setRankingState('ready','');}
   function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
@@ -645,9 +671,14 @@
   IronarabeI18n.SUPPORTED_LANGUAGES.forEach(function(language){const option=document.createElement('option');option.value=language.id;option.textContent=language.name;option.lang=language.id;el.languageSelect.appendChild(option);});
   el.languageSelect.addEventListener('change',function(){i18n.setLanguage(el.languageSelect.value);refreshLanguage();});
   [el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){button.addEventListener('click',function(){sound.setEnabled(!sound.isEnabled());if(sound.isEnabled())sound.unlock();updateSoundButtons();});});
+  const volumeControls=[document.getElementById('homeVolume'),document.getElementById('resultVolume')];
+  volumeControls.forEach(function(input){input.value=String(sound.getVolume()*100);input.addEventListener('input',function(){sound.setVolume(Number(input.value)/100);volumeControls.forEach(other=>{other.value=input.value;});});});
+  async function copyShare(link){updateShareLinks();const text=new URL(link.href).searchParams.get('text');try{await navigator.clipboard.writeText(text);}catch(_){window.prompt(t('共有文をコピー'),text);}}
+  document.getElementById('homeCopyBtn').addEventListener('click',()=>copyShare(el.homeShareBtn));
+  document.getElementById('resultCopyBtn').addEventListener('click',()=>copyShare(el.resultShareBtn));
   // These calls run in the gesture stack, including iPhone Safari touch and keyboard activation.
-  document.addEventListener('pointerdown',function(){sound.unlock();},{capture:true,passive:true});
-  document.addEventListener('keydown',function(){sound.unlock();},{capture:true});
+  document.addEventListener('pointerdown',function(e){if(!e.target.closest('.sound-toggle, .volume-control'))sound.unlock();},{capture:true,passive:true});
+  document.addEventListener('keydown',function(e){if(!e.target.closest('.sound-toggle, .volume-control'))sound.unlock();},{capture:true});
   el.startBtn.addEventListener('click',function(){startGame();});
   el.howToBtn.addEventListener('click',function(){const open=el.howToPanel.hidden;el.howToPanel.hidden=!open;el.howToBtn.setAttribute('aria-expanded',String(open));});
   el.guestStartBtn.addEventListener('click',function(){startGame(true);});
@@ -657,6 +688,9 @@
   el.board.addEventListener('contextmenu',function(e){e.preventDefault();});
   el.againBtn.addEventListener('click',replay);
   el.homeBtn.addEventListener('click',returnHome);
+  el.playerNameInput.addEventListener('input',()=>{const value=validateName(el.playerNameInput.value);if(value.ok){state.savedName=value.name;safeStorageSet(LS.playerName,value.name);}});
+  document.getElementById('retryScore').addEventListener('click',()=>{void scoreQueue.drain();});
+  document.getElementById('reloadRanking').addEventListener('click',()=>loadRankings(true));
   el.homeLabLink.href=LAB_URL;
   el.resultLabLink.href=LAB_URL;
   window.addEventListener('pagehide',function(){stopTimer();clearCountdownTimers();clearClearTimer();clearSwapTimer();});
@@ -673,6 +707,18 @@
   setPhase('home');
   void guestCounter.retry();
   window.addEventListener('online',function(){void guestCounter.retry({recover:true});});
+  function isRestorableScore(item){const p=item?.presentation;return Boolean(item&&item.state!=='conflict'&&p&&Number.isFinite(p.elapsedMs)&&p.elapsedMs>0&&Number.isSafeInteger(p.operations)&&p.operations>=0&&typeof p.stageId==='string'&&item.payload?.p_client_version?.endsWith('-'+p.stageId)&&isValidScore(item.payload.p_score)&&elapsedMsToScore(p.elapsedMs)===item.payload.p_score);}
+  const restoredScore=scoreQueue.list().filter(isRestorableScore).at(-1);
+  if(restoredScore?.presentation&&Number.isFinite(restoredScore.presentation.elapsedMs)){
+    const stage=STAGES.find(value=>value.id===restoredScore.presentation.stageId);
+    if(stage){state.stage=stage;state.scorePlay={id:restoredScore.id,name:restoredScore.payload.p_display_name,clientVersion:restoredScore.payload.p_client_version};
+      state.playerName=state.scorePlay.name;state.elapsedMs=restoredScore.presentation.elapsedMs;state.operations=restoredScore.presentation.operations;
+      state.cleared=true;state.playId+=1;state.clearPlayId=state.playId;state.submittedPlayId=state.playId;
+      setNameRecordPending(state.playerName);showResult(state.playId);onScoreQueueChange(restoredScore,null);
+    }
+  }
+  window.addEventListener('online',()=>{void scoreQueue.drain();});
+  void scoreQueue.drain();
 }());
 </script>
 </body>

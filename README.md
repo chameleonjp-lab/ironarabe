@@ -32,7 +32,7 @@
 - 全40ステージ表示
 - イロナラベの詳細ランキングへの導線
 
-ホームと結果画面の「Xでシェアする」は黒地・白字で、Xの投稿画面を開きます。ホームの日本語共有文は以下の3行です。他の言語では説明文を翻訳し、結果画面では今回のステージ・タイム・操作回数を共有します。
+ホームと結果画面の「Xでシェア」は黒地・白字で、Xの投稿画面を開きます。ホームの日本語共有文は以下の3行です。他の言語では説明文を翻訳し、結果画面では今回のステージ・タイム・操作回数を共有します。
 
 ```text
 イロナラベ
@@ -60,8 +60,8 @@ https://chameleonjp-lab.github.io/ironarabe/
 
 「もう一度遊ぶ」でホームへ戻ると保存名が入力欄に表示され、「ゲームを始める」1回で次のカウントダウンへ進めます。ホームを開いただけではキーボードを表示しません。保存済みのプレイヤー名・言語・効果音設定を残し、次を消去します。
 
-- 名前・言語・効果音設定以外の`ironarabe.` localStorage
-- `ironarabe.` sessionStorage
+- 端末保存領域は削除しません（旧記録・名前・言語・音量を維持）
+- sessionStorageも保持します
 - タイル、正解配列、盤面配列、固定集合
 - メモリ上のランキング結果
 - 結果画面のランキングDOMと登録名表示
@@ -160,3 +160,5 @@ node tools/verify-result-only-v14.cjs
 この追加機能は実験場の `docs/chameleonjp-lab/sql/ironarabe-guest-play-count.sql` にある専用RPCを使用します。[40問用DB手順・適用記録](https://github.com/chameleonjp-lab/chameleonjp_lab/blob/main/docs/chameleonjp-lab/16_ironarabe_stage_pack_40.md) に初回用と旧8問適用済み用の経路、確認したDB状態と検証範囲を記録します。登録URL2列の切替は先行8問版の公開後受入を経て完了しています。
 
 初回PR #16、任意名の [PR #17](https://github.com/chameleonjp-lab/ironarabe/pull/17)、匿名回数SQLの [PR #38](https://github.com/chameleonjp-lab/chameleonjp_lab/pull/38)、40問の [PR #18](https://github.com/chameleonjp-lab/ironarabe/pull/18) はマージ済みです。今後も既定ブランチへのPRマージ後に同じActionsで自動公開します。
+
+最新の共通仕様対応・検証範囲・残件は [対応記録](docs/common-spec-2026-10-31.md) を参照してください。

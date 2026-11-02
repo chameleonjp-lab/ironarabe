@@ -131,7 +131,7 @@ function soundEnd(context) {
 
 test("exports the same API to CommonJS and a classic browser script", () => {
   const soundModule = loadModule();
-  assert.deepEqual(Object.keys(soundModule).sort(), ["SOUND_STORAGE_KEY", "createSoundEffects"]);
+  assert.deepEqual(Object.keys(soundModule).sort(), ["SOUND_STORAGE_KEY", "VOLUME_STORAGE_KEY", "createSoundEffects"]);
   assert.equal(soundModule.SOUND_STORAGE_KEY, "ironarabe.sound.v1");
   const browser = {};
   vm.runInNewContext(fs.readFileSync(modulePath, "utf8"), browser);
@@ -442,3 +442,17 @@ for (const failedStep of ["context", "resume", "oscillator", "gain", "frequency"
     assert.equal(sound.play("select"), true);
   });
 }
+
+test('volume preserves zero across reload and stops pending voices', () => {
+  const storage=memoryStorage();
+  const first=loadModule().createSoundEffects({storage,windowObject:{}});
+  assert.equal(first.getVolume(),1);
+  first.setVolume(0);
+  const next=loadModule().createSoundEffects({storage,windowObject:{AudioContext(){throw Error('must not create')}}});
+  assert.equal(next.getVolume(),0);
+  assert.equal(next.unlock(),false);
+  next.setVolume(0.4);
+  assert.equal(loadModule().createSoundEffects({storage,windowObject:{}}).getVolume(),0.4);
+});
+
+test('interrupted context stops scheduled sounds without waiting for visibilitychange',()=>{const h=harness();h.sound.unlock();h.sound.play('complete');const c=h.contexts[0];c.state='interrupted';c.onstatechange?.();assert.ok(c.oscillators.every(o=>o.disconnected));assert.ok(c.gains.every(g=>g.disconnected));});

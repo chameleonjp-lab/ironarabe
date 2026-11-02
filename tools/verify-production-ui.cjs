@@ -21,7 +21,7 @@ if (errors.length === 0) {
 
   check(inlineScripts.length === 1, "index.html must contain exactly one inline game script");
   const scriptPaths = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
-  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js','js/stage-pack.js','js/guest-plays.js'];
+  const localScripts = ['js/language-options.js','js/translations.js','js/i18n.js','js/sound-effects.js','js/stage-pack.js','js/guest-plays.js','js/score-queue.js'];
   check(JSON.stringify(scriptPaths) === JSON.stringify(localScripts), "production scripts must be the six reviewed same-origin runtime files, in dependency order");
   for (const file of localScripts) {
     try { new Function(fs.readFileSync(path.join(root, file), 'utf8')); }
@@ -52,12 +52,12 @@ if (errors.length === 0) {
     ["SHUFFLE_SEED='ironarabe-official-001-v1'", "official seed changed"],
     ["FIXED_COORDS=[[0,0],[3,0],[6,0],[0,4],[6,4],[0,8],[3,8],[6,8]]", "fixed coordinates changed"],
     ["chooseNextStage();state.tiles=buildTiles(state.stage.challenge)", "stage selection is not wired into play preparation"],
-    ["postRpc('submit_score'", "shared submit_score RPC missing"],
+    ["postRpc('submit_score_once_shared_v1'", "shared submit_score RPC missing"],
     ["postRpc('get_best_score_ranking'", "best ranking RPC missing"],
     ["p_display_name", "ranking display-name field missing"],
     ["p_game_slug", "ranking slug field missing"],
-    ["p_score", "ranking score field missing"],
-    ["p_client_version:currentClientVersion()", "stage-aware client-version field missing"],
+    ["scoreQueue.enqueue(state.scorePlay,score", "ranking score field missing"],
+    ["scoreQueue.capture(state.playerName,currentClientVersion())", "stage-aware client-version field missing"],
     ["'apikey':RANKING_CONFIG.publishableKey", "apikey header missing"],
     ["swapTimerId", "swap timer state missing"],
     ["clearSwapTimer", "swap timer cleanup missing"],
@@ -81,8 +81,6 @@ if (errors.length === 0) {
     ["登録名のプレイ回数", "registered-name play count missing"],
     ["const LOCAL_CACHE_PREFIX='ironarabe.'", "cache namespace missing"],
     ["function replay(){clearReplayCachePreserveName();returnHome();}", "replay cache clearing missing"],
-    ["clearStorageNamespace(localStorage)", "localStorage cache clearing missing"],
-    ["clearStorageNamespace(sessionStorage)", "sessionStorage cache clearing missing"],
     ["key!==LS.playerName", "saved-name preservation missing"],
     ["el.againBtn.addEventListener('click',replay)", "replay handler mismatch"]
   ];
@@ -128,7 +126,7 @@ if (errors.length === 0) {
   const showResult = (html.match(/function showResult\(playId\)\{[^\n]+/) || [""])[0];
   check(showResult.includes("loadRankings(false)"), "result screen ranking load is missing");
   check(!showResult.includes("refreshHomeRecords"), "result screen still calls removed local record code");
-  check(/submitScoreForCurrentPlay[\s\S]*loadRankings\(true\)/.test(html), "ranking refresh after successful submission is missing");
+  check(/onScoreQueueChange[\s\S]*loadRankings\(true\)/.test(html), "ranking refresh after successful submission is missing");
 }
 
 if (errors.length > 0) {
