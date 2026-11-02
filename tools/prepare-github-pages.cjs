@@ -83,19 +83,27 @@ function preparePages({ source = process.cwd(), output, sha, requireClean = fals
   };
   fs.mkdirSync(path.dirname(output), { recursive: true });
   const staging = fs.mkdtempSync(path.join(path.dirname(output), ".ironarabe-pages-"));
-  try {
-    for (const file of RUNTIME_FILES) {
-      fs.mkdirSync(path.dirname(path.join(staging, file)), { recursive: true });
-      fs.writeFileSync(path.join(staging, file), contents[file]);
-    }
-    fs.writeFileSync(path.join(staging, "release.json"), JSON.stringify(release, null, 2) + "\n");
-    verifyArtifact({ directory: staging, expectedSha: sha });
-    fs.rmSync(output, { recursive: true, force: true });
-    fs.renameSync(staging, output);
-  } finally {
-    fs.rmSync(staging, { recursive: true, force: true });
+  // Never erase an earlier build or a failed staging directory. These paths are
+  // deliberately retained for inspection and owner-controlled cleanup.
+  for (const file of RUNTIME_FILES) {
+    fs.mkdirSync(path.dirname(path.join(staging, file)), { recursive: true });
+    fs.writeFileSync(path.join(staging, file), contents[file]);
   }
-  return { directory: output, release };
+  fs.writeFileSync(path.join(staging, "release.json"), JSON.stringify(release, null, 2) + "\n");
+  verifyArtifact({ directory: staging, expectedSha: sha });
+  let preserved = null;
+  if (fs.existsSync(output)) {
+    const holder = fs.mkdtempSync(path.join(path.dirname(output), ".ironarabe-preserved-"));
+    preserved = path.join(holder, "artifact");
+    fs.renameSync(output, preserved);
+  }
+  try {
+    fs.renameSync(staging, output);
+  } catch (error) {
+    error.message += `; staging retained at ${staging}` + (preserved ? `; prior artifact retained at ${preserved}` : "");
+    throw error;
+  }
+  return { directory: output, release, preserved };
 }
 
 function main(args) {
