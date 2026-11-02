@@ -456,3 +456,50 @@ test('volume preserves zero across reload and stops pending voices', () => {
 });
 
 test('interrupted context stops scheduled sounds without waiting for visibilitychange',()=>{const h=harness();h.sound.unlock();h.sound.play('complete');const c=h.contexts[0];c.state='interrupted';c.onstatechange?.();assert.ok(c.oscillators.every(o=>o.disconnected));assert.ok(c.gains.every(g=>g.disconnected));});
+
+test('a later gesture retries an indefinitely pending resume without replaying sounds', async () => {
+  const { sound, contexts, settings } = harness({ state: 'suspended', resumeMode: 'pending' });
+  sound.unlock();
+  const context = contexts[0];
+  const resolveOld = context.resolveResume;
+  sound.unlock();
+  assert.equal(context.resumeCalls, 1, 'same synchronous gesture is coalesced');
+  assert.equal(sound.play('result'), false);
+  await new Promise(setImmediate);
+  settings.resumeMode = 'resolve';
+  assert.equal(sound.unlock(), true);
+  assert.equal(context.resumeCalls, 2);
+  assert.equal(contexts.length, 1);
+  resolveOld();
+  await Promise.resolve();
+  assert.equal(context.oscillators.length, 0, 'old sounds are not queued');
+});
+
+for (const condition of ['off', 'zero', 'hidden', 'closed']) {
+  test(`pending resume retry respects ${condition} and can recover on a later gesture`, async () => {
+    const { sound, contexts, documentObject, settings } = harness({ state: 'suspended', resumeMode: 'pending' });
+    sound.unlock();
+    const old = contexts[0];
+    const settleOld = old.resolveResume;
+    await new Promise(setImmediate);
+    if (condition === 'off') sound.setEnabled(false);
+    if (condition === 'zero') sound.setVolume(0);
+    if (condition === 'hidden') { documentObject.hidden = true; documentObject.emit('visibilitychange'); }
+    if (condition === 'closed') old.state = 'closed';
+    sound.unlock();
+    assert.equal(old.resumeCalls, 1);
+    assert.equal(sound.play('result'), false);
+    if (condition === 'off') sound.setEnabled(true);
+    if (condition === 'zero') sound.setVolume(0.4);
+    documentObject.hidden = false;
+    await new Promise(setImmediate);
+    settings.resumeMode = 'resolve';
+    assert.equal(sound.unlock(), true);
+    const current = contexts.at(-1);
+    assert.equal(current.resumeCalls, 2);
+    settleOld();
+    await Promise.resolve();
+    assert.equal(current.oscillators.length, 0);
+    assert.equal(sound.getVolume(), condition === 'zero' ? 0.4 : 1);
+  });
+}
