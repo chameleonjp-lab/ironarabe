@@ -26,7 +26,7 @@ function fixture(t) {
   const source = path.join(directory, "source");
   const output = path.join(directory, "site");
   fs.mkdirSync(path.join(source, "js"), { recursive: true });
-  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  // Retain generated fixtures for inspection; no recursive/force cleanup.
   const scripts = runtimeFiles.filter(file => file.endsWith(".js")).map((file) => `<script src="./${file}"></script>`).join("\n");
   fs.writeFileSync(path.join(source, "index.html"), `<!doctype html><html><head><title>イロナラベ</title></head><body>${scripts}<script>
   const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2';
@@ -36,6 +36,11 @@ function fixture(t) {
   fs.mkdirSync(path.join(source, "assets"), {recursive:true});
   fs.copyFileSync(path.join(repository,"assets/social-preview.png"),path.join(source,"assets/social-preview.png"));
   return { directory, source, output };
+}
+
+function preserveFixtureFile(f, file) {
+  const holder = fs.mkdtempSync(path.join(f.directory, "preserved-file-"));
+  fs.renameSync(file, path.join(holder, path.basename(file)));
 }
 
 function run(file, args, cwd) {
@@ -70,6 +75,18 @@ test("Pages build excludes repository, tools, historical releases and private fi
   for (const file of runtimeFiles) assert.deepEqual(fs.readFileSync(path.join(f.output, file)), fs.readFileSync(path.join(f.source, file)));
 });
 
+test("rebuilding preserves the previous artifact without cleanup", (t) => {
+  const f = fixture(t);
+  checkBuild(f);
+  const previous = Object.fromEntries(filesIn(f.output).map(file => [file, fs.readFileSync(path.join(f.output, file))]));
+  checkBuild(f);
+  const holders = fs.readdirSync(f.directory).filter(name => name.startsWith(".ironarabe-preserved-"));
+  assert.equal(holders.length, 1);
+  const preserved = path.join(f.directory, holders[0], "artifact");
+  assert.deepEqual(filesIn(preserved), Object.keys(previous).sort());
+  for (const [file, bytes] of Object.entries(previous)) assert.deepEqual(fs.readFileSync(path.join(preserved, file)), bytes);
+});
+
 test("release metadata identifies the UI release without changing ranking compatibility", (t) => {
   const f = fixture(t);
   const release = checkBuild(f);
@@ -92,7 +109,7 @@ test("build refuses missing runtime dependencies and preserves a previous valid 
   const f = fixture(t);
   checkBuild(f);
   const previous = fs.readFileSync(path.join(f.output, "release.json"), "utf8");
-  fs.unlinkSync(path.join(f.source, "js/i18n.js"));
+  preserveFixtureFile(f, path.join(f.source, "js/i18n.js"));
   const result = build(f);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /missing.*js\/i18n\.js/i);
@@ -103,7 +120,7 @@ test("build rejects symlinked runtime files instead of following them outside th
   const f = fixture(t);
   const secret = path.join(f.directory, "private.txt");
   fs.writeFileSync(secret, "private fixture");
-  fs.unlinkSync(path.join(f.source, "js/i18n.js"));
+  preserveFixtureFile(f, path.join(f.source, "js/i18n.js"));
   fs.symlinkSync(secret, path.join(f.source, "js/i18n.js"));
   const result = build(f);
   assert.notEqual(result.status, 0);
@@ -188,7 +205,7 @@ test("artifact verifier detects changed bytes, extra files and a different build
   const extra = run(verifier, args, f.source);
   assert.notEqual(extra.status, 0);
   assert.match(extra.stderr, /allowlist|unexpected/i);
-  fs.unlinkSync(path.join(f.output, "private.txt"));
+  preserveFixtureFile(f, path.join(f.output, "private.txt"));
   const wrongSha = run(verifier, ["--dir", f.output, "--sha", "f".repeat(40)], f.source);
   assert.notEqual(wrongSha.status, 0);
   assert.match(wrongSha.stderr, /sha|commit/i);

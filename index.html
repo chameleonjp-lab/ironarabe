@@ -370,7 +370,7 @@
         <li id="stageCountInstruction" data-i18n="全{0}ステージから毎回1つが選ばれる">全40ステージから毎回1つが選ばれる</li>
       </ol>
     </div>
-    <a class="btn x-share home-share-btn" id="homeShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
+    <button class="btn x-share home-share-btn" id="homeXShare" type="button" data-i18n="Xでシェアする">Xでシェア</button>
     <a class="panel-link" id="homeLabLink" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe" data-i18n="イロナラベの詳細ランキングへ">ランキング</a>
     <div class="toast" id="homeToast" aria-live="polite"></div>
   </section>
@@ -418,7 +418,7 @@
     <div class="rank-note" id="rankNote" aria-live="polite"></div><button id="retryScore" type="button" data-i18n="再試行" hidden>再試行</button>
     <div class="btn-row result-primary-actions">
     <button class="btn" id="againBtn" data-i18n="もう一度遊ぶ">もう一度遊ぶ</button>
-      <a class="btn x-share" id="resultShareBtn" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" data-i18n="Xでシェアする">Xでシェア</a>
+      <button class="btn x-share" id="resultXShare" type="button" data-i18n="Xでシェアする">Xでシェア</button>
     </div>
     <div class="card ranking-card" aria-label="ベストタイムランキング30位まで" data-i18n-attrs="aria-label">
       <div class="ranking-title"><h3 data-i18n="ベストタイムランキング">ベストタイムランキング</h3><span data-i18n="30位まで">30位まで</span></div>
@@ -487,7 +487,7 @@
     languageSelect:document.getElementById('languageSelect'), homeSoundBtn:document.getElementById('homeSoundBtn'), resultSoundBtn:document.getElementById('resultSoundBtn'),
     stageCountLabel:document.getElementById('stageCountLabel'), stageCountInstruction:document.getElementById('stageCountInstruction'), logoChips:document.getElementById('logoChips'), stagePackDots:document.getElementById('stagePackDots'), startBtn:document.getElementById('startBtn'),
     howToBtn:document.getElementById('howToBtn'), howToPanel:document.getElementById('howToPanel'),
-    homeShareBtn:document.getElementById('homeShareBtn'), homeToast:document.getElementById('homeToast'),
+    homeXShare:document.getElementById('homeXShare'), homeToast:document.getElementById('homeToast'),
     homeLabLink:document.getElementById('homeLabLink'), playerNameInput:document.getElementById('playerNameInput'),
     nameError:document.getElementById('nameError'),
     nameRecordTitle:document.getElementById('nameRecordTitle'), registeredOnly:Array.from(document.querySelectorAll('.registered-only')),
@@ -501,7 +501,7 @@
     nameRecordStatus:document.getElementById('nameRecordStatus'), rankNote:document.getElementById('rankNote'),
     resultRankingStatus:document.getElementById('resultRankingStatus'), resultRankingScroll:document.getElementById('resultRankingScroll'),
     resultRankingList:document.getElementById('resultRankingList'), resultToast:document.getElementById('resultToast'),
-    againBtn:document.getElementById('againBtn'), resultShareBtn:document.getElementById('resultShareBtn'),
+    againBtn:document.getElementById('againBtn'), resultXShare:document.getElementById('resultXShare'),
     homeBtn:document.getElementById('homeBtn'), resultLabLink:document.getElementById('resultLabLink')
   };
 
@@ -616,7 +616,7 @@
     },CLEAR_BOARD_DISPLAY_MS);
   }
   function onBoardTap(e){const target=e.target.closest('.tile');if(!target)return;const pos=parseInt(target.dataset.pos,10);if(!Number.isNaN(pos))selectTile(pos);}
-  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);setMessage(el.resultTime,'{0}秒',()=>[formatScore(score)]);setMessage(el.resultOperations,'{0}回操作',()=>[formatNumber(state.operations)]);updateStageUi();updateShareLinks();setPhase('result');sound.play('result');loadRankings(false);}
+  function showResult(playId){if(playId!==state.playId||state.resultShownPlayId===playId)return;clearToast('home');hideCompletion();el.retireBtn.disabled=true;state.resultShownPlayId=playId;const score=elapsedMsToScore(state.elapsedMs);setMessage(el.resultTime,'{0}秒',()=>[formatScore(score)]);setMessage(el.resultOperations,'{0}回操作',()=>[formatNumber(state.operations)]);updateStageUi();refreshShareActions();setPhase('result');sound.play('result');loadRankings(false);}
   function retire(){if(state.phase!=='playing'||state.cleared||state.inputLocked||state.resultShownPlayId===state.playId)return;clearClearTimer();clearSwapTimer();returnHome();}
 
   const guestCounter=IronarabeGuests.createGuestPlayCounter({
@@ -667,44 +667,50 @@
   function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
   function xShareUrl(text){text=text.replace('\n'+GAME_URL,'\n#イロナラベ #ゲーム制作\n'+GAME_URL);const url=new URL('https://twitter.com/intent/tweet');url.searchParams.set('text',text);return url.href;}
-  function updateShareLinks(){el.homeShareBtn.href=xShareUrl(t('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}',[GAME_URL]));el.resultShareBtn.href=xShareUrl(t('イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}',[stageShortLabel(state.stage),stageLongLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations),GAME_URL]));}
+  function refreshShareActions(){el.homeXShare.dataset.shareUrl=xShareUrl(t('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}',[GAME_URL]));el.resultXShare.dataset.shareUrl=xShareUrl(t('イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}',[stageShortLabel(state.stage),stageLongLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations),GAME_URL]));}
   function buildLogoChips(){STAGE_PALETTES.slice(0,2).flatMap(function(palette){return palette.corners;}).forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
   function buildStagePackDots(){STAGE_PALETTES.map(function(palette){return palette.anchors?palette.anchors[0]:palette.corners[0];}).forEach(function(hex){const dot=document.createElement('i');dot.style.background=hex;el.stagePackDots.appendChild(dot);});}
 
   function updateCountdownValue(){const step=COUNTDOWN_STEPS[state.countdownStep];el.countdownValue.textContent=step==='START'?t('START'):formatNumber(Number(step));}
   function updateSoundButtons(){[el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){setMessage(button,sound.isEnabled()?'効果音：ON':'効果音：OFF');button.setAttribute('aria-pressed',String(sound.isEnabled()));});}
-  function refreshLanguage(){setMessage(el.stageCountLabel,'全{0}ステージ',()=>[formatNumber(STAGES.length)]);setMessage(el.stageCountInstruction,'全{0}ステージから毎回1つが選ばれる',()=>[formatNumber(STAGES.length)]);i18n.applyTranslations();el.languageSelect.value=i18n.getLanguage();updateStageUi();updateShareLinks();updateCountdownValue();el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);el.operationDisplay.textContent=formatNumber(state.operations);renderRankingList(el.resultRankingList,state.rankingRows);updateSoundButtons();}
+  function refreshLanguage(){setMessage(el.stageCountLabel,'全{0}ステージ',()=>[formatNumber(STAGES.length)]);setMessage(el.stageCountInstruction,'全{0}ステージから毎回1つが選ばれる',()=>[formatNumber(STAGES.length)]);i18n.applyTranslations();el.languageSelect.value=i18n.getLanguage();updateStageUi();refreshShareActions();updateCountdownValue();el.timeDisplay.textContent=formatElapsedMs(state.elapsedMs);el.operationDisplay.textContent=formatNumber(state.operations);renderRankingList(el.resultRankingList,state.rankingRows);updateSoundButtons();}
   IronarabeI18n.SUPPORTED_LANGUAGES.forEach(function(language){const option=document.createElement('option');option.value=language.id;option.textContent=language.name;option.lang=language.id;el.languageSelect.appendChild(option);});
   el.languageSelect.addEventListener('change',function(){i18n.setLanguage(el.languageSelect.value);refreshLanguage();});
   [el.homeSoundBtn,el.resultSoundBtn].forEach(function(button){button.addEventListener('click',function(){sound.setEnabled(!sound.isEnabled());if(sound.isEnabled())sound.unlock();updateSoundButtons();});});
   const volumeControls=[document.getElementById('homeVolume'),document.getElementById('resultVolume')];
   volumeControls.forEach(function(input){input.value=String(sound.getVolume()*100);input.addEventListener('input',function(){sound.setVolume(Number(input.value)/100);volumeControls.forEach(other=>{other.value=input.value;});});});
-  function activateXShare(event, link) {
-    updateShareLinks();
-    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    const href = link.href;
-    const text = new URL(href).searchParams.get('text');
-    let popup;
-    try {
-      popup = window.open('', '_blank');
-      if (!popup) throw new Error('Popup unavailable');
-      popup.opener = null;
-      if (popup.opener !== null) throw new Error('Popup opener could not be detached');
-      const target = popup.document.createElement('a');
-      target.href = href;
-      target.target = '_self';
-      target.rel = 'noreferrer';
-      target.referrerPolicy = 'no-referrer';
-      popup.document.body.append(target);
-      target.click();
-    } catch (_) {
-      try { if (popup) popup.close(); } catch (_) {}
-      window.prompt(t('共有文をコピー'), text);
-    }
+  function createShareAction(button, phase) {
+    let lastActivation = -Infinity;
+    return function shareAction(event) {
+      if (state.phase !== phase || button.disabled || (event.button != null && event.button !== 0)) return;
+      event.preventDefault();
+      const now = Date.now();
+      if (now - lastActivation < 500) return;
+      lastActivation = now;
+      refreshShareActions();
+      const href = button.dataset.shareUrl;
+      const text = new URL(href).searchParams.get('text');
+      let popup;
+      try {
+        popup = window.open('', '_blank');
+        if (!popup) throw new Error('Popup unavailable');
+        popup.opener = null;
+        if (popup.opener !== null) throw new Error('Popup opener could not be detached');
+        const destination = popup.document.createElement('a');
+        destination.href = href;
+        destination.target = '_self';
+        destination.rel = 'noreferrer';
+        destination.referrerPolicy = 'no-referrer';
+        popup.document.body.append(destination);
+        destination.click();
+      } catch (_) {
+        try { if (popup) popup.close(); } catch (_) {}
+        window.prompt(t('共有文をコピー'), text);
+      }
+    };
   }
-  el.homeShareBtn.addEventListener('click', event => activateXShare(event, el.homeShareBtn));
-  el.resultShareBtn.addEventListener('click', event => activateXShare(event, el.resultShareBtn));
+  el.homeXShare.addEventListener('click', createShareAction(el.homeXShare, 'home'));
+  el.resultXShare.addEventListener('click', createShareAction(el.resultXShare, 'result'));
   // These calls run in the gesture stack, including iPhone Safari touch and keyboard activation.
   document.addEventListener('pointerdown',function(e){if(!e.target.closest('.sound-toggle, .volume-control'))sound.unlock();},{capture:true,passive:true});
   document.addEventListener('keydown',function(e){if(!e.target.closest('.sound-toggle, .volume-control'))sound.unlock();},{capture:true});

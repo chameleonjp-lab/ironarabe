@@ -21,7 +21,7 @@ async function safeContext(browser,options){
 }
 async function mockXComposer(context){await context.route('https://twitter.com/intent/tweet**',route=>{assert.equal(route.request().method(),'GET');assert.equal(route.request().headers().referer,undefined);return route.fulfill({contentType:'text/html',body:'<title>X composer fixture</title>'});});}
 function shareLinkText(href){assert.ok(href,'share action links to the X composer');const url=new URL(href);assert.equal(url.origin+url.pathname,'https://twitter.com/intent/tweet');assert.deepEqual([...url.searchParams.keys()],['text']);return url.searchParams.get('text');}
-async function openXDraft(page,selector){const link=page.locator(selector),text=shareLinkText(await link.getAttribute('href'));const popupPromise=page.context().waitForEvent('page');await link.tap();const popup=await popupPromise;try{await popup.waitForURL('https://twitter.com/intent/tweet**');assert.equal(shareLinkText(popup.url()),text);}finally{await popup.close();}return text;}
+async function openXDraft(page,selector){await page.clock.runFor(501);const link=page.locator(selector),text=shareLinkText(await link.getAttribute('data-share-url'));const popupPromise=page.context().waitForEvent('page');await link.tap();const popup=await popupPromise;try{await popup.waitForURL('https://twitter.com/intent/tweet**');assert.equal(shareLinkText(popup.url()),text);}finally{await popup.close();}return text;}
 async function bounds(page){
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal page overflow');
  const bad=await page.locator('.screen.active button,.screen.active .x-share,.screen.active input,.screen.active select,.screen.active .record-line,.screen.active .hud,.screen.active .result-head,.screen.active .completion-banner,.screen.active .countdown-value').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+2).map(n=>n.id||n.className));
@@ -91,7 +91,7 @@ async function acceptance(engine,viewport,failAudio=false){
   for(const language of languages){await switchLanguage(page,language);await bounds(page);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Alice 日本語');assert.equal(await page.locator('.ranking-name').first().innerText(),'<保持名>');}
   await switchLanguage(page,'de');const expectedBest=new Intl.NumberFormat('de',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.min(3456,sent.p_score)/100);assert.ok((await page.locator('#bestScoreDisplay').innerText()).includes(expectedBest));
   fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${viewport.width}x${viewport.height}-result.png`),fullPage:true});
-  const shared=await openXDraft(page,'#resultShareBtn');assert.ok(shared.includes(gameUrl));assert.ok(!shared.includes('codeberg'));
+  const shared=await openXDraft(page,'#resultXShare');assert.ok(shared.includes(gameUrl));assert.ok(!shared.includes('codeberg'));
   await page.tap('#resultSoundBtn');assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'false');
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'false');await page.tap('#resultSoundBtn');
   assert.equal(await page.locator('#resultSoundBtn').getAttribute('aria-pressed'),'true');
@@ -101,7 +101,7 @@ async function acceptance(engine,viewport,failAudio=false){
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.language.v1')),'de');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.sound.v1')),'true');
   assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.old.cache')),'stale');assert.equal(await page.evaluate(()=>sessionStorage.getItem('ironarabe.old.cache')),'stale');
   const before=calls.length;await page.reload();assert.equal(await page.locator('html').getAttribute('lang'),'de');assert.equal(await page.locator('#homeSoundBtn').getAttribute('aria-pressed'),'true');assert.equal(calls.length,before);
-  assert.ok((await openXDraft(page,'#homeShareBtn')).includes(gameUrl));
+  assert.ok((await openXDraft(page,'#homeXShare')).includes(gameUrl));
   if(failAudio){await page.evaluate(()=>{Object.defineProperty(window,'sessionStorage',{get(){throw new DOMException('blocked','SecurityError')},configurable:true});document.querySelector('#againBtn').click();});assert.equal(await page.locator('body').getAttribute('data-phase'),'home','replay survives storage denial');}
   assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} ${viewport.width}x${viewport.height} audioFailure=${failAudio}: 15 locales, full game, timing, ranking, replay, shares`);
  }finally{if(releaseSubmit)releaseSubmit();await context.close();await browser.close();}
@@ -260,33 +260,48 @@ async function visibleShareAction(page,selector){
  assert.ok(a.w>=44&&a.h>=44,selector+' target');assert.ok(a.opacity>0);assert.ok(a.viewport,selector+' full rect inside viewport');assert.ok(a.unclipped,selector+' full rect inside overflow ancestors');assert.notEqual(a.pointer,'none');assert.equal(a.hit,true);
 }
 async function adversarialShareVisibility(page,phase,engine){
- const selector=phase==='home'?'#homeShareBtn':'#resultShareBtn',ranking=phase==='home'?'#homeLabLink':'#resultLabLink',action=page.locator(selector);
+ const selector=phase==='home'?'#homeXShare':'#resultXShare',ranking=phase==='home'?'#homeLabLink':'#resultLabLink',action=page.locator(selector);
  // Synthetic environmental faults show the limit of a clean CI, not the user's cause.
- const style=await page.addStyleTag({content:'a[href*="twitter.com/intent/"] {display:none !important;}'});
+ const style=await page.addStyleTag({content:selector+' {display:none !important;}'});
  assert.equal(await action.count(),1);await assert.rejects(()=>visibleShareAction(page,selector));await visibleShareAction(page,ranking);
- fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${phase}-synthetic-href-hidden.png`),fullPage:true});await style.evaluate(e=>e.remove());await visibleShareAction(page,selector);
+ fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${phase}-synthetic-action-hidden.png`),fullPage:true});await style.evaluate(e=>e.remove());await visibleShareAction(page,selector);
  for(const [property,value]of [['display','none'],['opacity','0']]){await action.evaluate((e,[p,v])=>e.parentElement.style.setProperty(p,v),[property,value]);await assert.rejects(()=>visibleShareAction(page,selector));await action.evaluate((e,p)=>e.parentElement.style.removeProperty(p),property);}
  await action.evaluate(e=>{const wrap=document.createElement('div');wrap.style.cssText='overflow:hidden;height:'+(e.getBoundingClientRect().height-8)+'px';e.before(wrap);wrap.append(e);});await assert.rejects(()=>visibleShareAction(page,selector));await action.evaluate(e=>e.parentElement.replaceWith(e));
  await action.evaluate(e=>{e.dataset.originalStyle=e.getAttribute('style')||'';e.style.cssText='position:fixed;top:-8px;left:20px;width:180px;z-index:9999;margin:0';});assert.equal(await action.evaluate(e=>e.getBoundingClientRect().top),-8,'fault control actually crosses viewport edge');await assert.rejects(()=>visibleShareAction(page,selector));await action.evaluate(e=>{e.setAttribute('style',e.dataset.originalStyle);delete e.dataset.originalStyle});await visibleShareAction(page,selector);
  for(const viewport of [{width:393,height:852},{width:852,height:393}]){await page.setViewportSize(viewport);await visibleShareAction(page,selector);const enlarged=await page.addStyleTag({content:selector+' {font-size:200%;line-height:1.5;overflow-wrap:anywhere;}'});await visibleShareAction(page,selector);await visibleShareAction(page,ranking);await enlarged.evaluate(e=>e.remove());}
- console.log(JSON.stringify({adversarial:phase,engine:engine.name(),faultsDetected:['href-specific-hide','ancestor-display','ancestor-opacity','partial-clip','partial-offscreen'],viewports:['393x852','852x393'],enlargedText:'200%',userCause:'unconfirmed'}));
+ console.log(JSON.stringify({adversarial:phase,engine:engine.name(),faultsDetected:['action-specific-hide','ancestor-display','ancestor-opacity','partial-clip','partial-offscreen'],viewports:['393x852','852x393'],enlargedText:'200%',userCause:'unconfirmed'}));
 }
 async function captureShareLayout(page,phase,language,engine){
  for(const viewport of [{width:402,height:874},{width:874,height:402}]){
-  await page.setViewportSize(viewport);await visibleShareAction(page,phase==='home'?'#homeShareBtn':'#resultShareBtn');await visibleShareAction(page,phase==='home'?'#homeLabLink':'#resultLabLink');await bounds(page);
+  await page.setViewportSize(viewport);await visibleShareAction(page,phase==='home'?'#homeXShare':'#resultXShare');await visibleShareAction(page,phase==='home'?'#homeLabLink':'#resultLabLink');await bounds(page);
   fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${phase}-${language}-${viewport.width}x${viewport.height}.png`),fullPage:true});
-  const selector=phase==='home'?'#homeShareBtn':'#resultShareBtn';await openXDraft(page,selector);await blockedShareFallback(page,selector);
+  const selector=phase==='home'?'#homeXShare':'#resultXShare';await openXDraft(page,selector);await blockedShareFallback(page,selector);
   if(phase==='result'){await resultActionsBeforeRanking(page);await visibleShareAction(page,'#againBtn');}
  }
 }
 async function blockedShareFallback(page,selector){
+ await page.clock.runFor(501);
  assert.equal(await page.locator('#homeCopyBtn,#resultCopyBtn').count(),0);
- const text=shareLinkText(await page.locator(selector).getAttribute('href')),phase=await page.locator('body').getAttribute('data-phase'),score=await page.locator('#resultTime').textContent();
+ const text=shareLinkText(await page.locator(selector).getAttribute('data-share-url')),phase=await page.locator('body').getAttribute('data-phase'),score=await page.locator('#resultTime').textContent();
  await page.evaluate(()=>{window.__originalOpen=window.open;window.open=()=>null;});
  const waiting=page.waitForEvent('dialog'),tap=page.locator(selector).tap(),dialog=await waiting;
  assert.equal(dialog.type(),'prompt');assert.equal(dialog.defaultValue(),text);await dialog.dismiss();await tap;
  await page.evaluate(()=>{window.open=window.__originalOpen;delete window.__originalOpen;});
  assert.equal(await page.locator('body').getAttribute('data-phase'),phase);assert.equal(await page.locator('#resultTime').textContent(),score);
+}
+async function rebuiltInputAcceptance(page,selector){
+ const button=page.locator(selector);
+ assert.equal(await button.evaluate(e=>e.tagName),'BUTTON');assert.equal(await button.getAttribute('type'),'button');assert.equal(await button.getAttribute('href'),null);
+ for(const key of ['Enter','Space']){
+  await page.clock.runFor(501);await button.focus();const expected=shareLinkText(await button.getAttribute('data-share-url')),waiting=page.context().waitForEvent('page');await page.keyboard.press(key);const popup=await waiting;
+  try{await popup.waitForURL('https://twitter.com/intent/tweet**');assert.equal(shareLinkText(popup.url()),expected);}finally{await popup.close();}
+ }
+ await page.clock.runFor(501);
+ const evidence=await button.evaluate(e=>{
+  const savedOpen=window.open,savedPrompt=window.prompt;let opens=0,prompts=0;
+  window.open=()=>{opens++;return null};window.prompt=()=>{prompts++;return null};
+  try{e.click();e.click();e.click();return{opens,prompts};}finally{window.open=savedOpen;window.prompt=savedPrompt;}
+ });assert.deepEqual(evidence,{opens:1,prompts:1},'rapid repeated native activations create only one fallback');
 }
 async function resultActionsBeforeRanking(page){
  // Layout-only stress: actual network-state behavior remains covered by the
@@ -299,10 +314,10 @@ async function resultActionsBeforeRanking(page){
    fixture.textContent=state==='loading'?'Loading…':state==='long'?'長い名前 '.repeat(300):'';
    card.append(fixture);
   },state);
-  await visibleShareAction(page,'#againBtn');await visibleShareAction(page,'#resultShareBtn');
+  await visibleShareAction(page,'#againBtn');await visibleShareAction(page,'#resultXShare');
   assert.equal(await page.evaluate(()=>{
    const ranking=document.querySelector('.ranking-card').getBoundingClientRect(),score=document.querySelector('#resultTime').getBoundingClientRect();
-   return ['againBtn','resultShareBtn'].every(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=score.bottom&&r.bottom<=ranking.top;});
+   return ['againBtn','resultXShare'].every(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=score.bottom&&r.bottom<=ranking.top;});
   }),true,'score → replay/X → ranking for '+state);
   await page.evaluate(()=>{document.getElementById('ranking-layout-fixture').remove();delete document.querySelector('.ranking-card').dataset.testState;for(const id of ['resultRankingStatus','resultRankingScroll','reloadRanking']){const el=document.getElementById(id);el.hidden=el.dataset.originalHidden==='true';delete el.dataset.originalHidden;}});
  }
@@ -317,17 +332,18 @@ async function xShareAcceptance(engine){
  async function blackButton(selector){assert.equal(await page.locator(selector).innerText(),'Xでシェア');assert.deepEqual(await page.locator(selector).evaluate(node=>({background:getComputedStyle(node).backgroundColor,color:getComputedStyle(node).color})),{background:'rgb(0, 0, 0)',color:'rgb(255, 255, 255)'});}
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
-  await adversarialShareVisibility(page,'home',engine);
+  await adversarialShareVisibility(page,'home',engine);await rebuiltInputAcceptance(page,'#homeXShare');
   const homeText='イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n#イロナラベ #ゲーム制作\n'+gameUrl;
-  assert.equal(shareLinkText(await page.locator('#homeShareBtn').getAttribute('href')),homeText);await blackButton('#homeShareBtn');assert.equal(await openXDraft(page,'#homeShareBtn'),homeText);
-  for(const language of languages){await switchLanguage(page,language);await captureShareLayout(page,'home',language,engine);const text=shareLinkText(await page.locator('#homeShareBtn').getAttribute('href'));assert.match(await page.locator('#homeShareBtn').innerText(),/X/);assert.equal(text.split('\n').length,4);assert.equal(text.split('\n').at(-1),gameUrl);assert.equal(text.split(gameUrl).length-1,1);assert.ok(text.includes('7×9'));assert.ok(!/\{\d+\}/.test(text));}
+  assert.equal(shareLinkText(await page.locator('#homeXShare').getAttribute('data-share-url')),homeText);await blackButton('#homeXShare');assert.equal(await openXDraft(page,'#homeXShare'),homeText);
+  for(const language of languages){await switchLanguage(page,language);await captureShareLayout(page,'home',language,engine);const text=shareLinkText(await page.locator('#homeXShare').getAttribute('data-share-url'));assert.match(await page.locator('#homeXShare').innerText(),/X/);assert.equal(text.split('\n').length,4);assert.equal(text.split('\n').at(-1),gameUrl);assert.equal(text.split(gameUrl).length-1,1);assert.ok(text.includes('7×9'));assert.ok(!/\{\d+\}/.test(text));}
   await switchLanguage(page,'ja');await page.fill('#playerNameInput','X Audit');await page.tap('#startBtn');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  assert.equal(await page.evaluate(()=>{const original=window.open;let calls=0;window.open=()=>{calls++;return null};try{document.getElementById('homeXShare').click();document.getElementById('resultXShare').click();return calls;}finally{window.open=original;}}),0,'inactive home/result controls do not open during play');
   const stage=await page.locator('#stageDisplay').innerText(),title=await page.locator('#stageDisplay').getAttribute('title'),submitted=page.waitForResponse(response=>response.url().endsWith('/submit_score_once_shared_v1'));
   await page.evaluate(board=>{for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);document.querySelector(`.tile[data-pos="${i}"]`).click();document.querySelector(`.tile[data-pos="${j}"]`).click();[board[i],board[j]]=[board[j],board[i]];}},boardFixture.slice());await submitted;await page.clock.runFor(4001);assert.equal(await page.locator('body').getAttribute('data-phase'),'result');
   const score=calls.find(call=>call.method==='submit_score_once_shared_v1').payload.p_score,resultText=`イロナラベ\nSTAGE ${stage}「${title}」を${(score/100).toFixed(2)}秒・操作49回でクリア！\n#イロナラベ #ゲーム制作\n${gameUrl}`;
-  await blackButton('#resultShareBtn');assert.equal(await openXDraft(page,'#resultShareBtn'),resultText);
-  await adversarialShareVisibility(page,'result',engine);
-  for(const language of languages){await switchLanguage(page,language);await captureShareLayout(page,'result',language,engine);const text=shareLinkText(await page.locator('#resultShareBtn').getAttribute('href'));assert.match(await page.locator('#resultShareBtn').innerText(),/X/);assert.ok(text.includes(new Intl.NumberFormat(language,{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false}).format(score/100)));assert.equal(text.split('\n').at(-1),gameUrl);assert.ok(!/\{\d+\}/.test(text));}
+  await blackButton('#resultXShare');assert.equal(await openXDraft(page,'#resultXShare'),resultText);
+  await adversarialShareVisibility(page,'result',engine);await rebuiltInputAcceptance(page,'#resultXShare');
+  for(const language of languages){await switchLanguage(page,language);await captureShareLayout(page,'result',language,engine);const text=shareLinkText(await page.locator('#resultXShare').getAttribute('data-share-url'));assert.match(await page.locator('#resultXShare').innerText(),/X/);assert.ok(text.includes(new Intl.NumberFormat(language,{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false}).format(score/100)));assert.equal(text.split('\n').at(-1),gameUrl);assert.ok(!/\{\d+\}/.test(text));}
   await switchLanguage(page,'ja');fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-x-share-result.png`),fullPage:true});assert.equal(calls.filter(call=>call.method==='submit_score_once_shared_v1').length,1,'sharing never resubmits the score');await page.tap('#againBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.equal(calls.filter(call=>call.method==='submit_score_once_shared_v1').length,1,'replay action does not submit the previous result again');assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} X sharing: exact home text, live result, black/white buttons, 15 locales and intercepted composer popups`);
  }finally{await context.close();await browser.close();}
 }
@@ -348,10 +364,10 @@ async function scoreQueueAcceptance(engine){
   await page.selectOption('#languageSelect','ja');await page.fill('#playerNameInput','Captured Alice');await page.click('#startBtn');await page.clock.runFor(4200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
   const sent=page.waitForResponse(r=>r.url().endsWith('/submit_score_once_shared_v1'));
   await page.evaluate(board=>{for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);document.querySelector(`.tile[data-pos="${i}"]`).click();document.querySelector(`.tile[data-pos="${j}"]`).click();[board[i],board[j]]=[board[j],board[i]];}},boardFixture.slice());
-  await sent;await page.clock.runFor(4001);await page.locator('#retryScore').waitFor({state:'visible'});const share=await page.locator('#resultShareBtn').getAttribute('href');
+  await sent;await page.clock.runFor(4001);await page.locator('#retryScore').waitFor({state:'visible'});const share=await page.locator('#resultXShare').getAttribute('data-share-url');
   await page.evaluate(()=>localStorage.setItem('ironarabe.v2.playerName','Later Bob'));
   offline=false;await page.reload();await page.waitForFunction(()=>document.body.dataset.phase==='result'&&document.querySelector('#rankNote').textContent.includes('登録しました'));
-  assert.equal(calls.length,2);assert.deepEqual(calls[0],calls[1]);assert.equal(ledger.size,1);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Captured Alice');assert.equal(await page.locator('#resultShareBtn').getAttribute('href'),share);
+  assert.equal(calls.length,2);assert.deepEqual(calls[0],calls[1]);assert.equal(ledger.size,1);assert.equal(await page.locator('#recordNameDisplay').innerText(),'Captured Alice');assert.equal(await page.locator('#resultXShare').getAttribute('data-share-url'),share);
   await switchLanguage(page,'en');await page.click('#reloadRanking');assert.equal(calls.length,2);assert.deepEqual(errors,[]);
   invalidRanking=true;await page.click('#reloadRanking');await page.waitForFunction(()=>document.querySelector('#resultRankingStatus').classList.contains('err'));invalidRanking=false;
   await page.reload();assert.equal(calls.length,2);assert.equal(await page.locator('body').getAttribute('data-phase'),'home');
