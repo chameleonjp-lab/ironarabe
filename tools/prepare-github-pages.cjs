@@ -59,7 +59,7 @@ function preparePages({ source = process.cwd(), output, sha, requireClean = fals
   sha = assertSha(sha || process.env.GITHUB_SHA || git(source, ["rev-parse", "HEAD"]).trim());
   const contents = Object.fromEntries(RUNTIME_FILES.map((file) => [file, readRuntime(source, file)]));
   validateHtml(contents["index.html"].toString("utf8"));
-  for (const file of RUNTIME_FILES.slice(1)) new Function(contents[file].toString("utf8"));
+  for (const file of RUNTIME_FILES.filter((file) => file.endsWith(".js"))) new Function(contents[file].toString("utf8"));
 
   if (requireClean) {
     if (path.resolve(git(source, ["rev-parse", "--show-toplevel"]).trim()) !== source || git(source, ["rev-parse", "HEAD"]).trim() !== sha) {

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - claude/ironarabe-new-game-wlys30
+      - work/share-visibility-20261102
   pull_request:
 
 permissions:
@@ -40,6 +41,14 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
       - name: Test the game in Chromium and WebKit
         run: npm run test:browser
+      - name: Retain mock-only sharing screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ironarabe-sharing-acceptance
+          path: test-artifacts/*.png
+          retention-days: 3
+          if-no-files-found: warn
       - name: Build the public allowlist from this commit
         run: node tools/prepare-github-pages.cjs --sha "$GITHUB_SHA" --require-clean
       - name: Verify artifact contents and build SHA

@@ -16,7 +16,7 @@ const builder = path.join(repository, "tools/prepare-github-pages.cjs");
 const verifier = path.join(repository, "tools/verify-github-pages.cjs");
 const legacyVerifier = path.join(repository, "tools/verify-codeberg-publish-workflow.cjs");
 const sha = "0123456789abcdef0123456789abcdef01234567";
-const runtimeFiles = ["index.html", "js/language-options.js", "js/translations.js", "js/i18n.js", "js/sound-effects.js", "js/stage-pack.js", "js/guest-plays.js", "js/score-queue.js"];
+const runtimeFiles = ["index.html", "js/language-options.js", "js/translations.js", "js/i18n.js", "js/sound-effects.js", "js/stage-pack.js", "js/guest-plays.js", "js/score-queue.js", "assets/social-preview.png"];
 // Plain CLI subprocesses must not inherit node:test's child IPC protocol.
 const toolEnvironment = { ...process.env };
 delete toolEnvironment.NODE_TEST_CONTEXT;
@@ -27,12 +27,14 @@ function fixture(t) {
   const output = path.join(directory, "site");
   fs.mkdirSync(path.join(source, "js"), { recursive: true });
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
-  const scripts = runtimeFiles.slice(1).map((file) => `<script src="./${file}"></script>`).join("\n");
+  const scripts = runtimeFiles.filter(file => file.endsWith(".js")).map((file) => `<script src="./${file}"></script>`).join("\n");
   fs.writeFileSync(path.join(source, "index.html"), `<!doctype html><html><head><title>イロナラベ</title></head><body>${scripts}<script>
   const GAME_SLUG='ironarabe', CHALLENGE_ID='ironarabe-official-001', BOARD_VERSION=2, CLIENT_VERSION='ironarabe-web-1.4.1-stagepack001-v2';
   const SHUFFLE_SEED='ironarabe-official-001-v1';
   </script></body></html>`);
-  for (const file of runtimeFiles.slice(1)) fs.writeFileSync(path.join(source, file), `/* fixture ${file} */\n`);
+  for (const file of runtimeFiles.filter(file => file.endsWith(".js"))) fs.writeFileSync(path.join(source, file), `/* fixture ${file} */\n`);
+  fs.mkdirSync(path.join(source, "assets"), {recursive:true});
+  fs.copyFileSync(path.join(repository,"assets/social-preview.png"),path.join(source,"assets/social-preview.png"));
   return { directory, source, output };
 }
 
@@ -64,7 +66,7 @@ test("Pages build excludes repository, tools, historical releases and private fi
     fs.writeFileSync(path.join(f.source, file), "must not be public");
   }
   checkBuild(f);
-  assert.deepEqual(filesIn(f.output), ["index.html", "js/guest-plays.js", "js/i18n.js", "js/language-options.js", "js/score-queue.js", "js/sound-effects.js", "js/stage-pack.js", "js/translations.js", "release.json"]);
+  assert.deepEqual(filesIn(f.output), ["assets/social-preview.png", "index.html", "js/guest-plays.js", "js/i18n.js", "js/language-options.js", "js/score-queue.js", "js/sound-effects.js", "js/stage-pack.js", "js/translations.js", "release.json"]);
   for (const file of runtimeFiles) assert.deepEqual(fs.readFileSync(path.join(f.output, file)), fs.readFileSync(path.join(f.source, file)));
 });
 
@@ -160,7 +162,7 @@ test("strict production build accepts committed files and rejects dirty runtime 
     return result.stdout.trim();
   };
   git(["init", "--quiet"]);
-  git(["add", "index.html", "js"]);
+  git(["add", "index.html", "js", "assets"]);
   git(["-c", "user.name=Pages Test", "-c", "user.email=pages-test@example.invalid", "commit", "--quiet", "-m", "fixture"]);
   const commit = git(["rev-parse", "HEAD"]);
   const args = ["--source", f.source, "--output", f.output, "--sha", commit, "--require-clean"];
@@ -213,7 +215,7 @@ test("public verification reads the deployed build SHA and checks every runtime 
   const args = ["--url", baseUrl, "--sha", sha, "--expected-release", expectedRelease, "--attempts", "1", "--interval-ms", "1"];
   const result = await runAsync(process.execPath, [verifier, ...args], { cwd: f.source, env: toolEnvironment });
   assert.match(result.stdout, /verified/i);
-  assert.deepEqual([...served].sort(), ["index.html", "js/guest-plays.js", "js/i18n.js", "js/language-options.js", "js/score-queue.js", "js/sound-effects.js", "js/stage-pack.js", "js/translations.js", "release.json"]);
+  assert.deepEqual([...served].sort(), ["assets/social-preview.png", "index.html", "js/guest-plays.js", "js/i18n.js", "js/language-options.js", "js/score-queue.js", "js/sound-effects.js", "js/stage-pack.js", "js/translations.js", "release.json"]);
   fs.appendFileSync(path.join(f.output, "js/translations.js"), "corrupted public bytes");
   await assert.rejects(runAsync(process.execPath, [verifier, ...args], { cwd: f.source, env: toolEnvironment }), /integrity|hash/i);
   const forged = JSON.parse(fs.readFileSync(path.join(f.output, "release.json"), "utf8"));

@@ -11,7 +11,7 @@
 <meta property="og:title" content="イロナラベ — Ironarabe">
 <meta property="og:description" content="A 7×9 color tile time-attack puzzle with 40 puzzles.">
 <meta name="description" content="色の流れを並べ直す40問のタイムアタックパズル。15言語・効果音に対応。">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://chameleonjp-lab.github.io/ironarabe/">
 <meta name="ironarabe-ui-release" content="ironarabe-web-1.6.2-x-share">
 <style>
@@ -128,7 +128,7 @@
   .card h3 { margin:0 0 8px; font-size:13px; color:var(--accent); letter-spacing:.06em; }
   .card p, .card li { font-size:13px; color:var(--muted); line-height:1.7; margin:0; }
   .card ol { margin:0; padding-left:18px; }
-  .panel-link { color:var(--accent); text-align:center; display:block; margin:12px 0; text-decoration:none; font-weight:700; }
+  .panel-link { min-height:44px; display:flex; align-items:center; justify-content:center; color:var(--accent); text-align:center; margin:12px 0; text-decoration:none; font-weight:700; }
   .record-line { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
   .record-line .val { font-size:22px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .record-line { padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); }
@@ -327,6 +327,13 @@
   .completion-banner strong { overflow-wrap:anywhere; font-size:20px; letter-spacing:.02em; }
   [hidden] { display:none !important; }
 </style>
+<meta property="og:image" content="https://chameleonjp-lab.github.io/ironarabe/assets/social-preview.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="イロナラベの実際の配色と問題を使ったゲーム紹介">
+<meta name="twitter:image" content="https://chameleonjp-lab.github.io/ironarabe/assets/social-preview.png">
+<meta name="twitter:image:alt" content="イロナラベの実際の配色と問題を使ったゲーム紹介">
 </head>
 <body>
 <div class="app">
@@ -660,7 +667,7 @@
   function applyRankingRows(rows){state.rankingRows=rows;renderRankingList(el.resultRankingList,rows);if(rows.length===0)setRankingState('empty','まだランキング記録がありません。');else setRankingState('ready','');}
   function loadRankings(force){if(!isRankingConfigured()){setRankingState('error','ランキングは未設定です。');return Promise.resolve([]);}if(!force&&state.rankingRows.length){applyRankingRows(state.rankingRows);return Promise.resolve(state.rankingRows);}const requestId=++state.rankingRequestId;setRankingState('loading','ランキングを読み込み中…');return postRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT},RANKING_FETCH_TIMEOUT_MS).then(function(data){if(requestId!==state.rankingRequestId)return [];const rows=normalizeRankingRows(data);applyRankingRows(rows);return rows;}).catch(function(){if(requestId!==state.rankingRequestId)return [];setRankingState('error','ランキングを読み込めませんでした。');return [];});}
 
-  function xShareUrl(text){const url=new URL('https://twitter.com/intent/tweet');url.searchParams.set('text',text);return url.href;}
+  function xShareUrl(text){text=text.replace('\n'+GAME_URL,'\n#イロナラベ #ゲーム制作\n'+GAME_URL);const url=new URL('https://twitter.com/intent/tweet');url.searchParams.set('text',text);return url.href;}
   function updateShareLinks(){el.homeShareBtn.href=xShareUrl(t('イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n{0}',[GAME_URL]));el.resultShareBtn.href=xShareUrl(t('イロナラベ\nSTAGE {0}「{1}」を{2}秒・操作{3}回でクリア！\n{4}',[stageShortLabel(state.stage),stageLongLabel(state.stage),formatElapsedMs(state.elapsedMs),formatNumber(state.operations),GAME_URL]));}
   function buildLogoChips(){STAGE_PALETTES.slice(0,2).flatMap(function(palette){return palette.corners;}).forEach(function(hex){const s=document.createElement('span');s.style.background=hex;el.logoChips.appendChild(s);});}
   function buildStagePackDots(){STAGE_PALETTES.map(function(palette){return palette.anchors?palette.anchors[0]:palette.corners[0];}).forEach(function(hex){const dot=document.createElement('i');dot.style.background=hex;el.stagePackDots.appendChild(dot);});}
