@@ -6,6 +6,7 @@ on:
       - claude/ironarabe-new-game-wlys30
       - work/share-visibility-20261102
       - work/result-share-actions-20261102
+      - work/iphone-share-20261102
   pull_request:
 
 permissions:

@@ -12,6 +12,13 @@ const server=http.createServer((req,res)=>{
 const languages=['ja','en','es','pt-BR','zh-Hans','fr','de','ko','ru','it','zh-Hant','id','tr','vi','th'];
 const boardFixture=[0,29,42,3,15,49,6,50,22,33,41,13,55,43,16,36,57,17,37,14,47,20,54,1,31,24,35,46,28,61,4,25,45,18,34,9,53,10,38,40,27,7,51,2,5,8,23,12,32,26,48,21,60,30,11,52,56,39,44,59,58,19,62];
 const gameUrl='https://chameleonjp-lab.github.io/ironarabe/';
+async function safeContext(browser,options){
+ const context=await browser.newContext({...options,serviceWorkers:'block'});let unknown=0,sockets=0;
+ await context.routeWebSocket('**/*',socket=>{sockets++;socket.close();});
+ const assets=new Set(['/','/index.html','/assets/social-preview.png',...['language-options','translations','i18n','sound-effects','stage-pack','guest-plays','score-queue'].map(n=>'/js/'+n+'.js')]);
+ await context.route('**/*',route=>{const r=route.request(),u=new URL(r.url());if(u.origin===`http://127.0.0.1:${server.address().port}`&&assets.has(u.pathname)&&['GET','HEAD'].includes(r.method())){const file=path.join(root,u.pathname==='/'?'index.html':u.pathname.slice(1));return route.fulfill({contentType:u.pathname.endsWith('.js')?'text/javascript':u.pathname.endsWith('.png')?'image/png':'text/html; charset=utf-8',body:r.method()==='HEAD'?Buffer.alloc(0):fs.readFileSync(file)});}unknown++;return route.abort();});
+ const close=context.close.bind(context);context.close=async()=>{try{assert.equal(unknown,0,'unknown HTTP attempts');assert.equal(sockets,0,'WebSocket attempts');}finally{await close();}};return context;
+}
 async function mockXComposer(context){await context.route('https://twitter.com/intent/tweet**',route=>{assert.equal(route.request().method(),'GET');assert.equal(route.request().headers().referer,undefined);return route.fulfill({contentType:'text/html',body:'<title>X composer fixture</title>'});});}
 function shareLinkText(href){assert.ok(href,'share action links to the X composer');const url=new URL(href);assert.equal(url.origin+url.pathname,'https://twitter.com/intent/tweet');assert.deepEqual([...url.searchParams.keys()],['text']);return url.searchParams.get('text');}
 async function openXDraft(page,selector){const link=page.locator(selector),text=shareLinkText(await link.getAttribute('href'));const popupPromise=page.context().waitForEvent('page');await link.tap();const popup=await popupPromise;try{await popup.waitForURL('https://twitter.com/intent/tweet**');assert.equal(shareLinkText(popup.url()),text);}finally{await popup.close();}return text;}
@@ -27,7 +34,7 @@ async function switchLanguage(page,language){
 }
 async function acceptance(engine,viewport,failAudio=false){
  const browser=await engine.launch({headless:true});
- const context=await browser.newContext({viewport,deviceScaleFactor:1,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'});
+ const context=await safeContext(browser,{viewport,deviceScaleFactor:1,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'});
  const page=await context.newPage();const errors=[];const calls=[];let releaseSubmit;
  page.on('pageerror',e=>errors.push(e.message));await mockXComposer(context);
  await page.addInitScript(({failAudio})=>{
@@ -100,7 +107,7 @@ async function acceptance(engine,viewport,failAudio=false){
  }finally{if(releaseSubmit)releaseSubmit();await context.close();await browser.close();}
 }
 async function failureAcceptance(engine){
- const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
+ const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
  const errors=[],calls=[];let round=1,releaseSubmit,releaseRanking,releaseAll=false;page.on('pageerror',e=>errors.push(e.message));
  await page.route('https://*.supabase.co/**',async route=>{
   const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push(method);
@@ -125,7 +132,7 @@ async function failureAcceptance(engine){
  }finally{releaseSubmit?.();releaseRanking?.();await context.close();await browser.close();}
 }
 async function guestAcceptance(engine,viewport){
- const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();const calls=[],errors=[];let releaseGuest;
+ const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport,isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();const calls=[],errors=[];let releaseGuest;
  page.on('pageerror',error=>errors.push(error.message));
  await page.route('https://*.supabase.co/**',async route=>{
   const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push({method,payload});
@@ -135,7 +142,7 @@ async function guestAcceptance(engine,viewport){
   else throw Error('Guest attempted unexpected RPC '+method);
  });
  try{
-  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);assert.equal(await page.locator('#guestStartBtn').count(),1,'explicit unnamed play choice');
+  await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);assert.equal(await page.locator('#guestStartBtn').count(),0,'one start entrance with an optional name');
   const details='https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=ironarabe';assert.equal(await page.locator('#homeLabLink').getAttribute('href'),details);
   assert.equal(await page.inputValue('#playerNameInput'),'');await page.tap('#startBtn');await page.clock.runFor(3150);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing','empty name starts normally');
   assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,1);const first=calls[0].payload;assert.equal(first.p_game_slug,'ironarabe');assert.ok(!('p_display_name' in first)&&!('p_score' in first));
@@ -147,12 +154,12 @@ async function guestAcceptance(engine,viewport){
   const scroll=await page.locator('#resultRankingScroll').evaluate(n=>({scroll:n.scrollTop,max:n.scrollHeight-n.clientHeight}));assert.ok(scroll.scroll>0&&scroll.max>0,'all 30 entries are reachable inside the ranking scroll');
   await page.evaluate(()=>localStorage.setItem('ironarabe.v2.playerName','Saved Alice'));await page.tap('#againBtn');assert.equal(await page.inputValue('#playerNameInput'),'Saved Alice');assert.ok(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.'))),'replay retains the unacknowledged count');
   releaseGuest();await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));assert.equal(await page.locator('body').getAttribute('data-phase'),'home');
-  await page.tap('#guestStartBtn');await page.clock.runFor(3200);await page.waitForFunction(()=>document.body.dataset.phase==='playing');assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,2);assert.notEqual(calls.at(-1).payload.p_start_id,first.p_start_id);assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'Saved Alice');releaseGuest();await page.tap('#retireBtn');
+  await page.fill('#playerNameInput','');await page.tap('#startBtn');await page.clock.runFor(3200);await page.waitForFunction(()=>document.body.dataset.phase==='playing');assert.equal(calls.filter(c=>c.method==='start_ironarabe_guest_play_v1').length,2);assert.notEqual(calls.at(-1).payload.p_start_id,first.p_start_id);assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'','explicitly clearing the optional name is persisted by the canonical start');releaseGuest();await page.tap('#retireBtn');
   assert.equal(calls.filter(c=>c.method==='submit_score_once_shared_v1').length,0);assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} guest ${viewport.width}x${viewport.height}: optional name, count once/start, no score, 30 ranks, saved name and pending replay`);
  }finally{releaseGuest?.();await context.close();await browser.close();}
 }
 async function guestRecoveryAcceptance(engine){
- const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();let mode='hold',releaseFirst;const calls=[],errors=[];
+ const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();let mode='hold',releaseFirst;const calls=[],errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.route('https://*.supabase.co/**',async route=>{
   assert.ok(route.request().url().endsWith('/start_ironarabe_guest_play_v1'),'guest recovery sends count-only RPCs');const payload=route.request().postDataJSON();calls.push(payload);
@@ -172,7 +179,7 @@ async function guestRecoveryAcceptance(engine){
 }
 async function stagePackAcceptance(engine){
  const {loadGameStages}=require('../tools/game-stage-contract.cjs'),game=loadGameStages(),catalog=require('../js/translations.js');
- const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
+ const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
  const calls=[],errors=[],seen=new Set();page.on('pageerror',error=>errors.push(error.message));
  await page.addInitScript(()=>localStorage.setItem('ironarabe.sound.v1','false'));
  await page.route('https://*.supabase.co/**',async route=>{
@@ -207,7 +214,7 @@ async function stagePackAcceptance(engine){
  }finally{await context.close();await browser.close();}
 }
 async function homeStartAcceptance(engine){
- const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
+ const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
  const calls=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.addInitScript(()=>{localStorage.setItem('ironarabe.v2.playerName','Saved Alice');localStorage.setItem('ironarabe.sound.v1','false');});
  await page.route('https://*.supabase.co/**',async route=>{
@@ -216,7 +223,7 @@ async function homeStartAcceptance(engine){
  });
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
-  assert.equal(await page.locator('#playerNameInput').isVisible(),true,'the optional name is editable on the initial home screen');assert.equal(await page.inputValue('#playerNameInput'),'Saved Alice');
+  assert.equal(await page.locator('#guestStartBtn').count(),0);assert.equal(await page.locator('#startBtn').count(),1);assert.equal(await page.locator('#playerNameInput').isVisible(),true,'the optional name is editable on the initial home screen');assert.equal(await page.inputValue('#playerNameInput'),'Saved Alice');
   assert.notEqual(await page.evaluate(()=>document.activeElement.id),'playerNameInput','home does not open the keyboard automatically');
   for(const viewport of [{width:402,height:874},{width:874,height:402}]){
    await page.setViewportSize(viewport);
@@ -229,16 +236,40 @@ async function homeStartAcceptance(engine){
   await page.locator('#playerNameInput').dispatchEvent('keydown',{key:'Enter',isComposing:false});assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','Enter starts directly from home');await page.locator('#startBtn').dispatchEvent('click');
   assert.notEqual(await page.evaluate(()=>document.activeElement.id),'playerNameInput','starting closes the input keyboard');await page.clock.runFor(3200);assert.equal(await page.locator('body').getAttribute('data-phase'),'playing');assert.equal(calls.length,0);assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'Alice 日本語');
   await page.tap('#retireBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.equal(await page.inputValue('#playerNameInput'),'Alice 日本語');
-  await page.fill('#playerNameInput','');await page.tap('#startBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','one start tap with an empty name enters countdown');await page.locator('#startBtn').dispatchEvent('click');await page.locator('#guestStartBtn').dispatchEvent('click');assert.equal(calls.length,0,'counting waits for actual play');
+  await page.fill('#playerNameInput','');await page.tap('#startBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','one start tap with an empty name enters countdown');await page.locator('#startBtn').dispatchEvent('click');await page.locator('#startBtn').dispatchEvent('click');assert.equal(calls.length,0,'counting waits for actual play');
   await page.clock.runFor(3200);assert.equal(calls.length,1,'repeated start controls count one actual play');assert.equal(calls[0].p_game_slug,'ironarabe');assert.ok(!('p_score' in calls[0])&&!('p_display_name' in calls[0]));await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));await page.tap('#retireBtn');assert.equal(await page.inputValue('#playerNameInput'),'');
-  await page.tap('#guestStartBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','saved names still allow an explicit immediate guest start');await page.clock.runFor(3200);assert.equal(calls.length,2);assert.notEqual(calls[0].p_start_id,calls[1].p_start_id);await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));await page.tap('#retireBtn');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'');
+  await page.fill('#playerNameInput','');await page.tap('#startBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'countdown','empty optional name uses the same single start button for an anonymous play');await page.clock.runFor(3200);assert.equal(calls.length,2);assert.notEqual(calls[0].p_start_id,calls[1].p_start_id);await page.waitForFunction(()=>!Object.keys(localStorage).some(k=>k.startsWith('ironarabe.guestPlay.v1.')));await page.tap('#retireBtn');assert.equal(await page.evaluate(()=>localStorage.getItem('ironarabe.v2.playerName')),'');
   assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} home name: direct start, optional/saved names, validation, IME, repeat taps, 15 languages and portrait/landscape`);
  }finally{await context.close();await browser.close();}
 }
+let visibilityDiagnosticSequence=0;
 async function visibleShareAction(page,selector){
- const link=page.locator(selector);assert.equal(await link.isVisible(),true,selector+' visible');await link.scrollIntoViewIfNeeded();
- const box=await link.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);let opacity=1;for(let n=el;n;n=n.parentElement)opacity*=Number(getComputedStyle(n).opacity);return{width:r.width,height:r.height,opacity:String(opacity),pointerEvents:s.pointerEvents,hit:hit===el||el.contains(hit)};});
- assert.ok(box.width>=44&&box.height>=44,selector+' at least 44 CSS pixels');assert.notEqual(box.opacity,'0');assert.notEqual(box.pointerEvents,'none');assert.equal(box.hit,true,selector+' center receives input');
+ const e=page.locator(selector);assert.equal(await e.isVisible(),true);await e.scrollIntoViewIfNeeded();
+ const a=await e.evaluate(el=>{
+  const r=el.getBoundingClientRect(),epsilon=1;let opacity=1,unclipped=true;const ancestors=[];
+  for(let n=el;n;n=n.parentElement){
+   const style=getComputedStyle(n);opacity*=Number(style.opacity);
+   if(n===el)continue;const p=n.getBoundingClientRect(),left=n===document.scrollingElement?0:p.left+n.clientLeft,top=n===document.scrollingElement?0:p.top+n.clientTop;ancestors.push({tag:n.tagName,id:n.id,overflowX:style.overflowX,overflowY:style.overflowY,left,top,w:n.clientWidth,h:n.clientHeight,scrollTop:n.scrollTop,scrolling:n===document.scrollingElement});
+   if(/hidden|clip|scroll|auto/.test(style.overflowX))unclipped=unclipped&&r.left>=left-epsilon&&r.right<=left+n.clientWidth+epsilon;
+   if(/hidden|clip|scroll|auto/.test(style.overflowY))unclipped=unclipped&&r.top>=top-epsilon&&r.bottom<=top+n.clientHeight+epsilon;
+  }
+  const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+  return{rect:{x:r.x,y:r.y,w:r.width,h:r.height},ancestors,w:r.width,h:r.height,opacity,unclipped,viewport:r.left>=-epsilon&&r.top>=-epsilon&&r.right<=innerWidth+epsilon&&r.bottom<=innerHeight+epsilon,hit:hit===el||el.contains(hit),pointer:getComputedStyle(el).pointerEvents};
+ });
+ if(!a.unclipped||!a.viewport){console.error('VISIBILITY_DIAGNOSTIC',JSON.stringify({selector,metrics:a}));fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`visibility-failure-${page.context().browser().browserType().name()}-${await page.locator('body').getAttribute('data-phase')}-${++visibilityDiagnosticSequence}.png`),fullPage:true});}
+ assert.ok(a.w>=44&&a.h>=44,selector+' target');assert.ok(a.opacity>0);assert.ok(a.viewport,selector+' full rect inside viewport');assert.ok(a.unclipped,selector+' full rect inside overflow ancestors');assert.notEqual(a.pointer,'none');assert.equal(a.hit,true);
+}
+async function adversarialShareVisibility(page,phase,engine){
+ const selector=phase==='home'?'#homeShareBtn':'#resultShareBtn',ranking=phase==='home'?'#homeLabLink':'#resultLabLink',action=page.locator(selector);
+ // Synthetic environmental faults show the limit of a clean CI, not the user's cause.
+ const style=await page.addStyleTag({content:'a[href*="twitter.com/intent/"] {display:none !important;}'});
+ assert.equal(await action.count(),1);await assert.rejects(()=>visibleShareAction(page,selector));await visibleShareAction(page,ranking);
+ fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-${phase}-synthetic-href-hidden.png`),fullPage:true});await style.evaluate(e=>e.remove());await visibleShareAction(page,selector);
+ for(const [property,value]of [['display','none'],['opacity','0']]){await action.evaluate((e,[p,v])=>e.parentElement.style.setProperty(p,v),[property,value]);await assert.rejects(()=>visibleShareAction(page,selector));await action.evaluate((e,p)=>e.parentElement.style.removeProperty(p),property);}
+ await action.evaluate(e=>{const wrap=document.createElement('div');wrap.style.cssText='overflow:hidden;height:'+(e.getBoundingClientRect().height-8)+'px';e.before(wrap);wrap.append(e);});await assert.rejects(()=>visibleShareAction(page,selector));await action.evaluate(e=>e.parentElement.replaceWith(e));
+ await action.evaluate(e=>{e.dataset.originalStyle=e.getAttribute('style')||'';e.style.cssText='position:fixed;top:-8px;left:20px;width:180px;z-index:9999';});await assert.rejects(()=>visibleShareAction(page,selector));await action.evaluate(e=>{e.setAttribute('style',e.dataset.originalStyle);delete e.dataset.originalStyle});await visibleShareAction(page,selector);
+ for(const viewport of [{width:393,height:852},{width:852,height:393}]){await page.setViewportSize(viewport);await visibleShareAction(page,selector);const enlarged=await page.addStyleTag({content:selector+' {font-size:200%;line-height:1.5;overflow-wrap:anywhere;}'});await visibleShareAction(page,selector);await visibleShareAction(page,ranking);await enlarged.evaluate(e=>e.remove());}
+ console.log(JSON.stringify({adversarial:phase,engine:engine.name(),faultsDetected:['href-specific-hide','ancestor-display','ancestor-opacity','partial-clip','partial-offscreen'],viewports:['393x852','852x393'],enlargedText:'200%',userCause:'unconfirmed'}));
 }
 async function captureShareLayout(page,phase,language,engine){
  for(const viewport of [{width:402,height:874},{width:874,height:402}]){
@@ -277,18 +308,16 @@ async function resultActionsBeforeRanking(page){
  }
 }
 async function xShareAcceptance(engine){
- const browser=await engine.launch({headless:true}),context=await browser.newContext({viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'ja-JP',serviceWorkers:'block'}),page=await context.newPage(),calls=[],errors=[];
+ const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'ja-JP',serviceWorkers:'block'}),page=await context.newPage(),calls=[],errors=[];
  page.on('pageerror',error=>errors.push(error.message));
  // Fail closed for all external traffic before installing the explicit mock composer/RPC routes.
- await context.routeWebSocket('**/*',socket=>socket.close());
- await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
  await mockXComposer(context);
  await page.addInitScript(()=>{localStorage.setItem('ironarabe.language.v1','ja');localStorage.setItem('ironarabe.sound.v1','false');Object.defineProperty(navigator,'share',{value:async()=>{throw Error('Native sharing must not replace X sharing')},configurable:true});});
  await page.route('https://*.supabase.co/**',async route=>{const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push({method,payload});if(method==='submit_score_once_shared_v1')await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:payload.p_display_name,result_display_name:'X Audit',result_first_score:9000,result_best_score:Math.min(100,payload.p_score),result_play_count:3,is_first_play:false,is_new_best:false}]});else if(method==='get_best_score_ranking')await route.fulfill({json:[{rank_no:1,display_name:'Existing name',best_score:100}]});else throw Error('Unexpected share-test RPC '+method);});
  async function blackButton(selector){assert.equal(await page.locator(selector).innerText(),'Xでシェア');assert.deepEqual(await page.locator(selector).evaluate(node=>({background:getComputedStyle(node).backgroundColor,color:getComputedStyle(node).color})),{background:'rgb(0, 0, 0)',color:'rgb(255, 255, 255)'});}
  try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
-  await page.locator('#homeShareBtn').evaluate(el=>el.style.display='none');await assert.rejects(()=>visibleShareAction(page,'#homeShareBtn'));await page.locator('#homeShareBtn').evaluate(el=>el.style.removeProperty('display'));await page.locator('#homeShareBtn').evaluate(el=>el.parentElement.style.opacity='0');await assert.rejects(()=>visibleShareAction(page,'#homeShareBtn'));await page.locator('#homeShareBtn').evaluate(el=>el.parentElement.style.removeProperty('opacity'));await visibleShareAction(page,'#homeShareBtn');
+  await adversarialShareVisibility(page,'home',engine);
   const homeText='イロナラベ\n色の流れを見ながら、7×9のタイルを正しい場所へ並べよう。\n#イロナラベ #ゲーム制作\n'+gameUrl;
   assert.equal(shareLinkText(await page.locator('#homeShareBtn').getAttribute('href')),homeText);await blackButton('#homeShareBtn');assert.equal(await openXDraft(page,'#homeShareBtn'),homeText);
   for(const language of languages){await switchLanguage(page,language);await captureShareLayout(page,'home',language,engine);const text=shareLinkText(await page.locator('#homeShareBtn').getAttribute('href'));assert.match(await page.locator('#homeShareBtn').innerText(),/X/);assert.equal(text.split('\n').length,4);assert.equal(text.split('\n').at(-1),gameUrl);assert.equal(text.split(gameUrl).length-1,1);assert.ok(text.includes('7×9'));assert.ok(!/\{\d+\}/.test(text));}
@@ -297,6 +326,7 @@ async function xShareAcceptance(engine){
   await page.evaluate(board=>{for(let i=0;i<board.length;i++)if(board[i]!==i){const j=board.indexOf(i);document.querySelector(`.tile[data-pos="${i}"]`).click();document.querySelector(`.tile[data-pos="${j}"]`).click();[board[i],board[j]]=[board[j],board[i]];}},boardFixture.slice());await submitted;await page.clock.runFor(4001);assert.equal(await page.locator('body').getAttribute('data-phase'),'result');
   const score=calls.find(call=>call.method==='submit_score_once_shared_v1').payload.p_score,resultText=`イロナラベ\nSTAGE ${stage}「${title}」を${(score/100).toFixed(2)}秒・操作49回でクリア！\n#イロナラベ #ゲーム制作\n${gameUrl}`;
   await blackButton('#resultShareBtn');assert.equal(await openXDraft(page,'#resultShareBtn'),resultText);
+  await adversarialShareVisibility(page,'result',engine);
   for(const language of languages){await switchLanguage(page,language);await captureShareLayout(page,'result',language,engine);const text=shareLinkText(await page.locator('#resultShareBtn').getAttribute('href'));assert.match(await page.locator('#resultShareBtn').innerText(),/X/);assert.ok(text.includes(new Intl.NumberFormat(language,{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false}).format(score/100)));assert.equal(text.split('\n').at(-1),gameUrl);assert.ok(!/\{\d+\}/.test(text));}
   await switchLanguage(page,'ja');fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'test-artifacts',`${engine.name()}-x-share-result.png`),fullPage:true});assert.equal(calls.filter(call=>call.method==='submit_score_once_shared_v1').length,1,'sharing never resubmits the score');await page.tap('#againBtn');assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.equal(calls.filter(call=>call.method==='submit_score_once_shared_v1').length,1,'replay action does not submit the previous result again');assert.deepEqual(errors,[]);console.log(`PASS ${engine.name()} X sharing: exact home text, live result, black/white buttons, 15 locales and intercepted composer popups`);
  }finally{await context.close();await browser.close();}
