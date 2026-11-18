@@ -11,6 +11,7 @@ function storage() { const m = new Map(); return {get length(){return m.size}, k
 function ack(overrides={}) { return [{accepted:true,result_normalized_name:'Alice',result_display_name:'Alice',result_first_score:100,result_best_score:100,result_play_count:1,is_first_play:false,is_new_best:false,was_duplicate:false,...overrides}]; }
 for (const scoreOrder of ['asc','desc']) {
   const bad = [
+    ['best contradicts historical first',{result_first_score:scoreOrder==='asc'?50:150,result_best_score:scoreOrder==='asc'?75:125}],
     ['first overflow',{result_first_score:2147483648}], ['first underflow',{result_first_score:-2147483649}],
     ['best overflow',{result_best_score:2147483648}], ['best underflow',{result_best_score:-2147483649}],
     ['count overflow',{result_play_count:2147483648}], ['wrong direction',{result_best_score:scoreOrder==='asc'?101:99}]
@@ -35,3 +36,4 @@ test('ironarabe supplies its confirmed ascending order at the runtime queue call
   const game=fs.readFileSync(new URL('../index.html',`file://${__filename}`),'utf8');
   assert.match(game,/createScoreQueue\(\{\s*gameSlug:GAME_SLUG,\s*scoreOrder:'asc'/);
 });
+
