@@ -86,6 +86,7 @@
             if (receipt.result_display_name !== item.payload.p_display_name || receipt.result_normalized_name !== item.payload.p_display_name || !int4(receipt.result_first_score) || !int4(receipt.result_best_score) || !int4(receipt.result_play_count) || receipt.result_play_count < 1 || !['was_duplicate','is_first_play','is_new_best'].every(k=>typeof receipt[k]==='boolean')) throw new Error('Invalid score acknowledgement');
             // The normal SQL receipt includes this submitted score in its best.
             if (scoreOrder === 'asc' ? receipt.result_best_score > item.payload.p_score : receipt.result_best_score < item.payload.p_score) throw new Error('Invalid score acknowledgement');
+            if (scoreOrder === 'asc' ? receipt.result_best_score > receipt.result_first_score : receipt.result_best_score < receipt.result_first_score) throw new Error('Invalid score acknowledgement');
             list();
             if(conflicts.has(item.id)){notify({...item,state:'conflict'});continue;}
             item.state='submitted';
@@ -107,3 +108,4 @@
   if (typeof module === 'object' && module.exports) module.exports=api;
   root.CommonScoreQueue=api;
 })(typeof globalThis === 'object' ? globalThis : this);
+
