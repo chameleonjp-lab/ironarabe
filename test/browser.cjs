@@ -109,11 +109,14 @@ async function acceptance(engine,viewport,failAudio=false){
 async function failureAcceptance(engine){
  const browser=await engine.launch({headless:true}),context=await safeContext(browser,{viewport:{width:402,height:874},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'en-US'}),page=await context.newPage();
  const errors=[],calls=[];let round=1,releaseSubmit,releaseRanking,releaseAll=false;page.on('pageerror',e=>errors.push(e.message));
+ let markSubmitArrived,markRankingArrived;
+ const submitArrived=new Promise(resolve=>{markSubmitArrived=resolve;});
+ const rankingArrived=new Promise(resolve=>{markRankingArrived=resolve;});
  await page.route('https://*.supabase.co/**',async route=>{
   const method=new URL(route.request().url()).pathname.split('/').pop(),payload=route.request().postDataJSON();calls.push(method);
   if(round===1){await route.fulfill({status:503,json:{message:'offline'}});return;}
-  if(method==='submit_score_once_shared_v1'){if(!releaseAll)await new Promise(resolve=>{releaseSubmit=()=>{releaseAll=true;resolve();}});await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:'Alice',result_display_name:'Alice',result_first_score:12345,result_best_score:Math.min(3456,payload.p_score),result_play_count:9,is_first_play:false,is_new_best:true}]});}
-  else{await new Promise(resolve=>{releaseRanking=resolve});await route.fulfill({json:[{rank_no:1,display_name:'Late stale name',first_score:12345,best_score:3456,play_count:9,updated_at:'2026-10-31T00:00:00Z'}]});}
+  if(method==='submit_score_once_shared_v1'){if(!releaseAll)await new Promise(resolve=>{releaseSubmit=()=>{releaseAll=true;resolve();};markSubmitArrived();});await route.fulfill({json:[{accepted:true,was_duplicate:false,result_normalized_name:'Alice',result_display_name:'Alice',result_first_score:12345,result_best_score:Math.min(3456,payload.p_score),result_play_count:9,is_first_play:false,is_new_best:true}]});}
+  else{await new Promise(resolve=>{releaseRanking=resolve;markRankingArrived();});await route.fulfill({json:[{rank_no:1,display_name:'Late stale name',first_score:12345,best_score:3456,play_count:9,updated_at:'2026-10-31T00:00:00Z'}]});}
  });
  async function solve(){
   await page.fill('#playerNameInput','Alice');await page.tap('#startBtn');await page.clock.runFor(3200);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
@@ -126,6 +129,9 @@ async function failureAcceptance(engine){
   const catalog=require('../js/translations.js');for(const language of languages){await switchLanguage(page,language);assert.equal(await page.locator('#rankNote').innerText(),catalog[language]['ランキング送信に失敗しました']);assert.equal(await page.locator('#nameRecordStatus').innerText(),catalog[language]['登録名の記録を取得できませんでした。']);assert.equal(await page.locator('#resultRankingStatus').innerText(),catalog[language]['ランキングを読み込めませんでした。']);}
   assert.equal(calls.filter(method=>method==='submit_score_once_shared_v1').length,1);await page.tap('#againBtn');round=2;await solve();
   assert.equal(await page.locator('body').getAttribute('data-phase'),'result');await page.waitForFunction(()=>document.querySelector('#resultRankingStatus').getAttribute('data-i18n')==='ランキングを読み込み中…');
+  let arrivalTimeout;
+  try{await Promise.race([Promise.all([submitArrived,rankingArrived]),new Promise((_,reject)=>{arrivalTimeout=setTimeout(()=>reject(new Error('Mock RPC arrival timed out: submit='+Boolean(releaseSubmit)+', ranking='+Boolean(releaseRanking))),20000);})]);}
+  finally{clearTimeout(arrivalTimeout);}
   assert.ok(releaseSubmit&&releaseRanking);await page.tap('#againBtn');const readCount=calls.filter(method=>method==='get_best_score_ranking').length;releaseSubmit();releaseRanking();
   await page.waitForTimeout(100);assert.equal(await page.locator('body').getAttribute('data-phase'),'home');assert.equal(await page.locator('#recordNameDisplay').innerText(),'--');assert.equal(await page.locator('#resultRankingList').innerText(),'');assert.equal(calls.filter(method=>method==='get_best_score_ranking').length,readCount,'stale submit does not start another ranking request');assert.equal(await page.inputValue('#playerNameInput'),'Alice');assert.deepEqual(errors,[]);
   console.log(`PASS ${engine.name()} communication failure: 15 locales, retry-free submit, stale async response isolation`);
